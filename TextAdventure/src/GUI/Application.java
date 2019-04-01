@@ -68,7 +68,7 @@ public class Application
         
         //Add the LinkBar, ImageBox and CommandBox JPanels
 		this.frame.add(new LinkBar(frame));
-		this.frame.add(new ImageBox());
+		this.frame.add(new ImageBox(frame));
 		this.frame.add(new CommandBox());
 	}
 

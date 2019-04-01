@@ -9,6 +9,7 @@ package GUI;
 
 import java.awt.Color;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 import javax.swing.JTextArea;
@@ -20,10 +21,12 @@ import java.awt.Font;
 @SuppressWarnings("serial")
 public class ImageBox extends JPanel 
 {
+	private FrameDragListener frameDragListener;
+	
 	/**
 	 * Default constructor. Create the ImageBox panel.
 	 */
-	public ImageBox() 
+	public ImageBox(JFrame frame) 
 	{
 		//=================================================================================
 		//This constructor is going to need to be passed an object containing room data
@@ -42,7 +45,14 @@ public class ImageBox extends JPanel
 		textArea.setFont(new Font("Monospaced", Font.BOLD, 8));
 		textArea.setBackground(new Color(255, 255, 250));
 		textArea.setBounds(5, 5, 790, 490);
+		textArea.setEditable(false);
+		textArea.setHighlighter(null);
 		add(textArea);
+
+		//FrameDragListener object initialization, to make the ASCII image area capable of click-dragging the application window
+		this.frameDragListener = new FrameDragListener(frame);
+		textArea.addMouseListener(frameDragListener);
+		textArea.addMouseMotionListener(frameDragListener);
 		
 		textArea.setText(portrait);
 	}
