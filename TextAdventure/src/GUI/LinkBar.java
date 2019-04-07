@@ -29,18 +29,23 @@ import javax.swing.border.LineBorder;
 @SuppressWarnings("serial")
 public class LinkBar extends JPanel 
 {
+	InventoryWindow inventoryWindow;
 	/**
 	 * Default constructor.  Create this LinkBar and add components.
 	 */
 	public LinkBar(JFrame frame) 
 	{		
+    	//===============================================================
 		//Set the parameters for this panel
+    	//===============================================================
 		setBorder(new LineBorder(new Color(0, 0, 0), 4));
 		setBackground(new Color(255, 255, 250));
 		this.setBounds(0, 0, 800, 30);
 		setLayout(null);
-		
+
+    	//===============================================================
 		//Save button link
+    	//===============================================================
 		JLabel saveLink = new JLabel("Save");
 		saveLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		saveLink.setBounds(20, 0, 50, 30);
@@ -58,8 +63,10 @@ public class LinkBar extends JPanel
 				//code to save game
 			}
 		});
-		
+
+    	//===============================================================
 		//Load button link
+    	//===============================================================
 		JLabel loadLink = new JLabel("Load");
 		loadLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		loadLink.setBounds(80, 0, 50, 30);
@@ -77,8 +84,12 @@ public class LinkBar extends JPanel
 				//code to load a saved game
 			}
 		});
-		
+
+    	//===============================================================
 		//Inventory button link
+    	//===============================================================
+		inventoryWindow = new InventoryWindow();
+		inventoryWindow.setVisible(false);
 		JLabel inventoryLink = new JLabel("Inventory");
 		inventoryLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		inventoryLink.setBounds(140, 0, 72, 30);
@@ -93,11 +104,16 @@ public class LinkBar extends JPanel
 			@Override
 			public void mouseClicked(MouseEvent e) 
 			{
-				//code to display inventory
+				if (inventoryWindow.isVisible() == false)
+					inventoryWindow.setVisible(true);
+				else
+					inventoryWindow.setVisible(false);
 			}
 		});
-		
+
+    	//===============================================================
 		//Close application link
+    	//===============================================================
 		JButton closeButton = new JButton("X");
 		closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		closeButton.setFocusPainted(false);
