@@ -23,14 +23,16 @@ public class FrameDragListener extends MouseAdapter
 	//==============================================================================
 	private final JFrame frame;
 	private Point mouseDownCompCoords = null;
+	private Point offset = null;
 
 	/**
 	 * Default constructor for our FrameDragListener class.
 	 * @param frame JFrame The primary JFrame object representing our application window.
 	 */
-	public FrameDragListener(JFrame frame) 
+	public FrameDragListener(JFrame frame, Point offset) 
 	{
 		this.frame = frame;
+		this.offset = offset;
 	}
 
 	/**
@@ -54,7 +56,14 @@ public class FrameDragListener extends MouseAdapter
 	 */
 	public void mouseDragged(MouseEvent e) 
 	{
+		//==============================================================================
+		//This calculates location by using the difference between screen coordinates
+		//and the coordinates of the first mouse click.  The offset coordinate is here
+		//to adjust for an unintended shift caused when the Listener is focused on a
+		//component.  The first redraw on movement would shift the window across the
+		//screen an X, Y amount equal to the offset of the component within the JFrame.
+		//==============================================================================
 		Point currCoords = e.getLocationOnScreen();
-		frame.setLocation(currCoords.x - mouseDownCompCoords.x, currCoords.y - mouseDownCompCoords.y);
+		frame.setLocation(currCoords.x - mouseDownCompCoords.x - this.offset.x, currCoords.y - mouseDownCompCoords.y - this.offset.y);
 	}
 }
