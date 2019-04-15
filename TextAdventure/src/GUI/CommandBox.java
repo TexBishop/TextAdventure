@@ -9,6 +9,7 @@ package GUI;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Robot;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.LinkedList;
@@ -27,6 +28,9 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+
+import Structure.DisplayData;
+
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
@@ -48,6 +52,7 @@ public class CommandBox extends JPanel
 	//   index tracks position for the up and down arrow key bindings
 	//=====================================================================
 	private static final String PROMPT = ">> ";
+	private Application application;
 	private ActionMap action;
 	private InputMap input;
 	private JTextArea textArea;
@@ -55,7 +60,6 @@ public class CommandBox extends JPanel
 	private LinkedList<String> history = new LinkedList<String>();
 	private String command;
 	private int index = -1;
-	
 	
 	private class CommandFilter extends DocumentFilter
 	{
@@ -90,7 +94,12 @@ public class CommandBox extends JPanel
 	//=====================================================================
 	private class KeyAction extends AbstractAction
 	{
-	    private Action originalAction = null;
+	    /**
+		 * Used to save GameState objects to a file
+		 */
+		private static final long serialVersionUID = 1L;
+		
+		private Action originalAction = null;
 	    private int key;
 	    
 	    public KeyAction(int key)
@@ -107,6 +116,10 @@ public class CommandBox extends JPanel
 	    public void AddAction(Action originalAction)
 	    {
 	    	this.originalAction = originalAction;
+	    }
+	    public Action getOriginalAction()
+	    {
+	    	return originalAction;
 	    }
 	    
 		@Override
@@ -126,6 +139,15 @@ public class CommandBox extends JPanel
         	//===============================================================
         	//Set the code for our custom key bindings
         	//===============================================================
+        	if (key == KeyEvent.VK_INSERT)
+        	{
+            	//===============================================================
+        		//Set the new prompt and prompt position.
+            	//===============================================================
+        		textArea.append("\n" + PROMPT);
+				promptPosition = textArea.getText().length();
+        	}
+        	else
         	if (key == KeyEvent.VK_ENTER)
         	{
             	//===============================================================
@@ -140,12 +162,23 @@ public class CommandBox extends JPanel
         			history.removeLast();
 
             	//===============================================================
-            	//Resolve command, then append the resulting text.
-        		//Set the new prompt and prompt position.
+        		//Set the new prompt and prompt position, then resolve the
+            	//command, and update image and append text as needed.
             	//===============================================================
-        		//textArea.append(commandResolutionCall(command));
-        		textArea.append("\n" + PROMPT);
-				promptPosition = textArea.getText().length();
+    			textArea.append("\n" + PROMPT);
+    			promptPosition = textArea.getText().length();
+        		DisplayData display = application.getGameState().parseCommand(command);
+        		
+        		if (display.getImage().isEmpty() == false)
+        			application.getImageBox().setImage(display.getImage());
+        		if (display.getDescription().isEmpty() == false)
+        			application.getCommandBox().appendText(display.getDescription());
+
+            	//===============================================================
+        		//Update the contents of the Inventory window.
+            	//===============================================================
+        		application.getLinkBar().getInventoryWindow().updateContents();
+        		
         	}
         	else
         	if (key == KeyEvent.VK_UP)
@@ -156,9 +189,11 @@ public class CommandBox extends JPanel
             	//===============================================================
         		if (index < history.size())
         		{
-        			if (index < 9 && index + 1 < history.size())
+        			if (index < history.size() - 1)
+        			{
         				index++;
-        			textArea.replaceRange(history.get(index), promptPosition, textArea.getText().length());
+        				textArea.replaceRange(history.get(index), promptPosition, textArea.getText().length());
+        			}
         		}
         	}
         	else
@@ -198,7 +233,7 @@ public class CommandBox extends JPanel
     	//===============================================================
     	//Add our inputs and actions
     	//=============================================================== 	
-    	input.put(KeyStroke.getKeyStroke(pressedKey, 0, false), name + ".pressed"); 
+    	input.put(KeyStroke.getKeyStroke(pressedKey, 0, false), name + ".pressed");
         action.put(name + ".pressed", new KeyAction(pressedKey));
         
     	//===============================================================
@@ -217,8 +252,9 @@ public class CommandBox extends JPanel
 	 * Constructor.  Create the panel.
 	 */
 	@SuppressWarnings("static-access")
-	public CommandBox() 
+	public CommandBox(Application application) 
 	{
+		this.application = application;
     	//===============================================================
 		//Set the parameters for this panel
     	//===============================================================
@@ -298,5 +334,44 @@ public class CommandBox extends JPanel
 		});
 		scrollBar.setBorder(null);
 		this.add(scrollBar);
+	}
+	
+	/**
+	 * Add a text description / message to the text command area.
+	 * @param text String The description / message to append.
+	 */
+	public void appendText(String text)
+	{
+    	//===============================================================
+		//Clear anything currently typed onto the command line before appending
+    	//===============================================================
+		this.textArea.setSelectionStart(promptPosition);
+		this.textArea.replaceSelection("");
+		this.textArea.append(text);
+
+    	//===============================================================
+		//Use Robot to simulate an enter key press, to newline to a new
+		//command prompt.  It is necessary to set focus to the text area
+		//first for the robot key press to be read by the text area.
+		//To prevent the appended text from being stored as a command upon
+		//the newline, we need to give this input its own key binding, set
+		//to use the enter key action as its base.  We are appropriating
+		//the insert button, since it is unlikely to be used.
+    	//===============================================================
+		try 
+		{	
+			Robot robot = new Robot();
+			addKeyBinding("Robot_Enter", KeyEvent.VK_INSERT);
+        	((KeyAction) action.get("Robot_Enter" + ".pressed")).AddAction(((KeyAction) action.get("Enter.pressed")).getOriginalAction());
+
+			this.textArea.requestFocusInWindow();
+			robot.keyPress(KeyEvent.VK_INSERT);
+			robot.keyRelease(KeyEvent.VK_INSERT);
+		} 
+		catch (Exception e) 
+		{
+			System.out.println("Robot failed in CommandBox.appendText()");
+			e.printStackTrace();
+		}
 	}
 }

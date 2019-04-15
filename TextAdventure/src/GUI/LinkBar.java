@@ -10,6 +10,11 @@ package GUI;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,9 +24,15 @@ import java.awt.event.WindowEvent;
 import java.awt.Color;
 import java.awt.Cursor;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.border.LineBorder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+
+import Structure.GameState;
 
 //=====================================================================
 //The top link bar of our application
@@ -29,11 +40,10 @@ import javax.swing.border.LineBorder;
 @SuppressWarnings("serial")
 public class LinkBar extends JPanel 
 {
-	InventoryWindow inventoryWindow;
-	/**
-	 * Default constructor.  Create this LinkBar and add components.
-	 */
-	public LinkBar(JFrame frame) 
+	private TextWindow inventoryWindow;
+	private TextWindow helpWindow;
+	
+	public LinkBar(Application application) 
 	{		
     	//===============================================================
 		//Set the parameters for this panel
@@ -44,23 +54,65 @@ public class LinkBar extends JPanel
 		setLayout(null);
 
     	//===============================================================
+		//Restart button link
+    	//===============================================================
+		JLabel restartLink = new JLabel("Restart");
+		restartLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		restartLink.setBounds(20, 0, 50, 30);
+		restartLink.setForeground(Color.BLACK);
+		restartLink.setFont(new Font("Arial Black", Font.PLAIN, 12));
+		this.add(restartLink);
+		restartLink.addMouseListener(new MouseAdapter()
+		{
+			//==========================================================================
+            //Reset current game
+            //==========================================================================
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				application.resetGame();
+			}
+		});
+
+    	//===============================================================
 		//Save button link
     	//===============================================================
 		JLabel saveLink = new JLabel("Save");
 		saveLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		saveLink.setBounds(20, 0, 50, 30);
+		saveLink.setBounds(95, 0, 40, 30);
 		saveLink.setForeground(Color.BLACK);
 		saveLink.setFont(new Font("Arial Black", Font.PLAIN, 12));
 		this.add(saveLink);
 		saveLink.addMouseListener(new MouseAdapter()
 		{
 			//==========================================================================
-            //Save current game
+            //Save current game.
+			//Use a JFileChooser set the extension and get the file name.
+			//Then use ObjectOutputStream to write our GameState object to the file.
             //==========================================================================
 			@Override
 			public void mouseClicked(MouseEvent e) 
 			{
-				//code to save game
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Text Adventure Save Game (.adventure)", "adventure"));
+				fileChooser.setFileFilter(fileChooser.getChoosableFileFilters()[0]);
+				fileChooser.setAcceptAllFileFilterUsed(false);
+				
+				if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) 
+				{
+					try 
+					{
+						File file = new File(fileChooser.getSelectedFile().getCanonicalPath() + "." + ((FileNameExtensionFilter) fileChooser.getFileFilter()).getExtensions()[0]);
+						FileOutputStream fileStream = new FileOutputStream(file);
+						ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+						objectStream.writeObject(application.getGameState());
+						objectStream.close();
+					} 
+					catch (IOException e1) 
+					{
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 
@@ -69,7 +121,7 @@ public class LinkBar extends JPanel
     	//===============================================================
 		JLabel loadLink = new JLabel("Load");
 		loadLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		loadLink.setBounds(80, 0, 50, 30);
+		loadLink.setBounds(155, 0, 40, 30);
 		loadLink.setFont(new Font("Arial Black", Font.PLAIN, 12));
 		loadLink.setToolTipText("Load a saved game");
 		this.add(loadLink);
@@ -77,22 +129,50 @@ public class LinkBar extends JPanel
 		{
 			//==========================================================================
             //Load a saved game
+			//Use a JFileChooser set the extension and get the file name.
+			//Then use ObjectInputStream to overwrite our GameState object with
+			//the GameState object from the file, using loadGame().
             //==========================================================================
 			@Override
 			public void mouseClicked(MouseEvent e) 
 			{
-				//code to load a saved game
+				JFileChooser fileChooser = new JFileChooser();
+				fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("Text Adventure Save Game (.adventure)", "adventure"));
+				fileChooser.setFileFilter(fileChooser.getChoosableFileFilters()[0]);
+				fileChooser.setAcceptAllFileFilterUsed(false);
+				
+				if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) 
+				{
+					try 
+					{
+						File file = new File(fileChooser.getSelectedFile().getCanonicalPath());
+						FileInputStream fileStream = new FileInputStream(file);
+						ObjectInputStream objectStream = new ObjectInputStream(fileStream);
+						
+						application.loadGame((GameState) objectStream.readObject());
+						objectStream.close();
+					} 
+					catch (IOException e1) 
+					{
+						e1.printStackTrace();
+					} 
+					catch (ClassNotFoundException e1) 
+					{
+						System.out.println("GameState object not found in file.");
+						e1.printStackTrace();
+					}
+				}
 			}
 		});
 
     	//===============================================================
 		//Inventory button link
     	//===============================================================
-		inventoryWindow = new InventoryWindow();
+		inventoryWindow = new InventoryWindow(application);
 		inventoryWindow.setVisible(false);
 		JLabel inventoryLink = new JLabel("Inventory");
 		inventoryLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		inventoryLink.setBounds(140, 0, 72, 30);
+		inventoryLink.setBounds(215, 0, 72, 30);
 		inventoryLink.setHorizontalAlignment(SwingConstants.LEFT);
 		inventoryLink.setFont(new Font("Arial Black", Font.PLAIN, 12));
 		this.add(inventoryLink);
@@ -105,9 +185,41 @@ public class LinkBar extends JPanel
 			public void mouseClicked(MouseEvent e) 
 			{
 				if (inventoryWindow.isVisible() == false)
+				{
+					inventoryWindow.updateContents();
 					inventoryWindow.setVisible(true);
+				}
 				else
 					inventoryWindow.setVisible(false);
+			}
+		});
+
+    	//===============================================================
+		//Help button link
+    	//===============================================================
+		helpWindow = new HelpWindow(application);
+		helpWindow.setVisible(false);
+		JLabel helpLink = new JLabel("Help");
+		helpLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		helpLink.setBounds(305, 0, 40, 30);
+		helpLink.setHorizontalAlignment(SwingConstants.LEFT);
+		helpLink.setFont(new Font("Arial Black", Font.PLAIN, 12));
+		this.add(helpLink);
+		helpLink.addMouseListener(new MouseAdapter()
+		{
+			//==========================================================================
+            //Display help window
+            //==========================================================================
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				if (helpWindow.isVisible() == false)
+				{
+					helpWindow.updateContents();
+					helpWindow.setVisible(true);
+				}
+				else
+					helpWindow.setVisible(false);
 			}
 		});
 
@@ -130,8 +242,13 @@ public class LinkBar extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e) 
 			{
-				frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+				application.frame.dispatchEvent(new WindowEvent(application.frame, WindowEvent.WINDOW_CLOSING));
 			}
 		});
+	}
+	
+	public TextWindow getInventoryWindow()
+	{
+		return this.inventoryWindow;
 	}
 }
