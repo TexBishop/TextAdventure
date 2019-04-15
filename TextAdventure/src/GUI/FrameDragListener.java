@@ -13,7 +13,10 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 
-public class FrameDragListener extends MouseAdapter 
+/**
+ * Class that is used to make a JFrame drag-able from any point within a chosen component using mouse listeners
+ */
+public class FrameDragListener extends MouseAdapter
 {
 	//==============================================================================
 	//Our primary JFrame is set to undecorated, which removes the title bar and
@@ -27,7 +30,8 @@ public class FrameDragListener extends MouseAdapter
 
 	/**
 	 * Default constructor for our FrameDragListener class.
-	 * @param frame JFrame The primary JFrame object representing our application window.
+	 * @param frame  JFrame The primary JFrame object representing our application window.
+	 * @param offset Point The amount of x, y offset needed to correct the window positioning when dragging.
 	 */
 	public FrameDragListener(JFrame frame, Point offset) 
 	{
