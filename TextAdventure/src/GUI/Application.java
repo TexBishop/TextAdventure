@@ -12,8 +12,10 @@ import java.awt.Point;
 
 import javax.swing.JFrame;
 
-import Rooms.OldFarmhouse;
+import Items.Item;
+import Items.CustomItems.BottleOfWater;
 import Rooms.Room;
+import Rooms.CustomRooms.OldFarmhouse;
 import Structure.DisplayData;
 import Structure.GameState;
 
@@ -108,6 +110,13 @@ public class Application
 			this.imageBox.setImage(display.getImage());
 		if (display.getDescription().isEmpty() == false)
 			this.commandBox.appendText(this.startingText + display.getDescription());
+
+    	//===============================================================
+        //Initialize starting inventory
+    	//===============================================================
+		Item startingBottle = new BottleOfWater(this.gameState);
+		this.gameState.addSpace(startingBottle.getName(), startingBottle);
+		this.gameState.addToInventory(startingBottle.getName());
 	}
 	
 	/**
@@ -135,6 +144,13 @@ public class Application
 			this.imageBox.setImage(display.getImage());
 		if (display.getDescription().isEmpty() == false)
 			this.commandBox.appendText(this.startingText + display.getDescription());
+
+    	//===============================================================
+        //Initialize starting inventory
+    	//===============================================================
+		Item startingBottle = new BottleOfWater(this.gameState);
+		this.gameState.addSpace(startingBottle.getName(), startingBottle);
+		this.gameState.addToInventory(startingBottle.getName());
 
     	//===============================================================
 		//Update the contents of the Inventory window.

@@ -28,7 +28,7 @@ public class CommandParser implements Serializable
 		//could be used to move north, or to move a rug.  Such cases
 		//need to be handled by the switch case command execution.
 		//===============================================================
-		this.setCommandSynonyms("go", "walk", "head", "travel", "approach");
+		this.setCommandSynonyms("go", "walk", "head", "travel", "approach", "enter");
 		this.setCommandSynonyms("look", "examine", "check", "inspect", "scan", "scrutinize", "study");
 	}
 	

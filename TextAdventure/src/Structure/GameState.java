@@ -8,11 +8,12 @@
 package Structure;
 
 import java.io.Serializable;
-
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import Items.Item;
+import Rooms.CountdownRoom;
 import Rooms.Room;
 
 /**
@@ -62,7 +63,24 @@ public class GameState implements Serializable
 		{
 			if (this.spaceMap.containsKey(key) == true)
 			{
+		    	//===============================================================
+				//If the room we are leaving is of type CountdownRoom, reset 
+				//the timer before leaving.  This prevents death from occurring
+				//on an action to leave the room.
+		    	//===============================================================
+				if (this.currentRoom instanceof CountdownRoom)
+					((CountdownRoom)this.currentRoom).resetTimer();
+				
+				//===============================================================
+				//Set the current room.  If the new room is a CountdownRoom,
+				//reset the timer to 0.  This ensures the room will start with
+				//the timer at 0.
+				//===============================================================
 				this.currentRoom = this.spaceMap.get(key);
+				
+				if (this.currentRoom instanceof CountdownRoom)
+					((CountdownRoom)this.currentRoom).resetTimer();
+				
 				return this.currentRoom.displayOnEntry();
 			}
 			else
@@ -88,47 +106,15 @@ public class GameState implements Serializable
 	 */
 	public DisplayData parseCommand(String commandString)
 	{
-		if (commandString.contains("death"))
-			return death("You are dead.  So sad...");
-
 		//===============================================================
 		//Parse the typed command, and turn it into a Command object.
 		//===============================================================
 		Command command = this.commandParser.parse(commandString);
 
 		//===============================================================
-		//If the command is to look at an item in inventory, do so, and
-		//set the value of the current rooms innerSpace to the Item's space.
+		//Determine and return display data
 		//===============================================================
-		if (command.getVerb().contentEquals("look") == true && command.getSubject().contentEquals("inventory") == true)
-		{
-			if (this.checkItemSearch(command.getTarget()) == true)
-			{
-				String key = this.getItemKey(command.getTarget());
-				if (this.checkInventory(key) == true)
-				{
-					((Room)this.currentRoom).setInnerSpace(key);
-					return ((Room)this.currentRoom).getInnerSpace().displayOnEntry();
-				}
-				else
-					return new DisplayData("", "Item not found in inventory.");
-			}
-			else
-				return new DisplayData("", "Item not found in inventory.");
-		}
-
-		//===============================================================
-		//If the current room's innerSpace is not null, handle the command
-		//execution in the Item that innerSpace is pointing to.
-		//===============================================================
-		if (((Room)this.currentRoom).getInnerSpace() != null)
-			return ((Room)this.currentRoom).getInnerSpace().executeCommand(command);
-
-		//===============================================================
-		//If the current room's innerSpace is null, handle the command
-		//execution in the room.
-		//===============================================================
-		return this.currentRoom.executeCommand(command);
+		return this.currentRoom.handleDisplayData(command);
 	}
 	
 	/**
@@ -377,6 +363,29 @@ public class GameState implements Serializable
 	public boolean checkInventory(String key)
 	{
 		return this.inventory.containsKey(key);
+	}
+	
+	/**
+	 * Remove an item from inventory.
+	 * @param key  String The key to check.
+	 */
+	public void removeFromInventory(String key)
+	{
+		this.inventory.remove(key);
+		this.spaceMap.remove(key);
+
+		//===============================================================
+		//Remove all entries in itemSearchMap that contain links to this
+		//item.
+		//===============================================================
+		this.itemSearchMap.values().removeAll(Collections.singleton(key));
+
+		//===============================================================
+		//If innerSpace is currently set to this deleted item, reset
+		//innerSpace.
+		//===============================================================
+		if (((Room)this.currentRoom).getInnerSpace() != null)
+			((Room)this.currentRoom).resetInnerSpace();
 	}
 	
 	/**

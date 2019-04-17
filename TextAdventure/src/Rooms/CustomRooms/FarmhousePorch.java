@@ -5,11 +5,12 @@
  * @due 05-01-2019
  */
 
-package Rooms;
+package Rooms.CustomRooms;
 
 import Items.BasicItem;
 import Items.Item;
-import Items.LostLocket;
+import Items.CustomItems.LostLocket;
+import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
@@ -22,17 +23,12 @@ public class FarmhousePorch extends Room
 	public FarmhousePorch(GameState gameState) 
 	{
 		super(gameState);
-
-		//=================================================================================
-		//Don't forget to set the room name and add it to the Space hashmap, or there
-		//will be copious errors.
-		//=================================================================================
+	}
+	
+	@Override
+	protected void setName() 
+	{
 		this.name = "Farmhouse Porch";
-		gameState.addSpace(this.name, this);
-		
-		createMovementDirections();
-		createItems();
-		createFlags();
 	}
 
 	@Override
@@ -54,7 +50,8 @@ public class FarmhousePorch extends Room
 		//room description, that will be handled here.
 		//=================================================================================
 		this.description = "This old farmhouse is falling apart.  The windows have been broken out, and the door is standing ajar.  "
-				+ "It's obvious it's been abandoned for quite a while.  A well worn path leads south towards the farm house's old mailbox.";
+				+ "It's obvious it's been abandoned for quite a while.  A well worn path leads south towards the farm house's old mailbox, "
+				+ "and another heads east towards the forest.";
 		
 		return this.description;
 	}
@@ -80,6 +77,15 @@ public class FarmhousePorch extends Room
 		this.addMovementDirection("path", "Old Farmhouse");
 		if (this.gameState.checkSpace("Old Farmhouse") == false)
 			new OldFarmhouse(this.gameState);
+		
+		//=================================================================================
+		//Create directions that move to Edge of Forest
+		//=================================================================================
+		this.addMovementDirection("east", "Edge of Forest");
+		this.addMovementDirection("forest", "Edge of Forest");
+		
+		if (this.gameState.checkSpace("Edge of Forest") == false)
+			new EdgeOfForest(this.gameState);	
 	}
 
 	@Override
@@ -103,7 +109,6 @@ public class FarmhousePorch extends Room
 		//Create lost locket
 		//=================================================================================
 		Item oldLocket = new LostLocket(this.gameState);
-		this.gameState.addItemSearch(oldLocket.getName(), "locket", "lost");
 		this.gameState.addSpace(oldLocket.getName(), oldLocket);
 	}
 
@@ -157,12 +162,19 @@ public class FarmhousePorch extends Room
 			
 		case "take":
 			//===============================================================
-			//Take the path to the mailbox.  Changes room.
+			//Take the one of the paths.  Changes room.
 			//===============================================================
 			if (command.getSubject().contentEquals("path"))
 			{
-				if (this.checkMovementDirection(command.getSubject()) == true)
-					return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+				if (command.getTarget().contentEquals("mail") || command.getTarget().contentEquals("mailbox"))
+				{
+					if (this.checkMovementDirection(command.getSubject()) == true)
+						return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+				}
+				else
+				if (command.getTarget().contentEquals("forest"))
+					if (this.checkMovementDirection(command.getSubject()) == true)
+						return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
 			}
 				
 			//===============================================================
@@ -250,7 +262,8 @@ public class FarmhousePorch extends Room
 			if (command.getSubject().contentEquals("locket"))
 			{
 				if (this.gameState.getFlag("locket found").isFlipped() == true)
-					return this.setInnerSpace("Lost Locket");
+					if (this.gameState.getFlag("locket taken").isFlipped() == false)
+						return this.setInnerSpace("Lost Locket");
 			}
 
 			//===============================================================

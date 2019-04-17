@@ -17,6 +17,8 @@ package Items;
 
 import java.io.Serializable;
 
+import Structure.Command;
+import Structure.DisplayData;
 import Structure.GameState;
 import Structure.Space;
 
@@ -32,8 +34,15 @@ public abstract class Item implements Space, Serializable
 	public Item(GameState gameState) 
 	{
 		this.gameState = gameState;
+		this.setName();
+		this.createItems();
+		this.createFlags();
 	}
 
+	/**
+	 * Set room name.
+	 */
+	protected abstract void setName();
 	/**
 	 * Creates the custom Items for this space.
 	 */
@@ -42,6 +51,12 @@ public abstract class Item implements Space, Serializable
 	 * Creates the custom flags for this space.
 	 */
 	protected abstract void createFlags();
+	
+	@Override
+	public DisplayData handleDisplayData(Command command)
+	{
+		return this.executeCommand(command);
+	}
 
 	//===============================================================
 	//Setters and getters
