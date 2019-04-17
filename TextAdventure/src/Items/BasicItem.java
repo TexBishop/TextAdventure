@@ -38,6 +38,12 @@ public class BasicItem extends Item
 		this.image = image;
 		this.description = description;
 	}
+	
+	@Override
+	protected void setName() 
+	{
+		//Not needed for basic item
+	}
 
 	@Override
 	public DisplayData displayOnEntry() 
@@ -75,7 +81,7 @@ public class BasicItem extends Item
 		//given verb has an invalid command.  
 		//===============================================================
 		switch (command.getVerb())
-		{				
+		{			
 		default: 
 			//===============================================================
 			//Pass the current command to the room commands when default is reached.

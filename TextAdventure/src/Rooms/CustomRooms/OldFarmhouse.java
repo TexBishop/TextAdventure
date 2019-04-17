@@ -1,7 +1,8 @@
-package Rooms;
+package Rooms.CustomRooms;
 
 import Items.BasicItem;
 import Items.Item;
+import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
@@ -15,17 +16,12 @@ public class OldFarmhouse extends Room
 	public OldFarmhouse(GameState gameState) 
 	{
 		super(gameState);
-
-		//=================================================================================
-		//Don't forget to set the room name and add it to the Space hashmap, or there
-		//will be copious errors.
-		//=================================================================================
+	}
+	
+	@Override
+	protected void setName() 
+	{
 		this.name = "Old Farmhouse";	
-		gameState.addSpace(this.name, this);
-		
-		createMovementDirections();
-		createItems();
-		createFlags();
 	}
 
 	@Override
@@ -253,8 +249,8 @@ public class OldFarmhouse extends Room
 			//===============================================================
 			if (command.getSubject().contentEquals("around"))
 				return new DisplayData("", "The path leading north to the farmhouse is well worn, but it is slowly disappearing beneath "
-						+ "the tall grass and weeds.  The mailbox is nearly overgrown itself.  The old farm road looks deserted in "
-						+ "both directions, no traffic visible.");
+						+ "the tall grass and weeds.  The mailbox is nearly overgrown itself.  On the eastern edge of the property lies "
+						+ "a forest.  The old farm road looks deserted in both directions, no traffic visible.");
 			
 			if (command.getSubject().contentEquals("house") || command.getSubject().contentEquals("farmhouse"))
 				return new DisplayData("", "The abandoned farmhouse has a hollow, abandoned atmosphere about it.  You wonder what "

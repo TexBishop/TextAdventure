@@ -14,6 +14,12 @@ package Structure;
 public interface Space
 {
 	/**
+	 * Executes command and determines data to display to the UI
+	 * @param command  Command the command to process
+	 * @return         DisplayData the data to display in the UI
+	 */
+	public abstract DisplayData handleDisplayData(Command command);
+	/**
 	 * Implementation of Image and / or Text to display when this space is entered.
 	 * @return Display An object representing the data to display.
 	 */

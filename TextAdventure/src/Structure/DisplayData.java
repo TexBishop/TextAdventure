@@ -34,6 +34,15 @@ public class DisplayData implements Serializable
 		this.image = image;
 		this.description = description;
 	}
+	
+	/**
+	 * Add more text to description of this DisplayData object.
+	 * @param message
+	 */
+	public void appendToDescription(String message)
+	{
+		this.description += message;
+	}
 
 	//===============================================================
 	//Getters.  No setters, initialization through constructor only.

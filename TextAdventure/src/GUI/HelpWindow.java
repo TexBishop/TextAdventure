@@ -39,7 +39,9 @@ public class HelpWindow extends TextWindow
 				+ "\"look around\"\n"
 				+ "\"put the knife on the table\"\n"
 				+ "\"use the key on the door\"\n\n"
-				+ "To look at an item in inventory:\n"
-				+ "\"look in inventory at XXXXXX\"";
+				+ "To focus on an item in inventory:\n"
+				+ "\"look in inventory at XXXXXX\"\n"
+				+ "or\n"
+				+ "\"look at XXXXXX in inventory\"";
 	}
 }

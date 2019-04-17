@@ -60,6 +60,7 @@ public abstract class TextWindow extends JFrame
 	public void updateContents()
 	{
 		textArea.setText(this.setText());
+		textArea.setCaretPosition(0);
 	}
 
 	/**

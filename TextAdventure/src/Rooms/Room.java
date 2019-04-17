@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import Structure.Command;
 import Structure.DisplayData;
 import Structure.GameState;
 import Structure.InvalidMapKeyException;
@@ -47,8 +48,19 @@ public abstract class Room implements Space, Serializable
 	public Room(GameState gameState) 
 	{
 		this.gameState = gameState;
+		
+		this.setName();
+		gameState.addSpace(this.name, this);
+		
+		this.createMovementDirections();
+		this.createItems();
+		this.createFlags();
 	}
 	
+	/**
+	 * Set room name.
+	 */
+	protected abstract void setName();
 	/**
 	 * Creates the movement between Rooms for this Space.
 	 */
@@ -61,6 +73,29 @@ public abstract class Room implements Space, Serializable
 	 * Creates the custom flags for this space.
 	 */
 	protected abstract void createFlags();
+	
+	@Override
+	public DisplayData handleDisplayData(Command command)
+	{
+		//=================================================================================
+		//If innerSpace is null, check it to see if it needs to be set
+		//=================================================================================
+		if (this.innerSpace == null)
+		{
+			DisplayData displayData = this.checkInnerSpace(command);
+			if (displayData != null)
+				return displayData;
+		}
+		
+		//=================================================================================
+		//If the current room's innerSpace is not null, handle the command
+		//execution in the Item that innerSpace is pointing to.
+		//=================================================================================
+		if (this.innerSpace != null)
+			return this.innerSpace.handleDisplayData(command);
+		else
+			return this.executeCommand(command);
+	}
 	
 	/**
 	 * Add a new movement direction and the Room it leads to, to the hashmap.
@@ -101,7 +136,9 @@ public abstract class Room implements Space, Serializable
 		try 
 		{
 			if (movementDirection.containsKey(direction) == true)
+			{
 				return movementDirection.get(direction);
+			}
 			else
 				throw new InvalidMapKeyException();
 		} 
@@ -130,16 +167,102 @@ public abstract class Room implements Space, Serializable
 	}
 	
 	/**
+	 * Check to see if innerSpace needs to be set due to a look at an inventory object.
+	 * If yes, set it and return the display data.  If no, return null.
+	 * @param command  Command      The command to check.
+	 * @return         DisplayData  An object representing the data to display.
+	 */
+	public DisplayData checkInnerSpace(Command command)
+	{
+		//===============================================================
+		//If the command is to look at an item in inventory, do so, and
+		//set the value of the current rooms innerSpace to the Item's space.
+		//===============================================================
+		/*if (command.getVerb().contentEquals("look") == true && command.getSubject().contentEquals("inventory") == true)
+		{
+			if (this.gameState.checkItemSearch(command.getTarget()) == true)
+			{
+				String key = this.gameState.getItemKey(command.getTarget());
+				if (this.gameState.checkInventory(key) == true)
+				{
+					try 
+					{
+						if (this.gameState.checkSpace(key) == true)
+						{
+							this.innerSpace = this.gameState.getSpace(key);
+							return this.innerSpace.displayOnEntry();
+						}
+						else
+							throw new InvalidMapKeyException();
+					} 
+					catch (InvalidMapKeyException e) 
+					{
+						System.out.println("The Space you are attempting to view doesn't exist.");
+						e.printStackTrace();
+					}
+				}
+				else
+					return new DisplayData("", "Item not found in inventory.");
+			}
+			else
+				return new DisplayData("", "Item not found in inventory.");
+		}*/
+		//===============================================================
+		//If the command is to look at an item in inventory, do so, and
+		//set the value of the current rooms innerSpace to the Item's space.
+		//===============================================================
+		if (command.getSubject().contentEquals("inventory") == true || command.getTarget().contentEquals("inventory") == true)
+		{
+			if (this.gameState.checkItemSearch(command.getTarget()) == true || this.gameState.checkItemSearch(command.getSubject()) == true)
+			{
+				String key;
+				if (this.gameState.checkItemSearch(command.getTarget()) == true)
+					key = this.gameState.getItemKey(command.getTarget());
+				else
+					key = this.gameState.getItemKey(command.getSubject());
+					
+				if (this.gameState.checkInventory(key) == true)
+				{
+					try 
+					{
+						if (this.gameState.checkSpace(key) == true)
+						{
+							this.innerSpace = this.gameState.getSpace(key);
+							if (command.getVerb().contentEquals("look") == true)
+								return this.innerSpace.displayOnEntry();
+							else
+								return this.innerSpace.handleDisplayData(command);
+						}
+						else
+							throw new InvalidMapKeyException();
+					} 
+					catch (InvalidMapKeyException e) 
+					{
+						System.out.println("The Space you are attempting to view doesn't exist.");
+						e.printStackTrace();
+					}
+				}
+				else
+					return new DisplayData("", "Item not found in inventory.");
+			}
+			else
+				return new DisplayData("", "Item not found in inventory.");
+		}
+		
+    	//===============================================================
+		//If the Space does not exist, or the command is not for looking
+		//at an inventory object, return null
+    	//===============================================================
+		return null;
+	}
+	
+	/**
 	 * Sets the inner space, then returns display data.
 	 * @param key  String The key for the Space you wish to view.
 	 * @return     DisplayData An object representing the data to display.
 	 */
 	public DisplayData setInnerSpace(String key)
 	{
-    	//===============================================================
-		//Set the value of innerSpace.  If the Space does not exist
-		//in the hashmap, return a blank DisplayData object.
-    	//===============================================================
 		try 
 		{
 			if (this.gameState.checkSpace(key) == true)
@@ -155,7 +278,11 @@ public abstract class Room implements Space, Serializable
 			System.out.println("The Space you are attempting to view doesn't exist.");
 			e.printStackTrace();
 		}
-		return new DisplayData();
+		
+    	//===============================================================
+		//If the Space does not exist, return a blank DisplayData object.
+    	//===============================================================
+		return new DisplayData("", "");
 	}
 	
 	/**
