@@ -9,7 +9,6 @@ package Items;
 
 import java.util.LinkedList;
 
-import Structure.Command;
 import Structure.DisplayData;
 import Structure.GameState;
 
@@ -37,6 +36,13 @@ public abstract class BreakableItem extends Item
 	 */
 	protected abstract void initializeDurability();
 	
+	/**
+	 * Sets number of uses, and usage messages.
+	 * The number of use messages should match the number of uses.  The final message
+	 * should be the break message.
+	 * @param uses      int    The number of uses before this item breaks.
+	 * @param messages  String The messages to use for each use.
+	 */
 	protected void setDurability(int uses, String ...messages)
 	{
 		this.uses = uses;
@@ -47,6 +53,11 @@ public abstract class BreakableItem extends Item
 		}
 	}
 	
+	/**
+	 * Process a usage of this item.  Break it if max number of uses is reached.
+	 * @param displayData  DisplayData The display data to alter.
+	 * @return             DisplayData The altered display data.
+	 */
 	protected DisplayData useItem(DisplayData displayData)
 	{
 		try 
