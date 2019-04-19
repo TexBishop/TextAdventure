@@ -86,6 +86,17 @@ public class FarmhousePorch extends Room
 		
 		if (this.gameState.checkSpace("Edge of Forest") == false)
 			new EdgeOfForest(this.gameState);	
+
+		//=================================================================================
+		//Create directions that move to Backyard
+		//=================================================================================
+		this.addMovementDirection("north", "Backyard");
+		this.addMovementDirection("around", "Backyard");
+		this.addMovementDirection("backyard", "Backyard");
+		this.addMovementDirection("back", "Backyard");
+		
+		if (this.gameState.checkSpace("Backyard") == false)
+			new Backyard(this.gameState);	
 	}
 
 	@Override
@@ -138,20 +149,24 @@ public class FarmhousePorch extends Room
 		//===============================================================
 		switch (command.getVerb())
 		{
-		case "move":  //doing this will cause move to execute the go code
+		case "move":  //doing this will cause move to execute the look code
 		case "go": 
 			//===============================================================
-			//If go back, return base room DisplayData.
-			//Else, move room and return new room DisplayData.
-			//If the subject of the command is unrecognized, return
-			//a failure message.
+			//If go back, but not to backyard, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.getSubject().contentEquals("back") &&
+				!(command.getTarget().contentEquals("house") || command.getTarget().contentEquals("yard") || command.getTarget().contentEquals("farmhouse")))
 				return this.displayOnEntry();
-			
+
+			//===============================================================
+			//Change current room and return new room DisplayData.
+			//===============================================================
 			if (this.checkMovementDirection(command.getSubject()) == true)
 				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
-			
+
+			//===============================================================
+			//Go / Move command not recognized
+			//===============================================================
 			return new DisplayData("", "Can't go that direction.");
 			
 		case "return":

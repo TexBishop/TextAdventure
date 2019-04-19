@@ -140,7 +140,7 @@ public class OldFarmhouse extends Room
 		//===============================================================
 		switch (command.getVerb())
 		{
-		case "move":  //doing this will cause move to execute the go code
+		case "move":  //doing this will cause move to execute the look code
 		case "go": 
 			//===============================================================
 			//If go back, return base room DisplayData.

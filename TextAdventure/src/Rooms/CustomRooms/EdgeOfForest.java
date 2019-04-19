@@ -7,15 +7,18 @@
 
 package Rooms.CustomRooms;
 
-import Rooms.CountdownRoom;
+import Items.Item;
+import Items.CustomItems.BottleOfWater;
 import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
+import Structure.Flag;
 import Structure.GameState;
 
-public class EdgeOfForest extends CountdownRoom 
+public class EdgeOfForest extends Room 
 {
 	private static final long serialVersionUID = 1L;
+	private int waterLevel = 0;
 
 	public EdgeOfForest(GameState gameState) 
 	{
@@ -40,18 +43,23 @@ public class EdgeOfForest extends CountdownRoom
 	}
 	
 	@Override
-	protected void initializeCountdown() 
-	{
-		this.setCountdown(3, "One tick", "Two tick", "Blown up.");
-		this.setTriggers(null, null);
-	}
-
-	@Override
 	public String fullDescription() 
 	{
-		this.description = "The path leading to the edge of the forest is surprisingly well worn, a wide swath of clear, packed dirt.  It was "
-				+ "obviously heavily used in the past.";
+		this.description = "The path leading to the edge of the forest is surprisingly well worn, a wide swath of clear, packed dirt. "
+				+ "It obviously saw regular traffic at some point in the past. "
+				+ "It enters the forest just a bit further on, continuing east through the trees, disappearing from sight around a bend. "
+				+ "Off to the side of the path is an antique water pump with a large pump handle, and a water basin placed in front of it. ";
+		this.description += this.gameState.getFlag("muddy ground").toString();
 		
+		if (this.waterLevel == 0)
+			this.description += "The basin is empty. ";
+		else
+			if (this.waterLevel == 1)
+				this.description += "The basin is half full. ";
+				else
+					if (1 < this.waterLevel)
+						this.description += "The basin is full. ";
+				
 		return this.description;
 	}
 
@@ -68,6 +76,31 @@ public class EdgeOfForest extends CountdownRoom
 		
 		if (this.gameState.checkSpace("Farmhouse Porch") == false)
 			new FarmhousePorch(this.gameState);	
+		
+		//=================================================================================
+		//Create directions that move to Forest Path
+		//=================================================================================
+		this.addMovementDirection("east", "Forest Path");
+		this.addMovementDirection("forest", "Forest Path");
+		this.addMovementDirection("path", "Forest Path");
+		
+		if (this.gameState.checkSpace("Forest Path") == false)
+			new ForestPath(this.gameState);	
+
+		//=================================================================================
+		//Create directions that move to Backyard
+		//=================================================================================
+		this.addMovementDirection("north", "Backyard");
+		this.addMovementDirection("barn", "Backyard");
+		this.addMovementDirection("toolshed", "Backyard");
+		this.addMovementDirection("tool", "Backyard");
+		this.addMovementDirection("shed", "Backyard");
+		this.addMovementDirection("corn", "Backyard");
+		this.addMovementDirection("cornfield", "Backyard");
+		this.addMovementDirection("backyard", "Backyard");
+		
+		if (this.gameState.checkSpace("Backyard") == false)
+			new Backyard(this.gameState);	
 	}
 
 	@Override
@@ -79,7 +112,15 @@ public class EdgeOfForest extends CountdownRoom
 	@Override
 	protected void createFlags() 
 	{
-		// TODO Auto-generated method stub
+		//=================================================================================
+		//Create Flags and add them to the Flag hashmap.  The first string field in addFlag()
+		//is the key name for the Flag in the hashmap.  In the Flag constructor, the first
+		//field is the Flag's starting boolean value.  The second field is the string the
+		//Flag will return on toString() if it has not been flipped (false).  The third field
+		//is the string the Flag will return on toString() if it has been flipped (true).
+		//=================================================================================
+		this.gameState.addFlag("muddy ground", new Flag(false, "", "The ground around the basin is wet and muddy. "));
+		this.gameState.addFlag("water in basin", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -97,16 +138,19 @@ public class EdgeOfForest extends CountdownRoom
 		case "go": 
 			//===============================================================
 			//If go back, return base room DisplayData.
-			//Else, move room and return new room DisplayData.
-			//If the subject of the command is unrecognized, return
-			//a failure message.
 			//===============================================================
 			if (command.getSubject().contentEquals("back"))
 				return this.displayOnEntry();
 
+			//===============================================================
+			//Change current room and return new room DisplayData.
+			//===============================================================
 			if (this.checkMovementDirection(command.getSubject()) == true)
 				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
 
+			//===============================================================
+			//Go / Move command not recognized
+			//===============================================================
 			return new DisplayData("", "Can't go that direction.");
 
 		case "return":
@@ -114,18 +158,154 @@ public class EdgeOfForest extends CountdownRoom
 			//Return base room DisplayData.
 			//===============================================================
 			return this.displayOnEntry();
+			
+		case "drink":
+			//===============================================================
+			//Drink some of the water from the basin.
+			//===============================================================
+			if (command.getSubject().contentEquals("water"))
+			{
+				if (this.gameState.checkFlipped("water in basin") == true)
+					return new DisplayData("", this.decrementWaterLevel() + "Refreshing. ");
+				else
+					return new DisplayData("", "There isn't any water in the basin.");
+			}
 
-		case "search":  //doing this will cause search to execute the go code
+			//===============================================================
+			//Drink command not recognized
+			//===============================================================
+			return new DisplayData("", "You don't see that here.");
+			
+		case "take":
+			//===============================================================
+			//Reject attempt to take mud
+			//===============================================================
+			if (command.getSubject().contentEquals("mud"))
+				return new DisplayData("", "Why would you want that?");
+
+			//===============================================================
+			//Take command not recognized
+			//===============================================================
+			return new DisplayData("", "Can't take that.");
+			
+		case "pump":
+		case "use":
+			//===============================================================
+			//Use the pump to fill the basin with water.  When it overflows,
+			//it creates mud around the basin.
+			//===============================================================
+			if (command.getSubject().contentEquals("pump") ||
+				command.getSubject().contentEquals("water") ||
+				command.getSubject().contentEquals("handle"))
+			{
+				//===============================================================
+				//Flip the flag indicating that the basin has water in it
+				//===============================================================
+				this.gameState.flipFlag("water in basin");
+
+				//===============================================================
+				//Increment the water, up to a value of 3
+				//===============================================================
+				if (this.waterLevel < 3)
+					this.waterLevel++;
+
+				//===============================================================
+				//Set the messages for each level of water, and flip the flag
+				//for muddy ground at water level 3
+				//===============================================================
+				if (this.waterLevel == 1)
+					return new DisplayData("", "You fill the basin halfway. ");
+				else
+					if (this.waterLevel == 2)
+						return new DisplayData("", "You fill the basin to the top. ");
+						else
+							if (this.waterLevel == 3)
+							{
+								this.gameState.flipFlag("muddy ground");
+								return new DisplayData("", "The basin is overflowing.  Water is splashing over the edges, and turning the ground "
+										+ "around the pump to fresh mud. ");
+							}
+			}
+			
+			//===============================================================
+			//Intentionally allow case "use" to pass into fill/refill, if it
+			//hasn't yet been caught.  This is to allow "use" to also be
+			//caught by the code in fill/refill.
+			//===============================================================
+			
+		case "put":
+		case "fill":
+		case "refill":
+			//===============================================================
+			//Use the water in the basin to turn the empty dasani bottle
+			//into a full dasani bottle.
+			//===============================================================
+			if (command.getSubject().contentEquals("bottle") ||
+				command.getSubject().contentEquals("dasani") ||
+				(command.getSubject().contentEquals("water") && (command.getTarget().contentEquals("bottle") || command.getTarget().contentEquals("dasani"))))
+			{
+				if (this.gameState.checkFlipped("water in basin") == true)
+				{
+					if (this.gameState.checkInventory("Dasani Bottle (Empty)") == true)
+					{
+						//===============================================================
+						//Remove empty bottle from inventory
+						//===============================================================
+						this.gameState.removeFromInventory("Dasani Bottle (Empty)");
+
+						//===============================================================
+						//Create and add a new bottle of water to inventory
+						//===============================================================
+						Item refilledBottle = new BottleOfWater(this.gameState);
+						this.gameState.addSpace(refilledBottle.getName(), refilledBottle);
+						this.gameState.addToInventory(refilledBottle.getName());
+						
+						return new DisplayData("", this.decrementWaterLevel());
+					}
+					else
+						return new DisplayData("", "Your bottle of water is already full.");
+				}
+				else
+					return new DisplayData("", "There isn't any water in the basin");
+			}
+
+			//===============================================================
+			//Use / Fill / Refill command not recognized
+			//===============================================================
+			return new DisplayData("", "Not sure what you're trying to do.");
+
+		case "search":  //doing this will cause search to execute the look code
 		case "look":
 			//===============================================================
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
 			if (command.getSubject().contentEquals("around"))
-				return new DisplayData("", "");
+				return new DisplayData("", "The forest looms large before you here, an inscrutable wall. "
+						+ "You feel a bit of apprehension at the thought of entering the ancient wood, but you aren't sure why. "
+						+ "From this angle, you can see a barn and what looks to be a tool shed behind the house, with a corn field stretching beyond. ");
 
 			if (command.getSubject().contentEquals("forest"))
-				return new DisplayData("", "");
+				return new DisplayData("", "The edge of the forest is abrupt, immediately dense. It doesn't look like much light is getting "
+						+ "through beneath the canopy.  The path continues on, cutting between the trees bravely. ");
+
+			if (command.getSubject().contentEquals("water") ||
+				command.getSubject().contentEquals("pump"))
+				return new DisplayData("", "The old water pump looks to be in good repair.  It probably still works. ");
+
+			if (command.getSubject().contentEquals("basin"))
+				return new DisplayData("", "A small tin trough.  Surprisingly, it looks clean, and in good repair. ");
+
+			if (command.getSubject().contentEquals("mud"))
+			{
+				//===============================================================
+				//Change return message based on whether the ground is muddy
+				//===============================================================
+				if (this.gameState.checkFlipped("muddy ground") ==  true)
+					return new DisplayData("", "The water has soaked into the soil around the basin, causing some mud. ");
+				else
+					return new DisplayData("", "You don't see any mud here. ");
+			}
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -139,53 +319,80 @@ public class EdgeOfForest extends CountdownRoom
 			return new DisplayData("", "Can't do that here.");
 		}
 	}
+	
+	/**
+	 * Decrement the basin's water level, and return a String message to display.
+	 */
+	private String decrementWaterLevel()
+	{
+		//===============================================================
+		//Decrement water level.  Either 3 or 2, both of which indicate
+		//a full basin, reduce to 1, which is a half-full basin.
+		//===============================================================
+		if (0 < this.waterLevel)
+			this.waterLevel = this.waterLevel/2;
+
+		//===============================================================
+		//Return message, based on water level.
+		//===============================================================
+		if (this.waterLevel == 0)
+			return "You use some of the water. The basin is now empty. ";
+		else
+			if (this.waterLevel == 1)
+				return "You use some of the water. The basin is now half full. ";
+
+		//===============================================================
+		//Blank return, to provide an always reachable return.
+		//===============================================================
+		return "";
+	}
 
 	//===============================================================
 	//ASCII image String constants beyond this point
 	//===============================================================
-	private final String edgeOfForestImage = "NNNNMMMMMMMMMMMNyhdsoo++yNNNm--+yNMMM-.:.-` - `/`     .sm+dyy..:yhy++o++sy/:///-:+++:++:+++/:/+/+/oys++mMyo+sosdyyhdo:dMNs/sNMdNMMMMMMMhodyhhhddhNNmmmysMmmmm\r\n" + 
-			"NNNMMMMMMMMMMMMy:y/.-..`oNNNy ./dNMMN-.-`::.-`.:..`   `om/hys. :dmy:://+yyoo/oo+s+yoooo+/+/:+yhhhyyhso+dNysyhyyhyhddh+mMNs/sNMdNMMMMMMMhhmhyhdddyNNdddssNmmmm\r\n" + 
-			"NNNMMMMMMMMMMMMy+o`- ` `smNmo.-+mNMMN``- .. -..:``.`  `+d+oo/--.hNy:-//+dN/:+oosso::-+++:oso:hyhsshmmmdmmmdddhdmmdNmdoNMNhssNMdmMMMMMMMhhmhhhhhhyNNdddysNmmmm\r\n" + 
-			"NNNMMMMMMMMMMMMh/+```.-:hNmms`-/mNMMN/:/`.. . `/````  `odssy+:..hNd///+ohdsss++-:///o+ss+ssooyso+yddhymNNmmmyhmddhddhoNMds:sNMhmMMMMMMMssNsyhdhhsNmdmdhoNmmmm\r\n" + 
-			"NNNNMMMMMMMMMMMh++---:-/ymmmy..:mNMMN.`.``.`.  :`..``  /hoos/:`+dNm..-/sdms+so+//+:+osyyyhdmhddmmmmmddmNNmmmdmdddmmmhyNMdsooNMhmMMMMMMMy+mhyhhysyNmdddh+NNddd\r\n" + 
-			"NNNNMMMMMMMMMMMhss:/-`` /mmdd::+mNNMN. -  . .``-`  `` `/hsoh/+`+hmm-`..:yh//o+/:///+osyyoydhyddhdhhdh+hNNhdhhhhmdhmdyhNNdyo+NNhmNMMMMMNhsmdhhhdhhNmdddd+Nmmmm\r\n" + 
-			"MNNNMMMMMMMMMMMo++:..`.-/dmhNd.-mNMMN:.:.`-``` ..````  :hy+d/+-/symo-../mN+/--:-.//-:/d-:smh+oosy/-s/:sNMs+sos+mddhd/yMMyso+NNhNNMMMMMNy+ddysyhsdNmdmmd+Nmdhy\r\n" + 
-			"MNNNMMMMMMMMMMMo:/`...`./dmNNy--mmNMN- `. . ..`-. ```  -yh/d/+-:smmo:--/mNy/:.//`````:y.-ymd.+o++--d-.+NNh::sy+mmdNdsyMMyoo+NNhmNMMMMMNs+dssyyy/hNdddddoNmhdh\r\n" + 
-			"MNNNMMMMMMMMMMMs-+````-:+dmNNo-.dmNNN/`.-`.  ` `-``````-yh:d++.:ymms+-.:mNy.----````.:m..ymd`+s++..h:.+NNh..-+/mNmNdshMMyos/mNymNMMMMMNs/Nsss+o-hMdhddh/mmhhy\r\n" + 
-			"MNNMMMMMMMMMMMNo+/:--::++hNNN: `dmNMN:  . .``. `-  ````.sd:h/:`:ydms.-./dmo`......`.`-m.-hmy-::/o:.h/.:NNd:/::/mNmNhshMMy+s:mNymNMMMMMNoodys+os:dNhdhhh/mmssy\r\n" + 
-			"MmNMMMMMMMMMMMN/:o/:-::-omNNN:  dmNMNs` . `` ``.:`  ````sd/h+/.-yhmo`.`+mm-..`...`--.:m-:dNy+oooso/yo--mNm.-::/hmmmyodMMo/+-mNyNNMMMMMMsyms+osy-dNdhhdd/mmoss\r\n" + 
-			"MNNNMMMMMMMMMMNs/y``...`+NNNm.``hmNNNN:`.  ` ` `.```` ``od/y+:.`smmy...smd......-.:-:-d:/dNs:++/so+hyoomNN..--:ymmmyodMMs/o-mNsmNMMMMMMoyd/+ssy-mNhhdmy+mNysh\r\n" + 
-			"MNNNMMMMMMMMMMNyo+```.-:+mNNm-.`hmmNNN+ .  ` ```.```````od+yo+:`smms...smy..--.:o:-:--d//dms-+o/+-:yy+/dNN:----shhyoomMMs/o-mmsmNMMMMMMshd/++ss:mNhyyso+dmhdh\r\n" + 
-			"MNNMMMMMMMMMMMdssh+/-:../hmmNs--hmNNNNh .  ` ` `:````.``+h+ys/:.+dmy...ydo-:-.:-::--`-d/+dm/-:y-/:-+s+/dNN-.---oNmmhsdmN///-hdymNMMMMMMohd/::oo-mNssyyy+dNhyd\r\n" + 
-			"MmNNMMMMMMMMMMh//o/++oooosmNNh-.hmNMMm` .  `````.``    `/hoys::-+dmh//+yhso///+::-:-`-s/+os/-/o:+/:oso/hNN/+/+/+dmhs+odd+++/hhhmNMMMMMM+ym/o/++:NNddddh+dNhyd\r\n" + 
-			"MNNNMMMMMMMMMMs+++/++:ooydmNNh..hmNMMy``.  ` `  :``...../hssy---:hmd::/dds:--::-/::::::++//o++oos++oso+smNyooosos+oo/oosho+:hdymNMMMMMMhhmo:/s+/Nmysyhd+hNdhd\r\n" + 
-			"MNNNMMMMMMMMMM+oysyshyss/hddmm-.ydNNMy `-` ``.``..``...`/hysh:++:ymm/-oddo.....-/oooo+oss++oshyyyyhyhyysyysooo+sosyyosyyhss:hhymNMMMMMMdhmhhhhoyNmyhyyyohNhsy\r\n" + 
-			"MNNNMMMMMMMMMMoshyshssyssdmmmmo`smNNMd:-:......`....-.../hhsdoo//hmh::smhy..-:-:/:/:/:+sosys:hdhhmddhhdmdyo+o/+yhdhsoyyossh+hmymNMMMMMMdymysoyyhhhhyyhhohmdyh\r\n" + 
-			"MNNNMMMMMMMMMN-+yosy+///+mNNNNs/mNMMMh` -  ```.`......../hdsdoos-ymh:/dmmy-.-:/--/:/+:soshhsoshydds+mdyddh+yhysohdys/yhyyyy/mNhmNMMMMMMNmmmdmmmmmdmddhhyhmdhh\r\n" + 
-			"MNNNMMMMMMMMMd.:+//sooyosdmmmms:mNNMMm/::..-....--/++++:/hmydy+/-ymmsomNNo/://+oo//++ohsomdyyyhsos::ho+dmdsso/:/syssyNNys+s:dmdmNMMMMMMmdmdNmNmNNNNmddhydNmhd\r\n" + 
-			"MNNNMMMMMMMMMd/soy+/syssodNNmmhyhmNNMmo++:..-:::----:-:./hmydyss-hmdddmmm+:::////:+++odyodm///hsss..:/-dMNo:++::ymsohmhooos/yddNMMMMMMMNdddmNNNNNNNmmmNmNNNhm\r\n" + 
-			"MNNNMMMMMMMMNho+hyyyhsyhsdmmmmhhhmNNMNs/+++ss/:::+--:+//ohdydsh+:dmNhdNNNsoo::::+ooo:omhodmss+yshyyyso:dNNo::::/hhyosohhsssohymNMMMMMMMMNNNNmmmNNNMNNNNMNNNNN\r\n" + 
-			"MNNNMMMMMMMMmhydddhhyhddhdmmmdhhymNNMNy++o++:/+:-.-.:++sohddddd++mmmdmNNmsssyy++ssosoydhsdmh::yo/hyss/-hNms:--//+oo/yddoyossyhmNMMMMMMMMMMNNNNNMMMNNMMMMNMNNN\r\n" + 
-			"MNNNMMMMMMMMMhsyo:+-:smyymmmddhhhNMMMMs+++/o::://::+oo+:+hddddd+ommmdmmmmyhyyhhddddhdhddhmmo- oy:+./s:`ymdh:-:::++osyyhyhyhyddmNNMMMMMMMMMMMMNMMMMMMMMMMMMMNN\r\n" + 
-			"MNNNMMMMMMMMMhhdmdhhdhhydmmmmmmddNMMMMs//:../.-`.+///+-`+hmddso//dmdddddmdddddmddhhyyhmddmmo: +y.../y:.smNh-:+o//o+ydmdhddmdNmdmNMMMMMMMMMMMMNMMMMMMMMMMMMMMM\r\n" + 
-			"MNNMMMMMMMMMNhyydddddddmmmmNmNmddNMMMMdssy+--`- `+.-:.--ohdmmdy:.hmmmddhddddddyhyydhyhmddmm:. +y---++/-sdmy:::/+ooshddmmhddmmmdmNNNddNmMMMNNNNMNNMMNMMMMMMMNN\r\n" + 
-			"NNNMMMMMMMMMMNNmmmmmNNNmNmNNmNNmmNNNMMmhyhh//`-`.--.://+ydmmmmh/smmNNmyymmhddmyhhddhshmddmh.- /dys+oho:+sy/:/+sydmmmmmNNNmNNNNdNmymdMMMMMNNNNMMMMMMMMMMMMMMNN\r\n" + 
-			"NNNMMMMMMMMMMMNNNNNNNNNNNNNNNNNmNNNMMMmmmNmmdy+//+/oo///ydmmmd//ymmNNNmddydhhmhhddddhdmmmmh:/`:dyo//y+:/hs/-/:ydddhyddmmmmmNNNdNMMMNMMNMMMNNMMNNMMNNmMMNmMmdm\r\n" + 
-			"NNMMMMMMMMMMMMNMNNNNNNNNNNNNNNNmNNMMMMNNNmyydh++:-o/////sdmmmhsohmNNNNNmhhdddhdmmdmddhmmmmhyy`:ddh/-hh::sys:-oo+ssyhddddhyhNMNdNMMMMMMMMmNNNNMMMMMMMMMMMNMNmd\r\n" + 
-			"NNMMMMMMMMMMMMNNNMNmNMNMMMMNNNMmNNNNMMNhydhyssyoo/+/-::+sdmmmd/ohmmmdhdmddddmmmdhdmddhmmmNdyy`:yddo.dh::oyo::://ohhdmdhdddNMMNmMMMMMMMMMNMMmmMMMMMMMMMMMMMMMN\r\n" + 
-			"NNMMMMMMMMMMMMNNNNMMMMMMMMMNMMMmNNNMMMNmydNmsdsso++:--//smmmNm+sdmmdhdmmmmmdyyhdsyyhssmNmNy+s.-oss:-:-::+--:/+ssohmdyddhmNmymNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN\r\n" + 
-			"NMMMMMMMMMMMMMMMMNMMMMMMMMMNNMNmNNMMMMNNNNNmdymdsoo/::..+mmNNhsymNdyshmNmmh++o/...-//omNNNs/o`.so:....::///oo+oooshyossddsyyyNMMMMMMMMMMMNNNmmNMMMMMMMMMMMMNN\r\n" + 
-			"NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmNNNMMMMMNNNNNmddsho+-...-omNNmsshmNmdmmmmdysyy+:-.....omNNNy+/``-:.----//:/sosy+syysyss+ossyhmMMMMMMMMNNNmmdmmmmmmmmmmmmmmNNmd\r\n" + 
-			"NMNNNNMMMMMMMMMNNMMMMMMNNMMMMMmNNMMMMMNMNhhhhhdhhso//+++shyhososdNmdydmyoo+oyyo+os//ohmmmdmys:--:.:-:-//+oyhhhmmhho++::sosymNMMMMNmmNmmmmmddddhhhdhhdddhdmhhN\r\n" + 
-			"MMNNNMMMMMMMMMMNMMMMMMMMNMMMMNNMMMMMMMNMNNNNmmdds++o++/hyhddmyoyddddhhdyssyhyyhhhddmmmNNNmmmho+++--:::/-/oshhdhy+/::+s/+yymmmhdhhyhmNNNNdhhdhdddhdddyhhhmdmNN\r\n" + 
-			"MMMNNMMMMMMMMMMMNNMMMMMNMMMMMNMMMMMMMMNNNMMNNmhysoyshsyhhdmmmmhhmmNNNmddddmddmNmmdmmdddmmmNmds+///+/o+:-::+yhs+:+/:/+/+hhmNhysyysymdddhhyhhyhhhhhmmmNmmmNdmmm\r\n" + 
-			"MNNNNNNNNMMMMMMMMMMMNNNNNNNmNmMMMMMMMMNNmNNNNNNmmdhhosyhhNmmmmhdmNNNNNmdhhdmmmmmmmmddhhhhmddms:-+o++/:/+:/oo+:/o+:+ososshhddmdhsyyyyyhhhhhhyyyyhhdddhhhhdmmmm\r\n" + 
-			"MMMMNNNNNNNNNNNNNNNMNmNNNNNNNNNNNNNNNNNNNNmdmddmmmmmmdyyyddhyssoyyyyhhyyhhyyyyyysyyysoooshssso/-.::-.--///:-+s///+/++oohdmddhsoyhhhhhhddddhyhyhyyyyhddmdddhhd\r\n" + 
-			"NMMMMMMNNmNNMMMMMMMNMNNNNNNNNNNNNNNmmNNNNNNNhyydddddmdddmyyso++oo/::::::::-::::/::::-----::--/:-o:---:/:/--:/:///+ohyysyyhs/++yhdyhhysyyhhdmmmmmddhhyhddddddh\r\n" + 
-			"NNNNNMMMMMMMMMMMMNMMMMMNNNMNNmNNNNNNNNmNNNNNmdyo++++ooooossoo+/:---....``..`.``````````..``....-:-::::---:///::://++o+os+//+syyyysyhysssyhNNNNNNNmhhhhhddmddm\r\n" + 
-			"MMMMMMMMMMMMMMMMMMMNNNNNMMMMMNNNNNNNNNNNMMNNNNdo///:---.````````````````````````````....`...---.-:/::/:--:/+//+y+/://+o+++ysshdyyyyyssyhdNNNmmmdmddddddmmddmN\r\n" + 
-			"MMMMMMMMMMMMMMMMMMMMMMNNNMMMMMMMNNMMMMMMMNNNNMNmo+/::-.:...````````..``````````````.`...-..-.-.....-::--:-///+///+++ooosossssyyyyysyhddhmmdmdmmmNNNdmmdddmNNN\r\n" + 
-			"MMMMMMMMMMMMMMMMMMMMMMMMMMNNMMMMMMMMMMMMMMNMMMMNhdysoo+////:---...`..-...........------------------:///+/++++++o+oooosssyssssyyyhhdhhdhdddmmdmmmmmmmddhddmmmm\r\n" + 
-			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNMNNNMMMMMMMMNNNMMMNmddhyyyyyso+s//:::::-:/:::-::--:--:::::::::::::::/::///++oooossosooososysyhhhhhhdddddddddddmmdmmmmddmNNmmmm\r\n" + 
-			"NNNMMMMMNMMNNNNNMMMMMMMMMMMMMMMMMMNMNNNNNMMMMNNNNMMNNNmmmmmmdddhysssooo+oo+/+////+////////+/////+++++/+++o+++o+ooosssyyyyhyhhhhdhddddddddhddddddmdmmmmmNmmmNN";
+	private final String edgeOfForestImage = "++++//////////////////////////:::--::-----....``````````````````````         ``````..............`..``````````````````````````...`````.``````````````````````\r\n" + 
+			"///////////////////////////////////////::--....````````````````````````````````   ``````````` ```      ````````````..........................................\r\n" + 
+			"/////////////////////////////::://///////::::--...`````````````````````````````````````````    ``````````.............--------.............--........----....\r\n" + 
+			"////////////////////////////:-.-:///////////::-.--................``````````````` `````````````````..........----------------------.......-----..........-:-.\r\n" + 
+			"////////////////::---:::::/::----:////////////::::::::::::::------.......```````````.....``````.......-------------------------.........-----------...:.ohsso\r\n" + 
+			"///////////////::--........-::/://////////////////////////////////:....``````````````...............----------------------------.........-------------//ssyys\r\n" + 
+			"/::::::-...--...............----://////////////////////////////////:::--..``````````````````........---------:::::--------------.......-----------./+yyhsddhh\r\n" + 
+			"/::-....``````````````.......``.....---:////////////////////////////////:-............``````````......------------------------------.....----.--::+yyyhshhhhd\r\n" + 
+			"::::::-----.............````..``.......-:::/:::///////////////////////////::::::::-::---.....``````````...----------:------------:+:---:::-://+yyyhdhdhhddddm\r\n" + 
+			"::::::::::::::----::-----.....``..........--::::://////////////////////////////////////::::------........---:::::::::::-::::---/oyhhysyhhhhyhyyyhhhdhhhhhhdhh\r\n" + 
+			"::::::::::::::------:::--...`..............-....--:::::::///////////////////////////////////::///::::::::::::::/::::::+oyhshssyhhddhhdhdddddhhhhdddhhddhdhdmh\r\n" + 
+			"::::::::::::::::::::::--..`````````````.`` ```````......-::://////////////////////////////////////////:...-/+--:/oooyyhddhdddhddmmhddddddddddhhddhhdmmmmmmdmm\r\n" + 
+			"...--..--:-:::::::::-........````.....`````````````````...--:::::::/:-------:://///////////////////::::--+yyhhhhhddhhhhdhddmmmmdmmmhmdhyhhdddhhhhhdmmmdmmdddd\r\n" + 
+			"`............```..------------.............................--:::::::-.``.`.....-://:://::::::///ooso//o+hhhhhddddddhhdmmmmdmmmdhhdddmdmmdhdddddhdmdmmdmdhdmdd\r\n" + 
+			"...........```````````..---::::------------------------:::::::::::::::--.......--::-/:/soo+osyhohdddhhhddddmdhhdddhdddddddhhdddddmmdhmdmhhhddhdmmmmdmNmdmmddm\r\n" + 
+			"......------.............---::-----:::::::::::::::::::::::::::::::::::::::-::/:/++:yhyhdhyhddddmmddddddddhdmmmdddhhdmmmmddmdddddmdhdyyddmdmmmmddddmmmmmdddhdd\r\n" + 
+			"------------------------..------....--:::::--::::::::::::::::::::::::+/+/+yhhddyyhhhdddddhdddddddmmdmmmdhddmmmmmmdddmmmNNmmmddddhhhmmddddmNmmddmmdmmmNmmdmNmm\r\n" + 
+			"---------------------------........-----:::::::::::::::::::/o/:osooshdhdddddddddhdddmdddddmmmmdddmmmmmdmmhmmdNNdhdhdhddmNmdddhhdhhdddmmdhhmddmmmmmmmmmmmmmmNm\r\n" + 
+			"--------------------------------.......-----::-/o+++::/oysdhhdhhdhhhddmdmdmmmmmmmmmmmdmmmdmmmmdmmmddhdmNmmmmmdhhdhhhhdmmdmdddddhhhhddmmmmmhhhmmmmmmmmdddmdmhh\r\n" + 
+			"-------------------------:-:::::///:/:////:/yyyhddhddddddddhhhddddddddddmmmNNmmmNmmmddmmmmmmmmmmmmmddhhdmmmdhhmmmdddhhmmdhdmdmdhdhdddmmmmmmmmmdddhddddmNmdyhm\r\n" + 
+			"///////sso++/oyhhyyyyyhyyhydhddhdhhhhhhhdhhhyysydmmmmmdysyyyyyyyhddmmmmmmmmNNmdddmNmmmmmmmmmmNmdddmdmdmdddddmmmNmdddmmmmdhhhmmdddddddmmmNNNNNmNNmhmmmmddhyydd\r\n" + 
+			"dmmmmmmmmmmdddddhdddddmmmmmdmmdddhyhydhhhhsyyssoossyhyssosyyyyhyshddmmmmmNmNNmmmddmdmmmmmNNNmmdmddmmNmNmmmdmmmmdmdmmmhmmmhdyhhhddhdmmNmmNNmNNmmmddmmdhyssyyhd\r\n" + 
+			"mmmmmmmmmmmmdmmdmmmdmmmmmmddddhyyhyssyyyhssyhhssoddhd+osyyyhddyyyysyyyhmmmNmmmmmdmdmmmmmmddmddhhysyhhdmNNmdmNNNmmmmddmmmmdmmmddddmmdmNdmmNmmmNddhhyydddmyydmm\r\n" + 
+			"NmNNmmNmmdhddmddddhysooshhdmmdssyyhhhyyyysyyhdhodms+hoshmdddmyosyyhhhyyydmmmmmddyososysyhhmmsoyyhhyyyyymmmdmmNNNNNmmmhdmNmmNNNmmmdhyyyyyhhddNmhddmddhysyyhmmN\r\n" + 
+			"mmNNNNhhysssyhyyysyysyyyydhyyosssssyyyysshdhhyssdNNyy+hdmdhdsoyssssyyyysssyyyyysyhsyysyhyysssssssyyyyssdNddmmmmmNNNNNNmddmmmNmNmdddmdhhdhyyyyyyhyhddhyddddhdh\r\n" + 
+			"dmmmmdyyyyyyyyhdossydhhhhhyyssshdddddhyyyyyyyhho+mNdhsyhysyyssydddddhyhyssyyydsssydyyhyhyysssyhhdddhddymmhhmmmmmNNNNNNNNmmddmNNmyyhdmmmmmhhyyyssssyyyhhdmhddd\r\n" + 
+			"hyyyyyysssyhyyhyyhdhddyyyhyyyydNmdddsysssyhhyhy+ymNmdhssyyyyyhmNdddhysyyyhyydyshhhhdhyhhyyyyhmmddmmmdmmhddhdmdmmmmdmmmmmmmmmmmhys//ydmmdmmmdmhyhhyhyhhydmmmmm\r\n" + 
+			"ysssssssysysssssyyysssssssssossssssooooo++ooo++/+dddNms+oooo+sosooosooo+ooooooosssssososssosyyysyhdhyyyyhyyyhhhysyyhddddhyo/-...-/sydhyhhhhyyhdddhdyhhyhdmmmm\r\n" + 
+			"ooooooo+++++++++/////////////////////////////////doyNh//////////////////////////////////////////////////////////////+s+-.......-/oo+oo+ooyhyyyhhdddhdddhhyhdm\r\n" + 
+			"////////////////////////////////////////////////sh/yNh/////////////////////////////////////////////////////////////:--.......-:////+::/++syyhddmmmmmmmmddhhhd\r\n" + 
+			"///////////////////////////////////////////////od//dmd+//////////////////////////////////////////////////////////:-..........//////+o+:syyhddmmmdmmmmmmmmmmmm\r\n" + 
+			"//////////////////////////////////////////////+d+//dNddy//////////////////////////////////////////////////////:-............-///////+yssyhdhddddhdmmmmNmmmNNN\r\n" + 
+			"//////////////////////////////////////////////sh///yNs/yo////////////////////////////////////////////////////:..............://///////syhhhyhddhhhdmmmNNNmmNN\r\n" + 
+			"//////////////////////////////////////////////sh///yNs/////////////////////////////////////////////////////:-...............//////////+yhhhhhdhdhhhddddmmmNNN\r\n" + 
+			"//////////////////////////////////////////////+m///hNs+osssyyyyhhhyyyyso+////////////////////////////////:-................./////////////oyhyyhhhhyyhddddmmmm\r\n" + 
+			"///////////////////////////////////////////////+//smmmmddddddddddddddddddmmds//////////////////////////:-...................//////////////+osyhhdmddhhsyysyhd\r\n" + 
+			"/////////////////////////////////////////////////ommmNmmmdddddddddmmmmmmmmmmm+////////////////////////-.....................//////////////////++osssoosss+oos\r\n" + 
+			"/////////////////////////////////////////////////+mmNmmmddddddddddhddddmmmmmm///////////////////////:-....................../////////////////////////+//////+\r\n" + 
+			"//////////////////////////////////////////////++++mmmmmmmmmmmmmmmmNNNNNNNmmmh/++///////////////////:......................../////////////////////////////////\r\n" + 
+			"////////////////////////////////////////////+++ooomNNNmmmNNNNNNNNNNNNNNNNNNNhooo+++//////////////:-........................./////////////////////////////////\r\n" + 
+			"//////////////////////////////////////////+++oosssdmNNNNNNNNNNNNNNNNNNNNNNmmdssooo++++//////////:...........................:////////////////////////////////\r\n" + 
+			"////////////////////////////////////////+++oooossyyddddmmmmmmmmmNNNNNmmddhhhyyssooooo++////////-............................:////////////////////////////////\r\n" + 
+			"////////////////////////////////////////++ooooossyyhhhhhhhhdddddddddhhdhhhhhyyyssoooo++//////:-.............................-////////////////////////////////\r\n" + 
+			"/////////////////////////////////////////++oooossyyyyhhhhhhhhhhhhhhhhhhhhhyyyyyssooo+++/////:...............................-////////////////////////////////\r\n" + 
+			"//////////////////////////////////////////+++ooooooooosssssyyyyyyyyyysssssooooooo++++/////:-................................-////////////////////////////////";
 }
