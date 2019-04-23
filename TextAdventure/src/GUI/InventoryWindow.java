@@ -11,7 +11,7 @@ package GUI;
 public class InventoryWindow extends TextWindow 
 {
 	//===============================================================
-	//Text window containing an inventory list
+	//Text window containing an inventory list, updates dynamically
 	//===============================================================
 	/**
 	 * Constructor.  Create the frame.
