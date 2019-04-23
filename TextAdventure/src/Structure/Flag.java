@@ -37,9 +37,8 @@ public class Flag implements Serializable
 	}
 	
 	/**
-	 * Return String value of description for this flag.  Flag with default value of false, will
-	 * return a blank string on false.  Flag with a default value of true, will return a blank
-	 * string on true.
+	 * Return String value of description for this flag.  Will return the False description when Flag 
+	 * is False, and the True description when Flag is True.
 	 */
 	public String toString()
 	{

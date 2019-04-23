@@ -52,9 +52,9 @@ public abstract class Room implements Space, Serializable
 		this.setName();
 		gameState.addSpace(this.name, this);
 		
-		this.createMovementDirections();
 		this.createItems();
 		this.createFlags();
+		this.createMovementDirections();
 	}
 	
 	/**

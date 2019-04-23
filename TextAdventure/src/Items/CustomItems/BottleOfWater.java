@@ -70,8 +70,30 @@ public class BottleOfWater extends BreakableItem
 		//Most verbs will require default handling for cases where the
 		//given verb has an invalid command.  
 		//===============================================================
+		DisplayData displayData;
+		Item emptyBottle;
 		switch (command.getVerb())
 		{	
+		case "execute usage":
+			//=================================================================================
+			//Default usage code
+			//=================================================================================
+			displayData = new DisplayData("", "");
+			this.useItem(displayData);
+			
+			//=================================================================================
+			//Create empty bottle, and add it to inventory
+			//=================================================================================
+			emptyBottle = new BasicItem(this.gameState, "Dasani Bottle (Empty)", "", "An empty plastic Dasani bottle.");
+			this.gameState.addItemSearch(emptyBottle.getName(), "bottle", "dasani");
+			this.gameState.addSpace(emptyBottle.getName(), emptyBottle);
+			this.gameState.addToInventory(emptyBottle.getName());
+
+			//=================================================================================
+			//Default usage code, with blank display data
+			//=================================================================================
+			return displayData;
+			
 		case "sip":
 		case "swallow":
 		case "imbibe":
@@ -81,18 +103,18 @@ public class BottleOfWater extends BreakableItem
 				command.getSubject().contentEquals("bottle") ||
 				command.getSubject().contentEquals("dasani"))
 			{
-				DisplayData displayData = new DisplayData("", "You drink the water. ");
+				displayData = new DisplayData("", "You drink the water. ");
 				this.useItem(displayData);
 				
 				//=================================================================================
 				//Create empty bottle, and add it to inventory
 				//=================================================================================
-				Item emptyBottle = new BasicItem(this.gameState, "Dasani Bottle (Empty)", "", "An empty plastic Dasani bottle.");
+				emptyBottle = new BasicItem(this.gameState, "Dasani Bottle (Empty)", "", "An empty plastic Dasani bottle.");
 				this.gameState.addItemSearch(emptyBottle.getName(), "bottle", "dasani");
 				this.gameState.addSpace(emptyBottle.getName(), emptyBottle);
 				this.gameState.addToInventory(emptyBottle.getName());
 				
-				return new DisplayData("", "You drink the water. ");
+				return displayData;
 			}
 			
 		default: 
