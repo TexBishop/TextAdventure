@@ -140,7 +140,7 @@ public class ForestClearing extends CountdownRoom
 				return new DisplayData("", "");
 
 			if (command.getSubject().contentEquals("altar"))
-				return new DisplayData("", "");
+				return new DisplayData("", "XXXX");
 
 			if (command.getSubject().matches("statue|statues|figure|figures|figurine|figurines"))
 				return new DisplayData("", "");
