@@ -120,7 +120,17 @@ public abstract class CountdownRoom extends Room
 				if (this.timer == this.limit)
 					return this.gameState.death(this.messages.get(this.timer - 1));
 				else
-					displayData.appendToDescription(" " + this.messages.get(this.timer - 1));
+				{
+					//=================================================================================
+					//If command is not a successful command to move to a different room, append the
+					//timer message to the display data
+					//=================================================================================
+					if (command.getVerb().contentEquals("go") == false ||
+						(command.getVerb().contentEquals("go") && this.checkMovementDirection(command.getSubject()) == false))
+					{
+						displayData.appendToDescription(" " + this.messages.get(this.timer - 1));
+					}
+				}
 
 				return displayData;
 			} 

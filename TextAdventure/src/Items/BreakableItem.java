@@ -58,7 +58,7 @@ public abstract class BreakableItem extends Item
 	 * @param displayData  DisplayData The display data to alter.
 	 * @return             DisplayData The altered display data.
 	 */
-	protected DisplayData useItem(DisplayData displayData)
+	public DisplayData useItem(DisplayData displayData)
 	{
 		try 
 		{
