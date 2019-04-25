@@ -346,7 +346,14 @@ public class GameState implements Serializable
 		{
 			for (Map.Entry<String, Item> entry : this.inventory.entrySet()) 
 			{
-				inventoryList += entry.getValue().getName() + "\n";
+				//===============================================================
+				//If the item has a value stored in state, append it to the 
+				//item name.
+				//===============================================================
+				inventoryList += entry.getValue().getName();
+				if (entry.getValue().getState() != null)
+					inventoryList += " " + entry.getValue().getState();
+				inventoryList += "\n";
 			} 
 		}
 		else

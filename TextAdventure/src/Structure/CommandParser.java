@@ -28,7 +28,7 @@ public class CommandParser implements Serializable
 		//could be used to move north, or to move a rug.  Such cases
 		//need to be handled by the switch case command execution.
 		//===============================================================
-		this.setCommandSynonyms("go", "walk", "head", "travel", "approach", "enter");
+		this.setCommandSynonyms("go", "walk", "head", "travel", "approach", "enter", "follow");
 		this.setCommandSynonyms("look", "examine", "check", "inspect", "scan", "scrutinize", "study");
 	}
 	
@@ -171,7 +171,6 @@ public class CommandParser implements Serializable
 				words[i].equals("for") == false &&
 				words[i].equals("from") == false &&
 				words[i].equals("in") == false &&
-				words[i].equals("inside") == false &&
 				words[i].equals("into") == false &&
 				words[i].equals("near") == false &&
 				words[i].equals("of") == false &&
@@ -190,14 +189,12 @@ public class CommandParser implements Serializable
 				words[i].equals("below") == false &&
 				words[i].equals("beside") == false &&
 				words[i].equals("between") == false &&
-				words[i].equals("down") == false &&
 				words[i].equals("during") == false &&
 				words[i].equals("except") == false &&
 				words[i].equals("off") == false &&
 				words[i].equals("out") == false &&
 				words[i].equals("toward") == false &&
 				words[i].equals("towards") == false &&
-				words[i].equals("up") == false &&
 				words[i].equals("and") == false &&
 				words[i].equals("or") == false &&
 				words[i].equals("nor") == false &&

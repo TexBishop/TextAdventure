@@ -27,7 +27,6 @@ public class BasicItem extends Item
 	 * Constructor that can be used to fully initialize a basic item.
 	 * @param gameState    GameState Game state object.
 	 * @param name         String    The name of the item.
-	 * @param takable      boolean   Boolean value representing whether or not the item can be added to inventory.
 	 * @param image        String    The ASCII image.
 	 * @param description  String    The description of the item printed to the CommandBox.
 	 */

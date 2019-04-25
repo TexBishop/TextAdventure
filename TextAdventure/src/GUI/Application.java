@@ -11,6 +11,7 @@ import java.awt.EventQueue;
 import java.awt.Point;
 
 import javax.swing.JFrame;
+import javax.swing.text.AbstractDocument;
 
 import Items.Item;
 import Items.CustomItems.BottleOfWater;
@@ -201,13 +202,9 @@ public class Application
 	public void loadGame(GameState gameState)
 	{
     	//===============================================================
-        //Remove, re-initialize, and re-add the CommandBox, to clear it.
-		//We can't simply set it's text to empty, because we've made it
-		//non-editable.  This was the simplest solution I found.
+        //Clear the text out of the Command Box and reset promp position.
     	//===============================================================
-		this.frame.remove(commandBox);
-		this.commandBox = new CommandBox(this);
-		this.frame.add(commandBox);
+		this.commandBox.clearText();
 
     	//===============================================================
         //Load the saved game state, and then display the current room.

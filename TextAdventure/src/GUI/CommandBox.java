@@ -374,4 +374,13 @@ public class CommandBox extends JPanel
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Clear the text in the CommandBox and reset the prompt position.
+	 */
+	protected void clearText()
+	{
+		this.promptPosition = 3;
+		this.textArea.setText(">> ");
+	}
 }
