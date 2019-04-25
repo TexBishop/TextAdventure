@@ -30,6 +30,7 @@ public abstract class Item implements Space, Serializable
 	protected String name;
 	protected String image;
 	protected String description;
+	protected String state;
 	
 	public Item(GameState gameState) 
 	{
@@ -65,5 +66,10 @@ public abstract class Item implements Space, Serializable
 	public String getName()
 	{
 		return this.name;
+	}
+	
+	public String getState()
+	{
+		return this.state;
 	}
 }

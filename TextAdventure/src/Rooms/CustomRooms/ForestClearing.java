@@ -7,9 +7,12 @@
 
 package Rooms.CustomRooms;
 
+import Items.BasicItem;
+import Items.Item;
 import Rooms.CountdownRoom;
 import Structure.Command;
 import Structure.DisplayData;
+import Structure.Flag;
 import Structure.GameState;
 
 public class ForestClearing extends CountdownRoom 
@@ -62,8 +65,13 @@ public class ForestClearing extends CountdownRoom
 				+ "It's better lit than the path you've been following, with the canopy being thinner here. You can actually see the sky. "
 				+ "In the center of the clearing is a small altar, made of stone. "
 				+ "To either side of it are two statues, identical, that look like the same seated woman as the figurine "
-				+ "beneath the large tree.  However, neither of these is holding a basin. "
-				+ "The path you followed to get here trails back into the forest behind you, heading west. ";
+				+ "beneath the large tree.  However, neither of these is holding a basin. ";
+		if (this.gameState.getFlag("praying completed").isFlipped())
+		{
+			if (this.gameState.getFlag("zippo taken").isFlipped() == false)
+				this.description += this.gameState.getFlag("zippo taken").toString();
+		}
+		this.description += "The path you followed to get here trails back into the forest behind you, heading west. ";
 		
 		return this.description;
 	}
@@ -85,13 +93,33 @@ public class ForestClearing extends CountdownRoom
 	@Override
 	protected void createItems() 
 	{
-		// TODO Auto-generated method stub
+		//=================================================================================
+		//Create holy zippo lighter
+		//=================================================================================
+		Item holyZippo = new BasicItem(this.gameState, "Holy Zippo", "", "A zippo lighter with the \"eye within a pyramid\" symbol on it. "
+				+ "You came by it in a rather unusual fashion... Could it possibly have special properities? ");
+		this.gameState.addItemSearch(holyZippo.getName(), "holy", "zippo", "lighter");
+		this.gameState.addSpace(holyZippo.getName(), holyZippo);
 	}
 
 	@Override
 	protected void createFlags() 
 	{
-		//asdf
+		//=================================================================================
+		//Flag for whether the basin on the altar has water in it
+		//=================================================================================
+		this.gameState.addFlag("basin filled", new Flag(false, "The basin has some old, dried out flower petals lying in it. ", 
+				"The basin has some water in it, with some old, dried out flower petals floating on top. "));
+		
+		//=================================================================================
+		//Flag for whether the player has prayed yet
+		//=================================================================================
+		this.gameState.addFlag("praying completed", new Flag(false, "", ""));
+		
+		//=================================================================================
+		//Flag for whether the zippo has been taken
+		//=================================================================================
+		this.gameState.addFlag("zippo taken", new Flag(false, "A mysterious zippo lighter sits on the lip of the altar. ", ""));
 	}
 
 	@Override
@@ -129,6 +157,97 @@ public class ForestClearing extends CountdownRoom
 			//Return base room DisplayData.
 			//===============================================================
 			return this.displayOnEntry();
+			
+		case "pour":
+		case "fill":
+		case "put":
+			//===============================================================
+			//If command is to pour water into the basin
+			//===============================================================
+			if ((command.getSubject().matches("water|dasani|bottle") && command.getTarget().contentEquals("basin")) ||
+				(command.getSubject().contentEquals("basin") && command.getTarget().matches("water|dasani|bottle")))
+			{
+				//===============================================================
+				//Verify that the player has water in inventory
+				//===============================================================
+				 if (this.gameState.checkInventory("Bottle of Water"))
+				 {
+					 if (this.gameState.checkFlipped("basin filled") == false)
+					 {
+						//=================================================================================
+						//Flip the switch for basin filled, and set the display data
+						//=================================================================================
+						this.gameState.flipFlag("basin filled");
+						DisplayData displayData = new DisplayData ("", "You pour some water into the basin. "
+								+ "The dried petals swirl around, floating. "
+								+ "The atmosphere in the small clearing somehow becomes expectant. ");
+
+						//=================================================================================
+						//Use the Bottle of Water, which will cause it to break, and create an empty bottle
+						//=================================================================================
+						DisplayData bottleData = this.gameState.getSpace("Bottle of Water").executeCommand(new Command("execute usage", "", ""));
+						
+						return new DisplayData("", displayData.getDescription() + bottleData.getDescription());
+					 }
+					 else
+						 return new DisplayData("", "The basin already has water in it. ");
+				 }
+				 else
+					 return new DisplayData ("", "You don't have any water. ");
+			}
+
+			//===============================================================
+			//If put command not recognized
+			//===============================================================
+			return new DisplayData("", "That doesn't seem to do anything. ");
+			
+		case "pray":
+			//===============================================================
+			//Praying complete, flip flag and return message.  May only be
+			//done if the basin has water in it.
+			//===============================================================
+			if (this.gameState.checkFlipped("basin filled") == true && this.gameState.checkFlipped("praying completed") == false)
+			{
+				this.gameState.getFlag("praying completed").flipToggle();
+				return new DisplayData("", "You kneel, close your eyes and pray. It feels as if there's some kind of answer, an indistinct feeling. "
+						+ "You linger a bit, not sure what happened. But, when you open your eyes, they focus on something new before you. "
+						+ "A shiny zippo lighter, sitting on the lip of the altar. It has the same symbol on it as the brooch. ");
+			}
+
+			//===============================================================
+			//If basin not filled, or already prayed
+			//===============================================================
+			return new DisplayData("", "Nothing happens. ");
+			
+		case "grab":
+		case "get":
+		case "take":
+			//===============================================================
+			//Take the lighter.  Can only be done if the "praying complete"
+			//flag has been flipped, and the "zippo taken" flag has not.
+			//===============================================================
+			if (command.getSubject().matches("zippo|lighter|shiny"))
+			{
+				if (this.gameState.checkFlipped("praying completed") == true)
+				{
+					//===============================================================
+					//Flip the "zippo taken" flag, and add Holy Zippo to inventory.
+					//===============================================================
+					if (this.gameState.checkFlipped("zippo taken") == false)
+					{
+						this.gameState.flipFlag("zippo taken");
+						this.gameState.addToInventory("Holy Zippo");
+						return new DisplayData("", "You take the mysterious zippo lighter. ");
+					}
+					else
+						return new DisplayData("", "You've already taken that. ");
+				}
+			}
+			
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData("", "You don't see that here.");
 
 		case "search":  //doing this will cause search to execute the look code
 		case "look":
@@ -137,13 +256,28 @@ public class ForestClearing extends CountdownRoom
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
 			if (command.getSubject().contentEquals("around"))
-				return new DisplayData("", "");
+				return new DisplayData("", "While this seems like a nice, sunny spot in the middle of this shadowy forest, "
+						+ "it has a heavy feeling around it, a sense of foreboding, that ruins the image. "
+						+ "The encroaching forest at the edges of the clearing seems particularly dense here, for some reason. ");
 
 			if (command.getSubject().contentEquals("altar"))
-				return new DisplayData("", "XXXX");
+			{
+				String description = "It looks to be a construction of a brick column, with a concrete slab on top. "
+						+ "In the center of the slab is a hollowed out basin, a couple of hands across. "
+						+ "Carved into the slab around the basin are images of worshippers kneeling and praying. "
+						+ this.gameState.getFlag("basin filled").toString();
+				if (this.gameState.getFlag("praying completed").isFlipped())
+				{
+					if (this.gameState.getFlag("zippo taken").isFlipped() == false)
+						description += this.gameState.getFlag("zippo taken").toString();
+				}
+				
+				return new DisplayData("", description);
+			}
 
 			if (command.getSubject().matches("statue|statues|figure|figures|figurine|figurines"))
-				return new DisplayData("", "");
+				return new DisplayData("", "These statues are much larger than the one beneath the huge tree, "
+						+ "and they have no basins, but seem otherwise identical. They seem to be hewn from concrete. ");
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.

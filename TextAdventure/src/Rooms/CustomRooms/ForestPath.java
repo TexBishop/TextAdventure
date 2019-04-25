@@ -185,7 +185,15 @@ public class ForestPath extends Room
 				if (this.getMovementDirectionRoom(command.getSubject()).contentEquals("Forest Cliff"))
 				{
 					if (this.gameState.checkFlipped("left path switch") ==  true)
-						return this.gameState.setCurrentRoom("Forest Cliff");
+					{
+						//===============================================================
+						//If Forest Cliff has already been visited, prevent entering
+						//===============================================================
+						if (this.gameState.checkFlipped("ForestCliff first visit") == false)
+							return this.gameState.setCurrentRoom("Forest Cliff");
+						else
+							return new DisplayData("", "Remembering the overgrown path, and sudden fall, you decide against going that direction again. ");
+					}
 					else
 						return new DisplayData(this.forestPathImage, "You come upon a fork in the path, that looks strikingly similar to the "
 								+ "fork you just left. " + this.fullDescription());
@@ -241,6 +249,11 @@ public class ForestPath extends Room
 				//===============================================================
 				 if (this.gameState.checkInventory("Bottle of Water"))
 				 {
+					 //===============================================================
+					 //Verify that the right path switch hasn't already been thrown
+					 //===============================================================
+					 if (this.gameState.checkFlipped("right path switch") == false)
+					 {
 						//=================================================================================
 						//Flip the switch for the right path, and set the display data
 						//=================================================================================
@@ -254,6 +267,9 @@ public class ForestPath extends Room
 						DisplayData bottleData = this.gameState.getSpace("Bottle of Water").executeCommand(new Command("execute usage", "", ""));
 						
 						return new DisplayData("", displayData.getDescription() + bottleData.getDescription());
+					 }
+					 else
+						 return new DisplayData ("", "The basin is already full of water. ");
 				 }
 				 else
 					 return new DisplayData ("", "You don't have any water. ");
@@ -270,22 +286,31 @@ public class ForestPath extends Room
 			//===============================================================
 			//If the command is to light the torch using the holy zippo
 			//===============================================================
-			if ((command.getSubject().contentEquals("torch") && command.getSubject().matches("holy|zippo")) ||
+			if (command.getSubject().contentEquals("torch") ||
 				(command.getSubject().matches("holy|zippo") && command.getTarget().contentEquals("torch")) ||
 				command.getSubject().contentEquals("holy") && command.getTarget().contentEquals("zippo"))
 			{
 				//===============================================================
-				//Verify that the player has the holy zippo lighter
+				//Verify that the left path switch hasn't already been thrown
 				//===============================================================
-				if (this.gameState.checkSpace("Holy Zippo") == true)
+				if (this.gameState.checkFlipped("left path switch") == false)
 				{
-					this.gameState.flipFlag("left path switch");
-					return new DisplayData("", "You light the troll figure's torch. It sputters to life, illuminating the area among the ancient tree's "
-							+ "roots. You feel as if you've just completed some pagan ritual. "
-							+ "Maybe next, you'll meet a genie and get three wishes, you chuckle to yourself. ");
+					//===============================================================
+					//Verify that the player has the holy zippo lighter
+					//===============================================================
+					if (this.gameState.checkInventory("Holy Zippo") == true)
+					{
+						this.gameState.flipFlag("left path switch");
+						return new DisplayData("", "Using your Holy Zippo, you light the troll figure's torch. "
+								+ "It sputters to life, illuminating the area among the ancient tree's "
+								+ "roots. You feel as if you've just completed some pagan ritual. "
+								+ "Maybe next, you'll meet a genie and get three wishes, you chuckle to yourself. ");
+					}
+					else
+						return new DisplayData("", "That doesn't work. ");
 				}
 				else
-					return new DisplayData("", "That doesn't work. ");
+					return new DisplayData("", "The torch is already lit. ");
 			}
 
 			//===============================================================
