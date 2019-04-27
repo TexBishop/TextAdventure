@@ -81,8 +81,14 @@ public class Torch extends Item
 		case "extinguish":
 		case "snuff":
 		case "put":
+			//===============================================================
+			//Put out the torch
+			//===============================================================
 			if (command.getSubject().matches("lit|torch") || command.getTarget().matches("lit|torch"))
 			{
+				//===============================================================
+				//Verify that the torch is lit
+				//===============================================================
 				if (this.state == "(lit)")
 				{
 					this.state = "(unlit)";
@@ -94,10 +100,19 @@ public class Torch extends Item
 		
 		case "ignite":
 		case "light":
+			//===============================================================
+			//Light the torch
+			//===============================================================
 			if (command.getSubject().matches("unlit|torch") || command.getTarget().matches("unlit|torch"))
 			{
+				//===============================================================
+				//Verify that the torch isn't already lit
+				//===============================================================
 				if (this.state == "(unlit)")
 				{
+					//===============================================================
+					//Verify that the Holy Zippo is in inventory
+					//===============================================================
 					if (this.gameState.checkInventory("Holy Zippo"))
 					{
 						this.state = "(lit)";

@@ -320,6 +320,7 @@ public class ForestPath extends Room
 			
 		case "get":
 		case "remove":
+		case "grab":
 		case "take":
 			//===============================================================
 			//If the command is to take the brooch

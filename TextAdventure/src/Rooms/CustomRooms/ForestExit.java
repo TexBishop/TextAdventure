@@ -48,7 +48,7 @@ public class ForestExit extends Room
 				+ "and the foliage around the circular area is dense, difficult to see through. "
 				+ "It's like an upside down bowl, formed of trees and brush. "
 				+ "On the western end is a gate, the view through it showing a bit of empty field. "
-				+ this.gameState.getFlag("gate barred").toString()
+				+ this.gameState.getFlag("gate unbarred").toString()
 				+ "The stone staircase leads back down to the cave entrance on the southern end of the area. ";
 		
 		if (this.gameState.checkFlipped("troll satisfied") == true && this.gameState.checkFlipped("troll scene ran") == false)
@@ -105,7 +105,8 @@ public class ForestExit extends Room
 		//=================================================================================
 		//Flag for whether the gate has been unbarred
 		//=================================================================================
-		this.gameState.addFlag("gate unbarred", new Flag(false, "The gate is barred closed with a piece of heavy timber. ", ""));
+		this.gameState.addFlag("gate unbarred", new Flag(false, "The gate is barred closed with a piece of heavy timber. ", 
+				"It's sitting slightly ajar, the bar once holding it closed lightly off to the side, on the ground. "));
 
 		//=================================================================================
 		//Flag for whether the gate has been unbarred
@@ -232,7 +233,7 @@ public class ForestExit extends Room
 				//Adjust description based on whether the gate is still barred
 				//===============================================================
 				String gateDescription = "The gate is contructed of heavy timber, with several crossbars, and chain link covering the gaps. "
-						+ "It hugged so closely by the foliage, that it appears to be a door through the foliage. "
+						+ "It hugged so closely by the foliage, that it appears to be a door through the greenery. "
 						+ "There's presumable a fence as well, but it's completely invisible beneath the brush. ";
 				if (this.gameState.checkFlipped("gate unbarred"))
 					return new DisplayData("", gateDescription + "The piece of timber that was barring the gate closed now lies on the ground, "
