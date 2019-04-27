@@ -7,11 +7,14 @@
 
 package GUI;
 
+import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Point;
 
 import javax.swing.JFrame;
-import javax.swing.text.AbstractDocument;
+import javax.swing.border.LineBorder;
 
 import Items.Item;
 import Items.CustomItems.BottleOfWater;
@@ -38,6 +41,15 @@ public class Application
 	private LinkBar linkBar;
 	private ImageBox imageBox;
 	private CommandBox commandBox;
+
+	//===============================================================
+	//Variables used for sizing of UI elements
+	//===============================================================
+	protected final int screenHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+	protected final Font font = new Font("Monospaced", Font.BOLD, screenHeight/135);
+	protected final FontMetrics metrics;
+	protected final int imageWidth;
+	protected final int imageHeight;
 
 	/**
 	 * Main.  Launch the application.
@@ -66,6 +78,30 @@ public class Application
 	 */
 	public Application() 
 	{
+    	//===============================================================
+		//Set parameters for this application window's outer container
+    	//===============================================================
+		this.frame.setUndecorated(true);  
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.setFont(this.font);
+		this.frame.getRootPane().setBorder(new LineBorder(new Color(0, 0, 0), 4));
+		this.frame.setVisible(true);
+
+    	//===============================================================
+		//Initialize our final variables used for the UI sizing
+    	//===============================================================
+		this.metrics = this.frame.getGraphics().getFontMetrics(this.font);
+		this.imageWidth = metrics.stringWidth("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW\r\n");
+		this.imageHeight = metrics.getHeight() * 45;
+
+    	//===============================================================
+		//Set the size of the frame
+    	//===============================================================
+		this.frame.setBounds(100, 100, imageWidth + 10, this.imageHeight + this.screenHeight/3 + 60);   
+
+    	//===============================================================
+		//Initialize the frame's components
+    	//===============================================================
 		initialize();
 	}
 
@@ -74,15 +110,7 @@ public class Application
 	 */
 	private void initialize() 
 	{
-    	//===============================================================
-		//Set parameters for this application window's outer container
-    	//===============================================================
-		this.frame.setBounds(100, 100, 800, 930);   
-		this.frame.setUndecorated(true);
-		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.frame.setVisible(true);
-
-    	//===============================================================
+		//===============================================================
 		//FrameDragListener object initialization, to make our undecorated 
 		//frame drag-able
     	//===============================================================
@@ -93,7 +121,7 @@ public class Application
     	//===============================================================
         //Add the LinkBar, ImageBox and CommandBox JPanels
     	//===============================================================
-		this.imageBox = new ImageBox(this.frame);
+		this.imageBox = new ImageBox(this);
 		this.commandBox = new CommandBox(this);
 		this.linkBar = new LinkBar(this);
 		this.frame.add(linkBar);

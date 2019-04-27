@@ -74,7 +74,7 @@ public abstract class TextWindow extends JFrame
 		//Set parameters for this window's outer container
     	//===============================================================
 		this.frame = this;
-		this.setBounds(100, 100, 300, 400);
+		this.setBounds(100, 100, 300, (int) (application.frame.getHeight()/2.7));
 		this.setUndecorated(true);
 		this.setBackground(new Color(255, 255, 250));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -136,7 +136,7 @@ public abstract class TextWindow extends JFrame
 		//A scroll pane, to make our text area scroll-able
     	//===============================================================
 		JScrollPane scrollBar = new JScrollPane(textArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollBar.setBounds(15, 40, 270, 350);
+		scrollBar.setBounds(15, 40, 270, (int) (application.frame.getHeight()/2.7 - 50));
 		scrollBar.getVerticalScrollBar().setPreferredSize(new Dimension(10, 350));
 		scrollBar.getVerticalScrollBar().setUI(new BasicScrollBarUI() 
 		{

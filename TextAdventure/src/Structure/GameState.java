@@ -33,6 +33,7 @@ public class GameState implements Serializable
 	private Map<String, String> itemSearchMap = new HashMap<>();
 	private CommandParser commandParser = new CommandParser();
 	private Space currentRoom;
+	private boolean alive = true;
 	
 	public GameState()
 	{
@@ -107,14 +108,22 @@ public class GameState implements Serializable
 	public DisplayData parseCommand(String commandString)
 	{
 		//===============================================================
-		//Parse the typed command, and turn it into a Command object.
+		//Only allow commands to process if the player is currently alive
 		//===============================================================
-		Command command = this.commandParser.parse(commandString);
+		if (this.alive == true)
+		{
+			//===============================================================
+			//Parse the typed command, and turn it into a Command object.
+			//===============================================================
+			Command command = this.commandParser.parse(commandString);
 
-		//===============================================================
-		//Determine and return display data
-		//===============================================================
-		return this.currentRoom.handleDisplayData(command);
+			//===============================================================
+			//Determine and return display data
+			//===============================================================
+			return this.currentRoom.handleDisplayData(command);
+		}
+		else
+			return new DisplayData("", "You are dead. ");
 	}
 	
 	/**
@@ -124,6 +133,7 @@ public class GameState implements Serializable
 	 */
 	public DisplayData death(String message)
 	{
+		this.alive = false;
 		return new DisplayData(deathImage, message);
 	}
 
