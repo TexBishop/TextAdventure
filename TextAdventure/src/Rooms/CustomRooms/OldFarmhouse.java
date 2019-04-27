@@ -54,6 +54,7 @@ public class OldFarmhouse extends Room
 		this.addMovementDirection("porch", "Farmhouse Porch");
 		this.addMovementDirection("house", "Farmhouse Porch");
 		this.addMovementDirection("farmhouse", "Farmhouse Porch");
+		this.addMovementDirection("forward", "Farmhouse Porch");
 		
 		if (this.gameState.checkSpace("Farmhouse Porch") == false)
 			new FarmhousePorch(this.gameState);	

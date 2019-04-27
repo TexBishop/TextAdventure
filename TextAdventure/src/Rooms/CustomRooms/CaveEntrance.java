@@ -46,7 +46,7 @@ public class CaveEntrance extends Room
 		this.description = "The trail widens out into an area of flat, packed dirt, though it remains shadowed, the canopy still thick. "
 				+ "You see the cliff face here again, taller than it was before, on the western edge of the trail. "
 				+ "The only path away from this area, is the path back towards the crossroads to the south. "
-				+ "In the center of the sheer rock is a large, crude wooden door. "
+				+ "In the center of the sheer rock face is a large, crude wooden door. "
 				+ this.gameState.getFlag("cave door open").toString();
 
 		//=================================================================================
@@ -290,9 +290,32 @@ public class CaveEntrance extends Room
 						+ "and it looks squarish, hewn, not a natural shape. ");
 
 			if (command.getSubject().contentEquals("door"))
-				return new DisplayData("", "It's a giant slab of oak, made all of one piece. It seems pretty thick. "
-						+ "It's plain, no markings or windows, or a handle even.  You aren't sure how to open it. "
-						+ "To the right of it, on the cliff face, you see an empty torch sconce. ");
+			{
+				String doorDescription = "";
+
+				//===============================================================
+				//Different descriptions based on whether the door is open or not
+				//===============================================================
+				if (this.gameState.checkFlipped("cave door open"))
+					doorDescription += "It's a giant slab of oak, made all of one piece. It's pretty thick. "
+							+ "It's plain, no markings or windows, or a handle even. It's currently sitting open. "
+							+ "A lit torch is sitting in a sconce next to the door. ";
+				else
+				{
+					doorDescription += "It's a giant slab of oak, made all of one piece. It seems pretty thick. "
+							+ "It's plain, no markings or windows, or a handle even.  You aren't sure how to open it. ";
+
+					//===============================================================
+					//Different descriptions based on whether the torch is placed
+					//===============================================================
+					if (this.gameState.checkFlipped("torch placed"))
+						doorDescription += "An unlit torch is sitting in a sconce next to the door. ";
+					else
+						doorDescription += "An empty sconce is attached to the stone cliff face next to the door. ";
+				}
+				
+				return new DisplayData("", doorDescription);
+			}
 
 			if (command.getSubject().contentEquals("cliff"))
 				return new DisplayData("", "This portion of the cliff is much like the other, sheer and without handholds. "
@@ -303,6 +326,23 @@ public class CaveEntrance extends Room
 				return new DisplayData("", "Moving aside the foliage, you find that the stone is the first step of a hewn stone staircase, "
 						+ "heading upward, possibly towards the top of the cliff. The foliage almost completely hides it from view at the edges "
 						+ "of the area of packed dirt, but it looks to be clear enough to traverse easily beyond that point. ");
+
+			if (command.getSubject().matches("sconce|torch"))
+			{
+				//===============================================================
+				//Different descriptions based on whether the torch is placed, and
+				//if it's lit or not
+				//===============================================================
+				if (this.gameState.checkFlipped("torch placed"))
+				{
+					if (this.gameState.checkFlipped("cave door open"))
+						return new DisplayData("", "A lit torch sits in the sconce. ");
+					else
+						return new DisplayData("", "An unlit torch sits in the sconce. ");
+				}
+				else
+					return new DisplayData("", "It's a bracket for holding a torch about an inch and a half thick. It's currently empty. ");
+			}
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
