@@ -20,7 +20,6 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.LineBorder;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -258,9 +257,9 @@ public class CommandBox extends JPanel
     	//===============================================================
 		//Set the parameters for this panel
     	//===============================================================
-		this.setBorder(new LineBorder(new Color(0, 0, 0), 4));
+		//this.setBorder(new MatteBorder(4, 0, 0, 0, new Color(0, 0, 0)));
 		this.setBackground(new Color(255, 255, 250));
-		this.setBounds(0, 530, 800, 400);
+		this.setBounds(0, application.getImageBox().getHeight() + 40, application.frame.getWidth(), application.screenHeight/3);
 		this.setLayout(null);
 
     	//===============================================================
@@ -312,7 +311,7 @@ public class CommandBox extends JPanel
 		//A scroll pane, to make our command line text interface area scroll-able
     	//===============================================================
 		JScrollPane scrollBar = new JScrollPane(textArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollBar.setBounds(5, 530, 790, 390);
+		scrollBar.setBounds(5, application.getImageBox().getHeight() + 40, this.getWidth() - 10, application.screenHeight/3);
 		scrollBar.getVerticalScrollBar().setUI(new BasicScrollBarUI() 
 		{
 	    	//===============================================================

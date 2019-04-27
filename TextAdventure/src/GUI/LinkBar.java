@@ -13,6 +13,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import java.awt.Font;
@@ -48,9 +49,9 @@ public class LinkBar extends JPanel
     	//===============================================================
 		//Set the parameters for this panel
     	//===============================================================
-		setBorder(new LineBorder(new Color(0, 0, 0), 4));
+		setBorder(new MatteBorder(0, 0, 4, 0, new Color(0, 0, 0)));
 		setBackground(new Color(255, 255, 250));
-		this.setBounds(0, 0, 800, 30);
+		this.setBounds(0, 0, application.frame.getWidth(), 32);
 		setLayout(null);
 
     	//===============================================================
@@ -87,7 +88,7 @@ public class LinkBar extends JPanel
 		{
 			//==========================================================================
             //Save current game.
-			//Use a JFileChooser set the extension and get the file name.
+			//Use a JFileChooser to set the extension and get the file name.
 			//Then use ObjectOutputStream to write our GameState object to the file.
             //==========================================================================
 			@Override
@@ -102,7 +103,17 @@ public class LinkBar extends JPanel
 				{
 					try 
 					{
-						File file = new File(fileChooser.getSelectedFile().getCanonicalPath() + "." + ((FileNameExtensionFilter) fileChooser.getFileFilter()).getExtensions()[0]);
+						File file;
+				    	//===============================================================
+						//If the name of the file already ends with .adventure, save it
+						//without appending the file type to the end.  If it doesn't have
+						//.adventure already, then append .adventure to the end of the filename.
+				    	//===============================================================
+						if (fileChooser.getSelectedFile().getCanonicalPath().endsWith("." + ((FileNameExtensionFilter) fileChooser.getFileFilter()).getExtensions()[0]))
+							file = new File(fileChooser.getSelectedFile().getCanonicalPath());
+						else
+							file = new File(fileChooser.getSelectedFile().getCanonicalPath() + "." + ((FileNameExtensionFilter) fileChooser.getFileFilter()).getExtensions()[0]);
+						
 						FileOutputStream fileStream = new FileOutputStream(file);
 						ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
 						objectStream.writeObject(application.getGameState());
@@ -229,7 +240,7 @@ public class LinkBar extends JPanel
 		JButton closeButton = new JButton("X");
 		closeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		closeButton.setFocusPainted(false);
-		closeButton.setBounds(765, 5, 20, 20);
+		closeButton.setBounds(application.frame.getWidth() - 35, 5, 20, 20);
 		closeButton.setBorder(new LineBorder(new Color(0, 0, 0)));
 		closeButton.setBackground(new Color(255, 255, 250));
 		closeButton.setFont(new Font("Arial Black", Font.PLAIN, 12));

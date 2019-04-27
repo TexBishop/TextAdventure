@@ -9,11 +9,13 @@ package GUI;
 
 import java.awt.Color;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
-import javax.swing.JTextArea;
-import java.awt.Font;
+import javax.swing.border.MatteBorder;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import javax.swing.JTextPane;
+
 import java.awt.Point;
 
 //=====================================================================
@@ -23,40 +25,47 @@ import java.awt.Point;
 public class ImageBox extends JPanel
 {
 	private FrameDragListener frameDragListener;
-	private JTextArea textArea;
+	private JTextPane textPane;
 	
 	/**
 	 * Default constructor. Create the ImageBox panel.
 	 */
-	public ImageBox(JFrame frame) 
+	public ImageBox(Application application) 
 	{
     	//===============================================================
 		//Set the parameters for this panel
     	//===============================================================
-		this.setBorder(new LineBorder(new Color(0, 0, 0), 4));
+		this.setBorder(new MatteBorder(0, 0, 4, 0, new Color(0, 0, 0)));
 		this.setBackground(new Color(255, 255, 250));
-		this.setBounds(0, 26, 800, 500);
+		this.setBounds(0, 28, application.frame.getWidth(), application.imageHeight + 10);
 		this.setLayout(null);
 
     	//===============================================================
 		//The text area containing the ASCII art being displayed.
     	//===============================================================
-		textArea = new JTextArea();
-		textArea.setLineWrap(true);
-		textArea.setFont(new Font("Monospaced", Font.BOLD, 8));
-		textArea.setBackground(new Color(255, 255, 250));
-		textArea.setBounds(5, 5, 790, 490);
-		textArea.setEditable(false);
-		textArea.setHighlighter(null);
-		this.add(textArea);
+		textPane = new JTextPane();
+		textPane.setFont(application.frame.getFont());
+		textPane.setBackground(new Color(255, 255, 250));
+		textPane.setBounds(0, 5, application.frame.getWidth(), application.imageHeight);
+		textPane.setEditable(false);
+		textPane.setHighlighter(null);
+		this.add(textPane);
+
+    	//===============================================================
+		//Set the alignment of textPane to centered
+    	//===============================================================
+		StyledDocument doc = textPane.getStyledDocument();
+		SimpleAttributeSet center = new SimpleAttributeSet();
+		StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+		doc.setParagraphAttributes(0, doc.getLength(), center, false);
 
     	//===============================================================
 		//FrameDragListener object initialization, to make the ASCII image 
 		//area capable of click-dragging the application window
     	//===============================================================
-		this.frameDragListener = new FrameDragListener(frame, new Point(5, 26));
-		textArea.addMouseListener(frameDragListener);
-		textArea.addMouseMotionListener(frameDragListener);
+		this.frameDragListener = new FrameDragListener(application.frame, new Point(5, 26));
+		textPane.addMouseListener(frameDragListener);
+		textPane.addMouseMotionListener(frameDragListener);
 	}
 	
 	/**
@@ -65,7 +74,7 @@ public class ImageBox extends JPanel
 	 */
 	public void setImage(String image)
 	{
-		textArea.setText(image);
+		textPane.setText(image);
 	}
 }
 	
