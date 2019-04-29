@@ -181,5 +181,57 @@ public class BackOfCornfield extends Room
 	//===============================================================
 	//ASCII image String constants beyond this point
 	//===============================================================
-	private final String backOfCornfieldImage = "";
+	private final String backOfCornfieldImage = "////////::::--...-:------://////////////:/::::/::::://+///////::::--:///////////////:::::-/::yNhmMMMmNMhhmNMMMMMMMMMMMMMNNNNMMMMNdNNmmNNMNNmmhsdmmmMmNNMMMMNm\r\n" + 
+			"////:::::-----........-----::::::::::-::---::--.-:::-::::::::-----::://///////////+//oyso::/hNNmNMNNdNmyNNNMNMMMMMMMNMMMMMMNmmmNNdhmNmmmoohddNmmmNddmmhNNmmNm\r\n" + 
+			"::::::::--------.........---------------------------.---:----:::::::://///:::::::/oyyyy+oo//hmmNMNdsydNdNNMNNmMMMNMMNNMNNMNmmmmdmmhmNdmMmmmNNMNmNNNmMMNmNyydd\r\n" + 
+			"............................----------------..----..------------::::::::::-------:ssdNdhsshyydmmNddmhmNMNNNMMNMMMNNNNNmmNmmNmmdmddNmmNMMMMdhdmshdNNmMNMmNhhmm\r\n" + 
+			"...``````....```.``.```...........................`.`..------::::::::::::::-----./oydmmdyodhNNMNMMMMNNmmNmddNNNNdmMMMNNNNNNNNNNmmmdNNMMNNmdhNd+ydyyhyNNmy/+dm\r\n" + 
+			"``````....`  `..`...........------------------------.`..-::::::::::::::::::------./yNmNdhhymNdmNMMMNdshmmhNmNmmNmmNMMMMMMNNNNmmmMNNMNNMdNNNmNmdoo:+ssmMmyoshy\r\n" + 
+			"`````````.   `..`.-------------:::::::::::::::-------..--.-::---:::::::::::----:-::+ohyyyyhdmddhmNdssodNmymMNNddNNNNNNMMMNNNmmmmNNMMhyNmNMMMMNmy//s+dhdNhhhys\r\n" + 
+			"````````  `...--.--------::::::::::::::::::::::-----.....`..--..---::::---...../+syhhdmNmNMNdNNyyosdmmdhdNMMNNmNmddmNMMMMMMMNmddmdmhsymdmNMMMMNmmdy++oymmhyo-\r\n" + 
+			".........` .....---::::::::::::::::::::::::::::::---.......-.......----..`.//+osydddNNMMNMMdNMNmNmysmmysodNNNmmmmNNMMMMMMMNmhdmmMMNmdhNhomNMNNNMMNmmNMNNMdohh\r\n" + 
+			"...............------::::::::::::::::::::::::::::::----.....``......-o/-:-shdddhmNMMMMMNNNdhMMNMMMMmyoyyhyhdmdNNNMMMMNNNNNNhmmhyddmNN+ydhddydmNMMMMNNMMMNNmmN\r\n" + 
+			"..............-------:::::::::::::::::////::::::::::--------......---+yysshdmdhymNMMMMMdhMNmNNhmmdNMddhdyyddmdNNNMMMMNNMNNmNNNdysydNMdymdh+odNdNNMMMMMMMMNNNN\r\n" + 
+			"....````.......-------------::::-------------::::-----........```....`+yydddmyshNNMNNdhhhdddddmmmNNMdssshyddNNNmmNNNMMMMNNNMNmmmdhdmddohsshNNMhmNMMNMNNMMhsyd\r\n" + 
+			"``````````````....----............```````..------......````````````` `/yyyhdNdyssyhdmhyyyhmmsydmMMMMhsdddhhhNMMMNNmNNNNmmmmmNmhmNMNmhdyhmNNMMMMMMMMMMMMMNd/ym\r\n" + 
+			"              ````..............```````````....````````              :+oodhmmhdhhdmmNNmdmdmNdmdhNmNdyhNNdyhmNNMMMMNNmmmmdMMMNhoyNmNmmmddNNNMMMMMMMMMMMMmMMyhm\r\n" + 
+			"                        ```````````````                             `/ysymhdddhhddhyyyshddNNNdddNmdosddmddmNMMMNmNNdmhdNdNNNNNdhhmmmhydyhNNMMMMmNMMMMMMNMMmod\r\n" + 
+			"                                                                 `-``:/hhhyddhdmmdss+yydmhdyhyyhNmNNdNNNmNNNNNNddmmmdmdmmmmmmNmdmdNmdsdhymNMMMMNMMMMMMMMMMMos\r\n" + 
+			"                                                                -/ys+/sysso/ooymmmdhdddmmhdmdmmdNmMNNhdmNNmmNNNNddNMNhddyyNmmNNmmmNNdhhmydNMMMMMMMMMMMMMMMMms\r\n" + 
+			"                                                                -+oshhmmdyyddhdddmydmmmNNNNNNmhddNNNNshyhhmNNNMNmNmNNmdmysdmmNNmmmmMmhydyhmMMMMMMMMMMMMMMMMMN\r\n" + 
+			"                                                                `///sdmmhhdNNNmddhmmNNNNmmmhydyhdmmmNddydmNddmmNMNNNMNddhhmNdNNNmhdMMNNMdmhNMMMMMMMMMMMMMMMMM\r\n" + 
+			"                                                                `:-/sydhyhddmmmNmdmNNNdmyyymNMNNNmdhmmhddddddmNNNNdmNdsmmdmNmmNNMMMMNNNMM+oMMMMMNMMMMMMMMMMMM\r\n" + 
+			"                                                                  `sdy+s:://yoymhdydmdyNNNNNMNNhNhhmNmdmhhmmmNNNMMmhhysNmhshsyMMNNMMMMMMMhhNMMMMhNMMMMMMMMMMM\r\n" + 
+			"                                                                  -//-/s//o/hysos++oyhdMMMMMMNmsmydMMNmmdNMNNNmmMNNNmymmmmhhh+mMMMNNMMNMMm/hMMMMmMMMMMMMMMMMM\r\n" + 
+			"                                                                  :o+osy+/oydddhmmhsddhmNMMNNmysmddNNdmmNNMMNsdmNdmmdydmNNMNdsyMMMMMNNMMMN/oNMMMNMMMMMMMMMMMM\r\n" + 
+			"     .    `..`                                                  ::oosyhossydhddmNNdmNshdmNmddmhdMMNmNdNNMMMMMmNMMNNMNddhhmmmNmdNNMMMMMmmMM//hMMMMMMMMMMMMMMMM\r\n" + 
+			"``` `.`  `.--/                                               . :oymmhdoyddNNNNNNdddsdodNNMMNMMNmNNNhmddmNMMMNdNMMNdmmmNMMMMMMNsMMMMMMMmmNMs:+mNMMMMMMMMMMMMMM\r\n" + 
+			"``.:`--.```.+/-                                              +oodNdhmdddhNNNMmdhddmhhmMNNMMNmmhyymdmmMMMMMMMdoNMMNMMMMMNMMMMMNomNMMMMMmhdMh`:mMMMMMMMMMMMMMMM\r\n" + 
+			"`:- -s++./-:o++:.`                                       ``:+shNmNmmNNNMNmmdmhhdmNdddddddmdmdmdoyddMMMNMMMMMosmMMMMMNMMMMMMMMm:smNMMMMMydMm`.yNMMNNNMMMMMMMMM\r\n" + 
+			"-/- -+yo/:`oos/::+`                                   ` :s+syhhmdmmNMNMMMMMNNmddmddhoNNMNmNNNMN-hmNMMMMMNmmMyhMMMMMNNMMMMMNNMN.+NNMMMMM+odM`.oMMNdNMMMMMMMMMM\r\n" + 
+			"od/`:ohy:/.+yy+sy/:`                       `   `/-/+o+-/+ohmmydddmdmNNMNMNNNdhdmddNNhmMMMNNMMMM/mNmMMNMMMNNN.+MNMMMymMMMMmmMMM-:NMMMMMN++yM:`+NmmomMMMMMMMMMM\r\n" + 
+			"hsy+dym+o+-ssssshos/`           :s   `.:o:-yydysddy+oshhyhdmdhhmNmNNNNmmmNmNmNNNNmmMdmhmMMMMMMNyNdNmddmNMMMh.sMNMMmomMMMMNNMMM+-dNMMMMMsssM: .hmMdMMMMMMMMMMM\r\n" + 
+			"hhshmhmyhs/hysssdsyy+:/oo-//./+odms++hmmmddNmNhdddddhyymNNNNdhdmdddmmNMMMMMMMMMNNmNmNhdhMMMMMMN+hdNNNddMMmMy-yMMMMmsNMMMMMMMMMh`oNMMMMNyyhm: -+oNMMMMMMMMMMMM\r\n" + 
+			"hhyhddmyhooyyo/odsoyosodNNNNNNNNMMMMmNMNhmNdddhdNdmNmNmhddmMNmhmNmdmmNNMMMMMMNMNNMMMMmNsmMMMMNdymmNNNmhNMdM+:hMNMMhsMMMMMMMMMMM.-mMMMMNssdd/ -hdNmmMMMMMMMMMM\r\n" + 
+			"ysdmhdmhyhoosy+hdshyhys+hNNMMMMMMMNMNMNmdmdddddNmmmNNMNmmNMNMMNNmNNNmmNNMMmMMMMMMMMMMNyhmMNNNNmohmMMMNysNmM/:dMMMMyyMMMMMNdNMMMs.hMMMMNsohm: -sdMdmMMMMMMMMMM\r\n" + 
+			"ssmmNdNmhsyyoshddmdhmddyyNMMMMMMNMmMMMNNmmmdmmmdmmmNNMNNNMMNMMNMMMNmmNMMMMNMMMNmNmNMMM+ooNNNMMN.yhNMMmyomMN.:mMMMM+hMMMMMh+mMMMd.yNMMMMyohNs`-+yNmMMMMMMMMMMM\r\n" + 
+			"yhddNmNmdohy+yNNmNddddddmMMMNMMMMNNMMNmmmmmmddhhddmdNNNNNMNNMMNNMNNmmNMMMNNmNNmmmNNmMMo//mNMMMN-somMMdh+mNm.:mMNMN+dMMMMMdymMMMM-/NMMMMdhdmN-``odhMMMMMMMMMMM\r\n" + 
+			"mmmNNmmdoymyohNMhdNddmdmdmmmNNmNmNNNNNNmmddmdhmhhsyhNNNNNNMNNMNNNNNNNNNNNNNmNNdmmmmMMMh-:dMNMNN:o+yMMhh+NMh.+NMNMd/mMMMMMh/hMMMMo`sNMMMhoshMh``:dhMMMMMMMMMMM\r\n" + 
+			"NmNMNdyy+dNdsdMMdmNmmmmmd++++++++osyyshsyyyhyshsyommmmNNNNNNNMNNMmNNNMMNmNNNNNNNNMNNNNm..yNmNNN/+osMmoh/NMs.+MMNMy+mMMMMMh:yMMMMd`/NMMMy:/yMM: `ydMMMMMMMMMMM\r\n" + 
+			"MNMMNdsm+hm/+dMNmmddmmNNy//////++++++++/++++//::/:ooyshsymNNdmmmmyNNMMMNmmdmmNNMMMmmNMN:.yMNNNN//ssMm/d/mM/.sMMNM+oNMMMMMd:yMMMMm.:mMMMs-/sMMy `+hMMMMMMMMMMM\r\n" + 
+			"MNNNMdmMyh+:smMNNdmmNNNy++++++++++++++++++oooooo++/:--::/oydshhodshNNMMMhmmmyddNNMNNNmmo.yMMMdm/:osMN:N:mM--yMMmM:oMMMMMMd:yMMMMM.-dMMMs-:oNMm``-yNMMMMMMMMMM\r\n" + 
+			"NNNNNNMNyhyymmMdNmMdMNh++++++++++++++++++oooooooooooo+++////::::++/sshddodmyoydNMMMMMhmy-ymdmdm::syNd:m:dd.-hNMmN-oMMMMMMy-oNMMMM..hMMMs.-omMN``.sNMMMMMMMMMM\r\n" + 
+			"MNNMmNMmohmhhdNdNdMmMmo+++++oooo++++ooooooooooooooooooooooooooo+++//////::::::/+++ossoh+:dhsyyh-.yyy/+m/h+`:ddmdm.oMNMMMMy-+NMMMM-`sNMMs--odMN.`.+yMMMMMMMMMM\r\n" + 
+			"MMMMNNMdsodysyNdNhNddoooooooooooosssoooosssooossooooosooooooooooooooooooooooo+++++/////-:d+//++`.yh/-sd+o:.+mhhyh.ommmmNms:+mNMMN-`odmNo--+dMN- ./+MMMMMMMMMM\r\n" + 
+			"MMMMMmNh++hsodMNNhNdhssssssssossssssssssssssssssssssooossssooooooooooo+ooooooo+++++++++.:ds++oo..yso/yyss--sdsoso/osyysso:-+syysy``oosh+--/yMm/  :+NMMMMMMMMM\r\n" + 
+			"NNMMMNmsysdoydNMmhNyyyyyyyysyyyyssssssssssssssssoooooooooooooooooooossoosssoo+++///:::::/+/++++..++osoo+/`/ss/+osso+oooo+//ooysso``+ooo/--/hMNs  ./mMMMMMMMMM\r\n" + 
+			"mMMMMNmomhmsydNMNddsyssssssssssssssssssossosssssooooooossoooooo++oooo+++oo++++////+++++//////////:://////-/osoosso////+++++++++++.`/+++:--/yMMd  ./dMMMMMMMMM\r\n" + 
+			"MMNMmNNyNhhsohdNMyhyyyyyssysssssyysssyyossysssssssosyysssooosso+++/+/+++///+//////++/+/////++/:/:///////+++++++////////+/+//+++o+:.:ooy:-:/sMms` ./hNMMMMMMMM\r\n" + 
+			"MMNNmNNhmhyhodmMmyyyhhyyysyhhyyshyyhhyyssyyyyssyyysyssoooosyhoo+++++o+oosoo+++oo++///+/+/::///////////++++//++o++o++++///+++/////:-:hmh//+oohs+.``-hMMMMMMMMN\r\n" + 
+			"MmNmNmNhdhshsyNMyhdmdhyyhyydyysyyysyydhyssyyyysyyyoosssssoooossoo++oooo+sssoosyhsyo+//://:/:////++/////o+++++o+oo+:://+++//++////::+yyo++++++++-``.sMMMMMNdy+\r\n" + 
+			"NNNNNmNdhhysyymhysssyhyyhhhhhyyhddddhhsssyhhyhhssysoysssooossoysosossyso+oooo+yhssso++//+//:///:///:+///++////++++o++++-/:++o++/o+//+/+/////:/+-.`-+hdmhso+++\r\n" + 
+			"mmmNNdNmmhsoyhhoyyhhyhhhmdhhdddhdyyydyyyhyysyyhshdsy+sohyyydyddyhdhhssooso++o+ohhdhyoo+os+////+/+soo++:/++oo++/++++oooo+++++/+//://:///:///:---::/+++++/+++oo\r\n" + 
+			"mmdddmNdmhosossysyyyhmdhydyyysysysyoshoyyhhyshhyhhdhhsyooyhdshhhdhhhyhoooosooossoysdmhyyhsssy//+++/..-+o/:/+++///o++o++///+/++++o++o+++/+///+::.--/:::/:::/++\r\n" + 
+			"mdhsshmdhy+++shdyyyyhdyydddmdhysssysyssyssddhdddmhyddosssshyyossyhshddsssohhysosysydysosyyysyoo/://-.-://-///++oos+++s+++/+++oo+/++/+o++/+/+o+://-::://://+os\r\n" + 
+			"dmhy+oy+/sdhhdddshhmmdmNNmhhyso+ydhsshmmhhyhdhyyooyhdNmhosys+osysyhddmdydsymhyyyhhmdysoyhyyo+ssso////++++/+/////++os+ooo++o+//+//++o///+//++o++o/:///++//++sy";
 }

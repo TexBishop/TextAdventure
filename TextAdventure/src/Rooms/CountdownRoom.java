@@ -107,9 +107,9 @@ public abstract class CountdownRoom extends Room
 			displayData = this.executeCommand(command);
 		
 		//=================================================================================
-		//If count down is active, enter if statement
+		//If count down is active, and player is alive, enter if statement
 		//=================================================================================
-		if (startTimer.isFlipped() == true && stopTimer.isFlipped() == false)
+		if (startTimer.isFlipped() == true && stopTimer.isFlipped() == false && this.gameState.getAlive() == true)
 		{
 			try 
 			{
