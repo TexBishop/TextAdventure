@@ -54,6 +54,15 @@ public class GameState implements Serializable
 	}
 	
 	/**
+	 * Returns the boolean value of whether or not the player is dead
+	 * @return boolean alive value
+	 */
+	public boolean getAlive()
+	{
+		return this.alive;
+	}
+	
+	/**
 	 * Sets the current room, then displays.
 	 * @param key  String The key for the room you wish to move to.
 	 * @return     DisplayData An object representing the data to display.

@@ -163,7 +163,96 @@ public class ForestCliff extends Room
 	//===============================================================
 	//ASCII image String constants beyond this point
 	//===============================================================
-	private final String forestCliffImage = "";
+	private final String forestCliffImage = "MMMMMMMmhdhhhyhhMMMMyhhyysNMMNhsssyshddmddNNNmmmddmmmmmmmmdddddmmddddhhhhyhhyyyhhddhhyooosyyhhyssyssyyyyhhyyNMMNhyyyooysosyooysysssyyyyysyyyoshhddNMMMMMMMMNN\r\n" + 
+			"MMMMMMMNhyhsyssyMMMNshhyyhMMMMhysyyddhmdmNNNNmddydmmmmmmmmmmmmmmmmmmmNmdmmddhhddhhmmdddo+ooyyyyyyyhosyyyhyoyymNMMmhyhhs/+oosssssoosyyssosyyssyyhhNMMMMMMMMMMM\r\n" + 
+			"MMMMMMNsosyyyhsyMMMMhyhhydMMMMsosoohmmmdNmmmmNNmmhmddhdddddmmmmmmdyysooosyyyhhddhdmmdddyosyhyssyhsyyyyyyhhhdmNNmNNMMMMMmmdhhyooossyyyssysysssoosymMMMMMMMMMMh\r\n" + 
+			"MMMMMMmssyyyyhhyNMMMNyyyyNMMMM+osss+-:////++oyddmdy/:::///+oo+/:-.``.`.........-:/:::/::::ymdysyyyyyyhhyyyhdhhhosyyddmMNMMMMMNdysyyssssyssyyysyyyNMMMMMMMMMNm\r\n" + 
+			"MMMMMMNhyhyysyssmMMMmyhNMMMMMdssooso///-.........-.---:-::/:::::::::-:----:-::::::-::::::::os+/:/yyyyyyyyssyyysoooyyyhysyhdmMMMMNmdhdddys+shhyyyyhMMMMMMMMMmh\r\n" + 
+			"MMMMMMMdsoo++o+yhMMMNhymMMMMMysyyyossyyhs------..-------:::----:::::::::-:---::::::::::::::::---+ysssssssyosyhssoyyysssooyyyhyydNMMMMNNmhhyhhhhyyydMMMMMMMMNm\r\n" + 
+			"MMMMMMNdyo+syyyyyMMMMdhdMMMMMyso+ossyyyys:::/::::::::/:::::-:-:::::::/::::::::/:::::::::::::-:+syyhssysshysysysooyyysossosyhyyhdmydNMMMNmyshdhyyyhdMMMMMMMMNN\r\n" + 
+			"MMMMMMNdhhyysyyhdMMMMNhdMMNMMs+ossyyyo///:::////://////::::::::::-::::::---::://:::::::-::::::yyyhysssyyyssyyhyyyysyyysosyyyoyyhhyyhdNMMMMMNmdyshsdMMMMMMMMMd\r\n" + 
+			"MMMMMMdhhhhhhhhhhMMMMMdMMMMMNyossyyyyo:::::/:::::::::://:/:://///::----:------::----.------.--shhys+yssssyyysyyyysssyhysyhyyyhhyyhyhmhydNMMMMMNhddNMMMMMMMNdh\r\n" + 
+			"MMMMMMNhhhhhhhhhhmMMMMMMMMMMmyyyyyyyyyo/////////:://:::////:::::------.-......----------------:+syysoosssyyyyssosyyssshyyhyyhhhhyyyhhhymmNNMMMMMMNMMMMMMMMmhh\r\n" + 
+			"MMMMMMyyyhhhyhhhhdMMMMMMMMMMhyyyyssyhy+/+++//:///:////////:/::::::::::::------:-----::::::::::::::/++yyyyyhyyyyyyyyysossyhhhhhhhhyyyhhhhhyddMMMMMMMMMMMMMNhhy\r\n" + 
+			"MMMMMMssyyyyyhyhhyMMMMMMMMMmsyhhhysys////////////////////////+/////////::::::::::::::::/:::://:::::/ssyhyyhhyhyhhyyysssssyyyhhhhyyyyyyyhysyhmMMMMMMMMMMMMNhyh\r\n" + 
+			"MMMMMNsyhysyyyhyyymMMMMMMMMmysshhyyyhy+://:-::--:://///+///+//+++///////:::/::/://-://///:/://///:/sosyhhhhyyyyyyyssoyyssyyysysysyyhyyyysyyyydMMMMMMMMMMMNhsh\r\n" + 
+			"MMMMMNhhhhhyyhhhysNMMMMMMMMmhyysyhhssho++:-::----:::://++/+++++++/////+++/////:://:-:////::///+++/:+ysyhyyhyyyyysyssysoyyyyssyyyyyhhyysyyyyyyydMMMMMMMMMMmyyy\r\n" + 
+			"MMMMMNhhhhhhhhhyyhyMMMMMMMMdhysssyss+/++/:///////////////:/++++++///////////+//////:-//////://+///::+yyhhyyyyyyyyyyssooyhhhhyyysssyysyysyyyhysyMMMMMMMMMMmyyh\r\n" + 
+			"MMMMMNhhyhhhhysyyhhdNMMMMMMhyyyyoooo///+//+++++///++++++//:///++////////+o+/+++/////--/////://///////+yysyyyyysssyyyyyyyhhyhysss+oyyyyyooyhhhyhNMMMMMMMMMmyyh\r\n" + 
+			"MMMMMmyyyyhyyyhyysyddMMMMMMhyhhso/++///////////////+////////+////:::-:///+//+////+/:://+++////////////+sysyyysyyysyyyhhhyhyso++ssssoossssshhhhhdMMMMMMMMMmhyh\r\n" + 
+			"MMMMMdyyyhyyhhyo+++NMMMMMMd+osoo++//////////////////////////++////////////////+///::://+++/::://+++/////yhyysyyo++ohdmNNmh:::::/+oyhyyhyhyshhhhhmMMMMMMMMNhhh\r\n" + 
+			"MMMMMmhhyssoshyo//sNNMMMMMho+oo+/:::://////+//++////////////+///////////////+++///--://++++/////++///////oo+//////+ohdmmds/////:+/+ooshyhhyyyyymMMMMMMMMMNyhh\r\n" + 
+			"MMMMMdshhyysyyosoyhNNMMMMMhsyys///:///:////::////////////////////////////////////:://////+////+/++////////+///////////++//++//:://///+yhhhhysysomMMMMMMMMmyyh\r\n" + 
+			"MMMMNoyssyyyyhyhhhhMMMMMMMmssyyyysyyyo///+//////////////////+////////////////////::+//////////////::://+:/+//+////+///////++///:://///ohhhhhyysyMMMMMMMMMNhhh\r\n" + 
+			"MMMMmoosyhsshyyysddMMMMMMMhoyyyyyyhhhddo++++///+//+////////////+/////////////////-://///+///:::///////////+///////:///:////////:///+++ohhyhhyyyhMMMMNMMMMmsyh\r\n" + 
+			"MMMMy+//yssyhoooshmNMMMMMMdyhhyyshhhhydy+///+/++/////++++//++/+++//+/////////////-://///////://////////////////////:+//::::////////++/+hhhhyssymMMMMMMMMMNhhh\r\n" + 
+			"MMMMs++osssshssyyssNMMMMMMmyyyysyyhhyyd+/+++++++++/++/////+++++/+////////////////:-/////////::///////+/////////////:///::-:::/:/oysso+shhyyyyyhMMMMMMMMMMMhso\r\n" + 
+			"MMMMdssysysyhyyyssdMMMMMMMNdysyysysyhd+//++++/+++++/++////+++++++////////////::://--////////::////////:////+/+//////:/:-://///+soyyyyyyhhhyyymNMMMMMMMMMMMhyy\r\n" + 
+			"MMMMmoohhhhhhhhhyhMMMMMMMMdo++oo++//s+//+//+////////+//////////////////////::/::::-:///////::://////::::///++//+////://::://shyossyyysyhhyhyhmMMMMMMMNMMMMNdy\r\n" + 
+			"MMMMNyyhhhhhhhhhyhMNMMMMMMNhhyyshho+/////////////////////////////::::////://:::/::::////////::://///::////////////////:/::/odysyyyysyyyyhyyhdMMMMMMNNMMMMMMNm\r\n" + 
+			"MMMMNyhyyhhhyyhhdmMMMMMMMMNhhhyhyhy+///////+//++///://+/////:::::::::////////////:://///////////////:::::////:////////::///yhsyssyhyyyyyyydmNMMMMMMMMMMMMMMMd\r\n" + 
+			"MMMMMy+oyyhhhyhsmMMMMMMMMMdsyhyhhhyo//+//+////+/+////////:::/::::::::///:/://////::/:////////////////::///://///+++////:++//::/+oyhhhyyyyhdMMNMMMMMMMMMMMMMMd\r\n" + 
+			"MMMMMNmyyyyhhyhhNMMMMMMMMMdyhhhhhhhyo:////+/////+//////////:////////:::::://///:/:::::://///////////////++//++/++oosysshddhh++++++syysyyyyNMMMMMMMMMMMMMMMMMN\r\n" + 
+			"MMMMMNhyysshhyyydMMMMMMMMMhyyhhhhhhyy+////++++/////::///:://///::::::::::::/+ooooo+://:////////////+/+++++/+osyhhhhhdhhddmdhyhyhys+oyossyNMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMNhyhyyhhyyyyMMMMMMMMNyyyyyyyhhyh+//////+osssss+://///////+++//////::++oo+ososys+/://///////osyhsoosssshhhdddddddddmmmdhhhhhyysshyyodMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMNhhhhhhhhhmMMMMMMMMmysyyyyyysoo://+sshyyysooosys+////+oshyys++/+++ooo+/ooooss+o++//://++oysyhhyysyyyyyyyyyyhhhyhyyhhhhddddddddhhyyNMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMdyyhhhhhyNMMMMMMMMMhyo++oss+ohhhddhhyyyyssssossso++ossssyyysooo++++/:::/+syyyhsosoyyysssooosooosossysooso+/sossyshyhhhyhhdhhhhdyhmMMNMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMNhhhhhhyNMMMMMMMMMNdhyyssysyhhhhhhyhyyyyhhhyyyyysssyddddhhhsyyyyssssossssssssssssyyhhhs//:+/::/++oo+/syyo+ososo:+ssyyyyhhhdhhdhhhdNmmNMMMMMMMMMMMMNNN\r\n" + 
+			"MMMMMMMNMmNNmmmmNMMMMMMMMMmNmdhyddyyyosdddhyhhhyyyyyyyyyysyysyyydddddyys+//+++ooooo++/+//++//+/:/+so+--:::/++osysysysyyoso+oysooosoyyhyhddNNNNNMMMMMMMMMMNMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMmMMdNmhhddddmmmdhhhhdddhyhdyyysyyyhhyydmddsoyhoyssso//--..-----:/://ossyo:-::/o/:+//++/ssso///::--:/o+/+:/syydydNNMMNMNmNMMMNNMmm\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMmdmNmddmmmNMNNMNNNdhsyoydhdyhyysyhyysshddyooyossso+/+/:----..-::/oo+/:::osooss:.:+--------.....-..-++/+yssyysohdydddhhhmhddydmdm\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMdmMMNMMMMMMMMNMmysydhsdddddhsosyhhhysshysoy/+ooo///----.---::::////:----:----//o+os+s/:+/..-----::++/sso/soossossysysyysshyyyys\r\n" + 
+			"MMMMMNMMMMMMMMMMMMNMMMMMMMMMMMMMMMMNMMMMMMNmmddddddddddhhyso+hhhhyhhhhsyy+/:+++/-:/+/++::-.........--......-://::/:+oyyos+/:-:/://://::+/::--:/-/soo+ooo/oosy\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNmddddddddhhddy+/osshhhshhhhdhhyho+/-:::://:::-//o:-.............----.--+hysssyysyyyoo//:-..--:::::-:/.--...-:::/+sy\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNdddddh+:ssyddddhhhsyshyhhhyso::::soo+:-----:--..................--:-::..-//+syyhyyhhyyyo+//////yyyooo+osssosysy\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNMMNMMMMMmmmmmdhhyddy+shhhddhhhhhhhhhyhddhhooyho+sss+::/::/--............................-:::ossyyyyyhyyyhhhyyyyyyyhyyyyysyhhhh\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMmhmddmmmdddhhdddddddhdhdddhhhhhdhyyyoso+yso+::-..................................---:/ossoossyhhhhhhyyyyhyyhyhyhhhhh\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMNMMMMNMMMMMMMMMMMMMMNMMMNMMNNmmdddddddddddddhdhhhhyhyssoso:+yso+/---.--......-.-----.-...-./--:o.---:/::://:/+oososyssyyyyhhyyhhhhhhyyh\r\n" + 
+			"";
 	
-	private final String cliffCarvingImage = "";
+	private final String cliffCarvingImage = "hdmmmhhdmdmmmddhhdyhhdhdhdddhyhhyhhhhddmmddddNdsMdohsoyhhyyyhhhhdddhdddddhdNNmNNddmMMhdhhhmmmNddyyddddNNdmydmmdmddmmhmddsdmdNmdmhddNmmmmNNmNNNNmmNNNddmhhyyhy\r\n" + 
+			"mdMdddNNmdddhyyyyhdmNhdhydmddhyysydhddNMMmmdhdddMmh/d/oshhhmhNmmdhddhdhyhooydhdNNhmMMmhmmmdmNNNmhyydhhNmdddddhdmymmmymydyyddmmdhdydNmmmddNmmNNddmMMMMmdmNmmNN\r\n" + 
+			"hyddddmdhddmddhhyhhyhdhsshdyssyoyhdydhyyhhhyyhhddmmhddyshddmhdhhhydyyyhdsyydddshhdhMMNdmdddmmNNdyyyddmmmNmdNyydsydmmymsddshhhdmyhdhmhdmmmNNmNNyNNNMNNmddmNmNM\r\n" + 
+			"hhhdmddyhdhdddddhhyoyyyyhdhhhyyyyhhhhhysoydhyhhhmNddddhshmyhyhhdhhyyshhhysyyhdhddmdMMMddddmmNmmyhdddmmNmmydmddhsshmdhmhddyyyymNNyyddddmdmNNMMNhmNmNNmmhhhhNmm\r\n" + 
+			"hddNdyyyhdhdddmdmhhydmmdddhdmhhhhmmddhyyhddhyyhhhyyyhmyydNMmddNmddNhy/shosyhyhddddmMMMmddhhmNmdNmNNmddNNNmmNmmhsysdsydhddhyssmmNshNmmmNNNNmmdymdmmmNNNmsmhdmN\r\n" + 
+			"hmmhhdhdddddhhhhhhyhmmddddddmddhhhhhddhyymddhNmdmdhssydmmNMmNMMNMmhhhyhmhohdmdhyhhNMdMmdhhmmmmdddhhdmmmmdNNNmhmshyyhdmyhmdoysmdmhmMMMNmNmmmNmmNhhdNMMNNhhmhmm\r\n" + 
+			"hhhdhddhddydysyhyhhhhmdddddmmddhddddhddddmmhmmmmmdmddhyyyhmmmNmdmddyyyhmmdmsydhhdmNMdNdoyysydNdyhmmmNmNdddmmmsNsddydhhyhmmhdhhNMNNNmNdmmNmmmmmmdmhmNMNNNdmdmM\r\n" + 
+			"hddddhddhyddddhyyhhdhdmhshdmdhhhdmdddhhddmyyhhydhhdhhyhyhyyyyhhdyhhdhdhdmhdhymmhmNNmdddssyydNNNmdmdhddhhhdmmmymydhydyyhhmmmddmmmmNNmdNMMMNNNmdmhmhhNNMMNmmNMN\r\n" + 
+			"mmdhhddhdyyydmdmmNmmhmdyhymmmhdhdyshddhddmhdddddhhhyydhdhhhhdmdmmhhddhddhhdhyhmdhNMNmdhshhsmmMMMNdhsshdhydmmmymdmhyhdhhdNMNdmmNNNNNddNMNNNNNmhdymddNMMNNmdmNN\r\n" + 
+			"dmdddmmdhdNdyyydNNNNNNmmNMmdhyyddsshhhhyddhhddhhdhhhyyddhhdhhddmNmddhhmdhdyhyyhhhMMMmdmhdhdmmNmddmmyhyydyyhhdhdddmmhdNmmydmNNmmmmmNdhhmmmmNNmydmdhmMMNdydhmMN\r\n" + 
+			"mNNNNNNNNNmhydNNNNmNmmmNmNhddhhhdydyddddhhyhddhdhdhhhmNmmmmmmmmdddmdhhdNhsssyyhhNMMMNmddyhhdhmddddhyyhmhhyhhhNhNNMNmdhhhddysymdddmmNhyhmmmmNmyhdyddmNNmhmmNNN\r\n" + 
+			"NNNNddmddddddhmmdNNmmmMmmmddmddmmdhhddymdmmmmmmmddysyhhhhdhdhddmddmmddmddmdddhhdNMNdmhdyssyhhdhyhmdsshhmdddhhNhhmmNddhdmNhhdhdyyyymNyhhdmmmNdyNhmhNmMNNhmNNMN\r\n" + 
+			"MNmdhdhhmhddhhdddNMmdmNmdhdhddNMmmddhddhydddhhddmhyyhddddddmmmmdmmmdmhmmdhhdddhmMMyymdhhyyoydmmyhdhyshdmdymdmNdyyyymdhhdNshdmhhhdddhysshdmNNhhddydmmNmNdNMNNm\r\n" + 
+			"mdyhhdhshyhdmdmdmmmmdmmNmdmmmmmddhhhydhhdhhydddmmdhmhhhhdmmmmmmmmmdhddNmmmmmdymdMMhhhhmhhyhyhdmhyhhyyhmmmmNdNNdhhdNddmmhNhyyyhmhyyhhyyyhmmdmNhNmhdmmNdNNNmMmN\r\n" + 
+			"hhssmmdyhsdydmmddddymdmmddhyhmmmmdhdhdhhhhdhmNmmmmhdydddhhhNmddmdmmmmmdNdMNNhhmmNMymdddhhhhdhhdyyydhhyNNMmmdmmmhhmdyhhhdNhhhhhddddddyyhdhmNNMdmmmmmmhhmNNmhdd\r\n" + 
+			"syydddmd+oNdmmhddNNdh-hhhdhydmmmmhyshhdmdhhhmdyyhmyyyhhyyhdmmNddmmdddNmmdmNNhydNMNhhhmdmdhhyNdhhyhhhdNMMMmdhyNdhhddyyhhhmyyhmddmddddyyyyhhNNNhdhdhyyddyNNhhmm\r\n" + 
+			"hhhdNdmh:/Ndddddmdhdo-+hhhhhshhhy/:-hmdydhhhms::/ddhydddhhdddddmdmdddmmNdNNMdydMMssyhdhmddmdNNNddhmNmmNNNhyhhNhyhdmyydhdNyyydddmdmmdhyyddhNNmmdyhdyyyyhmdmdmd\r\n" + 
+			"yhmmddNo/-hdNmmddddy:`:shyshdsydh//-yhhyddhhh+:::ddhhdddhhhdmdddmmmddddddddmhydMNhddyhmdddmdNmmmmNmmNmmNNdhdNddyhdmdddhhhMmymmmmmmmmmdmmhdMMmdmhhsysddNmmyshN\r\n" + 
+			"sydmmNd//+/hNdddddho-:-/dhyhdhhhy::-syhhhddydo-::ddmhhhhdhdNddhddhhmmmmdmmNdmhhMMdyhyhdyhhdmNdmNNNmmdhhddddddhhydhmsyddhhmMhdmNNNmNmmddddhmdmddoooyydNNmmhyyh\r\n" + 
+			"shdmNNy+--:odmmhdhy:---:yhydhdyys-.:hdhhhdyhh/--:hhhydhyyhhmdhso-.+ddhmmdddmmhhMMdyhhydyhhyhh+:+syhdhhhdmmmhmhmso+-.-hhyhdNhyymdNmNMNhddhyhdmdho``:ohmddmmddy\r\n" + 
+			"ymNNmh:----:hdhddh:....--yhhhhhhd---sdhdhhyos/--:hhhyhdddyo:......-..------.--dMMy...`.......+-....-+sddNNmys:-````..`.``.::``.-dNNNo+-.---:.....``.--/ohhdys\r\n" + 
+			"dmmmmyo--::/yddhhh++-::/+hhyhhhyh-..osyhhdyyho:::hyhyyhso-````````.`........-.dMMy``.```.``..-.`````..:ymmh:`..```.```....-:``..dNNMy/+/-:..-..`.```...::omyy\r\n" + 
+			"mmmmmNN/-:+ddNdmmhhy---shyyoyyyhy-.-shhdddyyh+-::dyyysyysyyo+:`....::++:/+:++:mMMd::::::::::::-``.:+yhddyddddys:.`...///::+s:::/dNMMmhd++o+////:..`.:ohdddmhh\r\n" + 
+			"dmmddmd/-:/hyddmmdhs:-:sdhmddyy+/...::+syyyysoo/-s/syhhhyyhdhhyy+:odhydmmmmmNmmMMNddNmddyyydmo/oyhyyhhyhhhddddmmyyo//dddddmMdhmmNNNMdNNmhNNdmdhs::shNdmmmdmmd\r\n" + 
+			"dddmmdh:.-/hmNmmmmhs:-:hmddhysd:---..-shdyhd+::/:::yhyyhdhhmmdhddddmmmmmdhdmmmdMMMhddNdhhdmmmmMNhhhhdhhdhddddhddhyhmmdddhdmmNhdNMMmmddNddhmyhdmddhdhhhhdmNdhy\r\n" + 
+			"hmmmmmd:--:yhmmmNmdy/:-shhhhhyho--..-ohyyhhhs/-:::yydosyhyhddddmmmddddmmdNdNNNdNMMmddmddNmNmNMMmhddddhhmdMdhhhmmyyyymdddddmdMhNMMMMdyhmhdhdsymhhm+sdh+ydhhyos\r\n" + 
+			"hdNNmmm/--+hddmdmmdh-::yhyyhymhy/---/yhyhdshy//::ohhyyddyyhdhhhhhmmdmNmmmNNNNNmmNMNddmhdddmmNmmmdddddhyhhNNddddmhhdyhdhyhyhdNhydNNNmddddhhhdmMhydoydhmmmdhhys\r\n" + 
+			"ydddddd:--/hdddmmddd:-:shyhmdyydy:--yyhyhhyyhh--/hyhyyhhysyddddmmmmdmNmmdmNMNNmdMMNddddddmmmmmmNdmddddhhNNmmddmhyhhhhdyhhhymNmhmhNNmmdmhmmmmNmdyhsddhsmmMdMMm\r\n" + 
+			"ddmdhyh:.:+hydddddhy-:-yhhhdmdhdh+-+hhhydhhdmd/:sddhhyydyddmmmddmmdmmmmNdmmmMMmNMMNdddmNmmmmmmmNdmddddhNNMMNdhmdhdydddhdyhhdMMdmNNNdmdmNNNddhyyhhdodNmNdhyydm\r\n" + 
+			"ddddhhhsoohhhyhddhhy+oshdhydmmydmh/mmddhmhyddms/ddmmmdhdmddmdmmmdmmmddddmNdNNNNmMMMddmNmNmmmNmmNmdhddddNMmNmmhmhdhyddyyhddddmmNdNMMmdNNNmddddhmNNdyyhmmhhdhNd\r\n" + 
+			"dNmddhyhsmNhyysshhdyhhdmNddddNhymhymmdddmdymdddhdddmmmhddhhmmmmmmdhmNmNNNNNNNmNNMMMmhdmmmddmNMMNdhdhdddmNNNNmhmddyyhhddhmdhdddMNdNMMmmmdMMNMNmmNmyshddhyyhydh\r\n" + 
+			"hmmmmmhydmdddsyyyhhhddddhdyhmmhdmhyhddmdmNdhhmNmmmmmmmyhdmddddmmNmNNNNNmmNMMNmmNMMMNmdddddhmmmNNmNmdddmNNmNdddhmdhhdddhhddddmdNNmmmmmhmNMmhddhhmysshhddhdhoyd\r\n" + 
+			"hmmddhhyddhydhyhddddmmmmdddmmmyydhshyymhmNNdmdmdddmmmNmdddNNNNMNNmmmmNmmmNmmNmNMMNNmmhmmmNdmmdmmmddddhmmmmmmddmNmddNdddhddddmmNNNdddNmdhMmddhyyNhhddNdhyyyyyy\r\n" + 
+			"dmmmmddhdmhdmmddmmhdhdmmhsyddNhmmdyhddmdNNNmyhmdNNmNmmmNMNMMMMMmmdmmmNNNNmmdmmNMMmNdNddmmmmdmmdmmmmdmdmNNNNNNmmNmddMmdmddddhdmNNNdhdmddmNmhdhdhNhhyhhyhhhydhd\r\n" + 
+			"mNmmmmddNmdmmmdmmmdhhhhyyhydmmhmmmdhhmmmNNmmdsmmdddmNNMMMMMMMMMmmmNmddddmNmNdmdNNmdmhmhdmdmNmdmmmmmdddmNNNNNNmmNmddMmNddmddhyhdmNyymmdmNNyyoydhdhysymdNmmdhdd\r\n" + 
+			"NNNNNNdNNmdddmNNNddhmddydddhdddhmmhdyyhdhydNdddmmNNNMNNNNMNmNNmdmmmddddddmmmmmNNMNmNdNhdmdddddmmmdmmdmdNNNNNNmmNmddMmNddhhdhhdhmNhhdmmmMNddshyhdossymdmmdhyyN\r\n" + 
+			"NNdmmmmmmmmmNmNmNNNdNNNmmdddhdhmdhyhdyhhdmmdhhdNNNmNddNNMNNNNNmmmmdmNmmdmmmmdddmMNmNhNhydmdddmmhdhhmdmmmmmddNdmNNdodyhysyhhhyhyNNhhdmmmNNhdysohdyooyddddysssh\r\n" + 
+			"mNdNMmmMNdNmmNMmNMNmNNNmNddmyyyyyyhhdhhhdmdddddmmNNmmmNMMNNmNmNmdmdmNmmmmmmmmmmmMNmdmNmdmNmdmmmmmmmNdmhmNMMNddmmNdhyyhhhssshyddmmddddddNNdyyyyhmysyydmdmmdyhd\r\n" + 
+			"NNmNNmmmdmmmNNdNMMNmmddhdhhhhhdddhddhdmmmddhdhmddmNNNNNmmdmmNdmMmmmNmmmNmmhmdmmNMmNNmNmddhddddmmmmdmdmhmmmmNdhhdNhysyhsdhyhhhydmNdhhmmdNmmNdyyyhssssmNNNMhmhN\r\n" + 
+			"NNNMdmmMNdhdddNNmmNdhdhddhhdhshhhhddhyhhdmdmmmddmmmNmmmmmmmmmmmNNNNNNmdmmdmmdmNNMNNMNMNddmmmmdmdmmdmdNdmmmNdhyhyNhyyhyydhyhhyydmNmyhhNdNmhmyysyyysydNymNNyddm\r\n" + 
+			"mmmdhmNMNddmmNNmdmNmdddmmmmdhsyyhdyhhydmmdmmdddmmmdNmmmmmmmdmdmNNNmdNNmNmmmmNNmNMdmNMNmdddmmmmddmmmhdNmmydhydyhhdyyhyyyhyyhhyhdmmdyymmdMdsNoosohyodmmNmdmdhNN\r\n" + 
+			"mmNmddhdmdmmmNNNmmmNdmdhhhhhyhyhhhhdddmddddhdmNNNNmmNNmNmmNNNNNNMMMNmmmNNNmmmNmmNNmddNdhdhdddhdddmdhddhddyhhyshhmysyhsyhhyyyohhmNdysmNNNmmdyysyyyyymhdmmmyymm\r\n" + 
+			"NNNMMMNNmNNddddmmmddhhdhyydmddddmddmNmNmNMNddmmmNmdmdNNmmNNmNNMMNMMMNMMNmmmhhhymdddhydNhhhhhhhddmddhmdhyhsssssyhNyyyssyyysssyyshdddNNNNNNNmdysyhhyyhsddmmshdd\r\n" + 
+			"NNNNMMmNmmNhdhhdhNdNhdhmhddmdmNNNmNMNmNdmdNdyddNmNdmmdmmmNNNNNNmmMmNNmNNNdmdydhNmddydNMdhhhhddhdhdhdmdyyhhhhyssyNhyssysyshdmNmmmmNNNNNMMMMNmhhhhhyshyhhdmhddh\r\n" + 
+			"mdmmNmmmhmmdddNNmNmmddmmdNNNMNMmmmmmmddhdmmyymmNmmddhhyhhdmmddmmmNmmNhmNmhddyhhmmmmdhNMdhyhyhddmddhhhmdhyddhy+symsyyhhddmNNNNmmmNydNNmNNNNNNmyyyNmyNNmhyoooyd";
 }

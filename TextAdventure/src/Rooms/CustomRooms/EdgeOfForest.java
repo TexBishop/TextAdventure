@@ -240,9 +240,7 @@ public class EdgeOfForest extends Room
 			//Use the water in the basin to turn the empty dasani bottle
 			//into a full dasani bottle.
 			//===============================================================
-			if (command.getSubject().contentEquals("bottle") ||
-				command.getSubject().contentEquals("dasani") ||
-				(command.getSubject().contentEquals("water") && (command.getTarget().contentEquals("bottle") || command.getTarget().contentEquals("dasani"))))
+			if (command.getSubject().matches("bottle|water|dasani|empty"))
 			{
 				if (this.gameState.checkFlipped("water in basin") == true)
 				{

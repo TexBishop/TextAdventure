@@ -360,5 +360,49 @@ public class CaveEntrance extends Room
 	//===============================================================
 	//ASCII image String constants beyond this point
 	//===============================================================
-	private final String caveEntranceImage = "";
+	private final String caveEntranceImage = "hhhhyyyyssosyddhhyyyMMMs++osMMNo++++++oNMMmosooo+o+++o+/+o+/+so+++++sysooo+++osssys+//+o+++oo++/////++o++soooooso+yyysyooosoo+++oy++//oooymMMMMdyysosyydddmmm\r\n" + 
+			"hdhyyhsssyyyyhyossooMMNssosdMMh+o+ooosmMMmossoosoooosoooo+os++ososssssoo+ysooosssyysooosyyosooo+/+///oo+oo+ssss++sos+o+oosso+o/+ooo/:/++oyhdMMMMNyohdddddmmNm\r\n" + 
+			"dhhddyyoyhhyysyyysooMMNoooyMMNs++oosyNMMN+osssso+ss+sysosssooososyhysssoos+osssysyyyysyyy+++/++//+/++o+soysssys+oso/soo+//ssysyysoooo/+sysshmMMMMNdddmdhhdddd\r\n" + 
+			"mddddhyhhhhhyyyyossyMMMyysmMMhsoooomMMMNs+oosssoosoossyyossyyyhyyyyhyddhyhyyyysssyyyyyyy+/++ooooooossssoosssoo+ooss+soossssyyyyyssssyoshhhyyhdNMMMMdhhdddddmm\r\n" + 
+			"mddddhhyddhyysssysosMMmsodMMd+soosNMMMms+oo+ossssyyyoyhs+oyhhyhhhhyhhhddddmmNmhhyyyshhhsssysssssssyydddddddhmdhyyyyyyyyyyyyyyyyyyyssosoyhhhdmdhdMMMMdhhdmmddd\r\n" + 
+			"yymdhhhhhooyyyyyyosdMMy+yMMmosossdMMMdosoo+oosssssysyssooyhhhhhsyyhddhhyhhdddmMMMmNNNNMNNmNdddhdddhhssossooosshdmmmhhhyyyhhyhhyyyosssyyyhhhddhhhmMMMmhddmdhdd\r\n" + 
+			"yhhhhdddhysyysssyysmMMsodMMyosssyMMMdsssosysssyssyyyyhhysosyyyyhhhdmNNNNNNNmdhdddhhhhysssyhddmNNMMMMNNNNmddhdhddddmMMMMNmhhhhysysooyyhhhddddhyyyyhNMMNmddddhd\r\n" + 
+			"yyyhhhhyyhhhyo++ssyMMNssNMMso+o/mMMmssyssyyyyhyyyyyhyyyyy+oyyhydmNNmdyhhyhhyhyyyhhyyyhyysyyyys+/+ooydmNMMMMMMMMMMMMMMMMMMNNddhyhysyyhhddhdddhhyysydMMMMmhyhdh\r\n" + 
+			"ssshhhhysohyyo++oshMMdsyMMNsssssMMMssyyysoyhyyhhyyyyyysssydmNNmmdhyhhhhhhyyyysyyyyssso+sssyyy++o++oossshyyddhdddhhhhdyyhdNMMMNmdyyyhhhddddddhyyhyhhmMMMMMdhhy\r\n" + 
+			"y+osyyyhhhhhhysyssNMMhshMMmsyyhMMMmyhhhysssyyhyysyyhhyydNNmmdyyosssyhhhhyyysysoooooo++oooo+///ooshhyysoo+yhyy+++++osyysooyhdNMMMNmhhdmddddhhyyyhyyhhdMMMMMNmh\r\n" + 
+			"yyoyyhdyyhdmdmddhNMMNysdMMdyysmMMMhyyyyyyyyysssssyssdmNdhhhhhyyysooosoosssooss+oooo+o+oo+oo++oosshhyssooshysososso+oysysysoyyhdNMMMNmdhhhhdhyhhdddddhdNMMMMMm\r\n" + 
+			"ssyyhhhyyyhddhhhmMMMdyydMMmyydMMMMyhysyhyyyyyyyyhdNMNdyhhhhyyysossoooooooo+++/++oosso/+o+++ooooooosoosyyyyyssssyhs+ssssooyhyyhhddmNMMMmhhyhhddddmmdhhhhmNMMMM\r\n" + 
+			"sssyhhdmdddhhhhhNMMdyyhmMMNhmMMMMdssyyyyyhhhyyhmNMNhhssssssoo+++ooo+o++++/++//:/++o++//+///+/+++++oooooosssossssoss+/oosysyyhdhyhysNMMMMmyyhhhddddhhhddhmmMMM\r\n" + 
+			"ddhddmNmdyyhyhhMMMmysssdMMmdMMMMMhs+shhyhmmddNMMNdysyyyysso+++oo+////+o++o+/:////++o//o+///+/+++++ooo++o++ooooo+++s+//+o+syyyyyhhhhhdNMMMNdyyhdhdhhdyhhhdddNM\r\n" + 
+			"yhhhhddyyyyhshNMMMysoosmMMNNMMMMNhhhddmddhdmmMNh++oosssysooo+++//://::/:///++//+++++/+o+/+++o+++++///+/+++oo+++oosho/+ooooshhhhyyhhhhydNMMMNhhddmddhddhddhsyN\r\n" + 
+			"hhyssyso+oshhMMMMmhooosdMMMMMMMMy+sshyyhhhydNmy++ssooooooooo+o+/+ooo++osssssooossoossossoossyysysoo+++++++ooo++++ydyssysoossydNmhhyssyyhmMMMMmddmmmmdhdmdhysy\r\n" + 
+			"hhyhyhyhsosmMMMMNdhyosydMMMMMMMdssosyhyydNmmdy+sssossooooooo+o///+///hNmmNNNNNmNNNmNmmNNmNNmNNNNh++o/++/+o+oooso+sysyhyysssyyhhdmmdyhysshmNMMMMmhhhddhydyyyss\r\n" + 
+			"hdhhhhyyhydMMMMMddhhyhhdMMMMMMmhyyhhhhNNmdydho+soooo+oooooooooo+++++/ymmmNmmNNNNNNmmmmmNmmNNNNNNy/++++/o+o+oooyyhdyssyyyhyooyhyhyyhhy+/+osdmMMMMmdhyhyyyhsyyh\r\n" + 
+			"dhyhhdhyyhNMMMNyhyyshdhNMMMMMNdyhyhyyydhhsyhyssooooooo+/++oo+++o+++oohdhmmddmmmNNNmdhdmmdmmmmNNNy:+/::/+:+osoosyhhyyysyhhysyyysyyysyyso++oydNNMMMNdhhsyyhhhhy\r\n" + 
+			"ddddhddhyhMMMmddhyhhhhmMMMMMNyhhhysssoyhhshysossssoooo+o++++++////+//sdddmdmmdmmmmdyhmdmdmdmmmmmh//+/://://ossyhhhyyyhhhhhhyyhyhhhhhhhhhhyyydNMMMMMNdyhhhyshh\r\n" + 
+			"mmmdddhhdNMMmshmdhyhyhMMMMMMhyyyysyhyyyyshhhyhysysooooo+o+/++///+++//sddmmmmdmmmdmmddmmmmmdmmmdmh++++:///ooososyyydhhhddmddddddhydhhhhyyhyhyhyhNMMMMMMNhhhhyh\r\n" + 
+			"dhhhhdhymMMMhshsssyhhdMMMMNdhyhhyyyhyyssssssyyyysyyhyso+++//////++//:sddmmmmdmmmmmddhmmmdmhmmmmmy/++//++++osooosssyysyhhdhdmddddmmmdysyhhddhhhyssmNMMMMMMmddh\r\n" + 
+			"syhddddyNMMMdyssydhddNMMMMmhyhhhyhhhhhyysosossyssyhysoosss+ooo+///://ymdmmmmmmmmmmmmdmmmmmdmNmmmh////+++/++oo++oyyhssyhhhyhhhhdhdmdddhyyyhdhdysssyyhdNNMMMMMm\r\n" + 
+			"yyhhhddmMMMNhshdddhhhNMMMMdshyhhhhhhyyyossyhhhyyhhsss//oo++/+:oo+sso+ymmmNNNmmNmmmdmmmmNNNdNmmdmh/++++/+///++++ossyhyhyyyhhshddmddddhhhdhhhyyhyhdydyhhddmNNNd\r\n" + 
+			"hssysssMMMMdhdddddhhdMMMMNhdhhhhhddhhhyssssssyyyysss+/+++++/+-:/-/+oshmdmNNmNmNmmmdmmmNNmNmNmmmmy+:/+//+//:/++oooossysyyyyhhyyyhmmdddhyhhoyyyhdddydhddhhdhdhd\r\n" + 
+			"syyyysyMMMNdddhddddNMMMMMmhydhdyssyhhhyyyhhyhyysyyss//+++++//:/:/+/+ohmmNNNNNmNmmmmmmmNNNNmNNmmmh/::o+o/////oo+++/osyyhydhhhhhhhhmhdhysyyydddddhhyhhyhhhdhdhd\r\n" + 
+			"ysyhyhmMMMNmdhyhhhdMMMMMMdyhhhyyosoyyyyyyhhhhyysyyys:/+////:///+/+/++hNmNNNNNNNmmmmmNmNNNNNNNmmmh+++o+++///+oo+++oooyyyhhdddhdyhmmdhddhhdddddmmdhyhyhhyhhyyhh\r\n" + 
+			"sssyhddMMMNyyyhyhddMMMMMNmhhhydhysyyhhyyyyyyyyyyssysoso+/++/++/:osyyydNmNNNmNNNmmmmNNNNNNNNNNmmNdoo+oo+o+/+//+o+++ossssyhyyhdddddhhyhhdydhdmddddhdddhhhddhhhh\r\n" + 
+			"oyhyhdmMMMNyyhhyhydMMMMMMNyhyhhsyhdmhyysossssyyyyyyyyyso+/+++/:.-:-++hNmNNNNNNNmmNmNNNMNNNNNNmNNh/+o++:/+++++++/+o+oysyyhhyhddddhyshhddhdhddhdddhmdhhyhhhhhhh\r\n" + 
+			"+syhdmMMMMNshhyhdhmMMMMMMNdssyyshyhmysysssoooyssyssyssyossooo//-:-:++hNmNNNNNNNNNNmMNNMNNNNNNNNNho++/oo+/o+//+o+/++ossyyhhyhdmdhhyyhdddmdhmddmNmdNdhdhhdmdmmd\r\n" + 
+			"yyydmmMMMMmhhyyhdyNMMMMMMMhhhhyddhmmddhhyyyhys+oyysosysssso+oso++-:++hMNMNNNMNMNNNNMNNNNNNNNNNNNd/////+o+oo++ossosossyyyhsyhhdddddhddhhdNNmmdmmmdmmhddddmdmdd\r\n" + 
+			"ysymdmMMMMdhyysyhhNMMMMMMMmdddddddhhdddmhmmmmmmdmmmdmdddhsyssssoo//oohNmMNNNMMNNNNNNNNMNNMMNNNNNdo//+ooss+/+/oyyoosossyyhhhhhdmddhddmdhdmNmNdmmNNNddmdddmmmmd\r\n" + 
+			"yyhhdNMMMNhhhyyyhdmMMMMMMMNhdmmdmddhdmhhdhhddddddddhddddysssyyosysss+yNNNNNNNMNNMNNMNNNNNNMNNNNNd+oo++ooyso+/+yyysysssysossyhddyydmNNdddmMMNNmdMdmhhdhddddmmm\r\n" + 
+			"ddddNMMMMNmmddddddmMMMMMMMMhydddmmmdhhdddddmmmmmddyyhysssyoossossssyshNmNmmmNNmNNNNNNmNmmmNmmNNmdsoooossyssoosyhyssssssoossyyyyyhdhhdmmmmmNNNNNNhdmddddmdddmd\r\n" + 
+			"dddNMMMMMmmmmmmNNNNNNNMMMNNdddddmmmmmmmNmNmdsyyssosososssssysoooossooyhhddhhdddddhdddhhdddddddddhooo++ooyssssoyhhysysshsssssyyyyydmddddddhdddddmmmmmmmmmmNNNN\r\n" + 
+			"ddmMMMMMmddhhdmmmmmNmmddmmmmmmmmmNNmmmmdhhhyyyyyssyssssssssssssssssosssssyssssssssssssssssssssssssssssssssssssyyyyyyyyyyyyyhyhhhhdddddhdmmmmmNmNmmNmmmmmmmmmN\r\n" + 
+			"NNNNNMMNNmmmdmmmmmmNmmmmNmmmNmmmmddddhyyssssssssssssssysssssssssosoosssssssssssssssssssssssssssssssssssssssssssssssssssssyyysyyhhhddmddddmmmNNNNNNNNmmmNNNNNN\r\n" + 
+			"mNNmNNNNNmmmmmmdmmmmmmmmmmddddhhhyyssssssssssssssssysssssssssssssssssssssssssssssssosssssssssssssoooooooooooosssssoossooooooooossssssyhyddmmmddddddmmdddmdmdd\r\n" + 
+			"dmdmmmmmmmmNNNNNmmmmmdhhhhyyysssssssssssssssssssyysssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssoooooooooossooooooooosyyyyyyyyyyyyyyyhhhhh\r\n" + 
+			"hdddddddmmmmmmmddhhyyyyyyyysssssssssssyssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssysssssssssssssssssssyhhddmmddddmmmmmmmmm\r\n" + 
+			"dddddddddddhhyyysssssssssssssssssssssssssssssssssssssssssssssssssoooossssssssssssssssssssssssssssssssssssossssssssssssssyyyyyyssssssssssyyyyyyyhdmmmmmmmNmNmm\r\n" + 
+			"dddmmdmhyssssoooooooooooooooooosssooooooooooooooo++++++oooooooooooooooooooooooooossssoosssssoooossssssssosossssssssssssssssyyyssssssssssssssssssssyyhyhddmmmm\r\n" + 
+			"mhdhyssssssoooooooooooooooooooosssoooooooo+++oooooooooo+ooooooo+++ooooooooo++++++++oooooooooooooooooo+o+oooooooooooooooossssssssssssssssssssssssooosssssssyyh\r\n" + 
+			"hhyysssssoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo++++ooooooooooooooooooooooooo++++oooooooooosssoooooooooooooooooo\r\n" + 
+			"sssssssssoooossssssssssssssoosssssssssssssssooosooooooooooo+oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo+oooooooooooooooooooooo+++++++++ooo";
 }
