@@ -28,7 +28,7 @@ import Structure.GameState;
 //==============================================================================
 public class Application
 {
-	private final String startingText = "You stand at the side of an old farm road, watching the taxi that "
+	private final String startingText = "You stand at the side of an old farm road, watching the black car that "
 			+ "just dropped you off become small in the distance.  The last few days are a haze in your mind, and you "
 			+ "find yourself wondering how recent events managed to lead you to this place.  You try to piece things "
 			+ "together in your head, but the memories scatter, leaving nothing but the certainty that "
@@ -154,13 +154,9 @@ public class Application
 	public void resetGame()
 	{
     	//===============================================================
-        //Remove, re-initialize, and re-add the CommandBox, to clear it.
-		//We can't simply set it's text to empty, because we've made it
-		//non-editable.  This was the simplest solution I found.
+        //Clear the text out of the Command Box and reset promp position.
     	//===============================================================
-		this.frame.remove(commandBox);
-		this.commandBox = new CommandBox(this);
-		this.frame.add(commandBox);
+		this.commandBox.clearText();
 
     	//===============================================================
         //Re-initialize our game state, and then display the starting room.

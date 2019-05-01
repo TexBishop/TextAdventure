@@ -55,7 +55,7 @@ public class ForestExit extends Room
 		{
 			this.gameState.flipFlag("troll scene ran");
 			this.gameState.flipFlag("gate unbarred");
-			this.description += "You hear the brush rustling from the direction of the staircase. "
+			this.description += "\n\nYou hear the brush rustling from the direction of the staircase. "
 					+ "Turning to find out what is causing the noise, you see the Troll emerging onto the packed dirt. "
 					+ "He walks over to the barred gate, lifts the heavy timber from its seating, and throwing it aside. "
 					+ "He gives you a glance and a grunt, then turns and heads back down the staircase. ";

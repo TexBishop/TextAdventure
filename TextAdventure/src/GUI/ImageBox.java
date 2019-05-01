@@ -63,7 +63,7 @@ public class ImageBox extends JPanel
 		//FrameDragListener object initialization, to make the ASCII image 
 		//area capable of click-dragging the application window
     	//===============================================================
-		this.frameDragListener = new FrameDragListener(application.frame, new Point(5, 26));
+		this.frameDragListener = new FrameDragListener(application.frame, new Point(0, 36));
 		textPane.addMouseListener(frameDragListener);
 		textPane.addMouseMotionListener(frameDragListener);
 	}

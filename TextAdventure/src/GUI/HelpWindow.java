@@ -42,6 +42,8 @@ public class HelpWindow extends TextWindow
 				+ "To focus on an item in inventory:\n"
 				+ "\"look in inventory at XXXXXX\"\n"
 				+ "or\n"
-				+ "\"look at XXXXXX in inventory\"";
+				+ "\"look at XXXXXX in inventory\"\n\n"
+				+ "Once focus is on the item, you can perform actions on the item as normal. \n\n"
+				+ "\"return\" or \"go back\" will return focus to the current room.";
 	}
 }
