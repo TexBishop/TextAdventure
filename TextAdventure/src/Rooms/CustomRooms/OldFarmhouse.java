@@ -22,6 +22,7 @@ public class OldFarmhouse extends Room
 	protected void setName() 
 	{
 		this.name = "Old Farmhouse";	
+		this.image = this.whiteHouseImage;
 	}
 
 	@Override
@@ -32,6 +33,16 @@ public class OldFarmhouse extends Room
 		//used inner spaces from lingering.
 		//=================================================================================
 		this.resetInnerSpace();
+
+		//=================================================================================
+		//If the game has been won, return game win sequence
+		//=================================================================================
+		if (this.gameState.checkFlipped("game won"))
+		{		
+			this.gameState.flipFlag("game ended");
+			return new DisplayData(this.gameWon, this.fullDescription());
+		}
+		
 		return new DisplayData(this.whiteHouseImage, this.fullDescription());
 	}
 	
@@ -110,6 +121,24 @@ public class OldFarmhouse extends Room
 		mailboxEmpty.addFlag("mailbox open");
 		mailboxEmpty.addFlag("flyer taken");
 		this.gameState.addFlag("mailbox empty", mailboxEmpty);
+		
+		//=================================================================================
+		//Win condition flags.  Our win condition MultiFlag will depend on these three flags.
+		//=================================================================================
+		this.gameState.addFlag("cube solved", new Flag(false, "", ""));
+
+		//=================================================================================
+		//The win condition multi-flag
+		//=================================================================================
+		MultiFlag gameWon = new MultiFlag(this.gameState, false, "", "");
+		gameWon.addFlag("cube solved");
+		this.gameState.addFlag("game won", gameWon);
+
+		//=================================================================================
+		//Flag signifying the end sequence has ran
+		//=================================================================================
+		this.gameState.addFlag("game won message printed", new Flag(false, "", ""));
+		this.gameState.addFlag("game ended", new Flag(false, "", ""));
 	}
 	
 	@Override
@@ -119,13 +148,33 @@ public class OldFarmhouse extends Room
 		//This is used to return the main room description.  If any flags alter the main
 		//room description, that will be handled here.
 		//=================================================================================
-		this.description = "An old, dilapidated white farmhouse stands in front of you.  It "
-				+ "appears to be in poor repair, and has an abandoned feel about it.  A well worn path "
-				+ "heading north leads to the front porch.  The old farm road heads off to the east and west "
-				+ "from here.  There's an old, rusty mailbox next to you. ";
-		
-		if (this.gameState.checkFlipped("mailbox open"))
-			this.description += this.gameState.getFlag("mailbox empty").toString();
+		if (this.gameState.checkFlipped("game won") == false)
+		{
+			//=================================================================================
+			//Build room description
+			//=================================================================================
+			this.description = "An old, dilapidated white farmhouse stands in front of you.  It "
+					+ "appears to be in poor repair, and has an abandoned feel about it.  A well worn path "
+					+ "heading north leads to the front porch.  The old farm road heads off to the east and west "
+					+ "from here.  There's an old, rusty mailbox next to you. ";
+
+			if (this.gameState.checkFlipped("mailbox open"))
+				this.description += this.gameState.getFlag("mailbox empty").toString();
+		}
+		else
+		{
+			//=================================================================================
+			//If the game has been won, instead build the game won end sequence
+			//=================================================================================
+			this.description = "Walking back up to the old farm road, you see a black sedan waiting for you. "
+					+ "A man dressed in a black suit is standing next to it. "
+					+ "\"I see you've found what you were looking for. Congratulations.\", he says, as he opens the back door of the car for you. "
+					+ "\"Yes. Quite satisfying.\", you say, getting into the car. "
+					+ "As the car pulls away, a large, grotesque figure emerges from the forest. "
+					+ "He stands there, scratching himself, as he watches the black sedan amble down the road. "
+					+ "The car begins to shimmer, then slowly fade from sight, vanishing. \n\n"
+					+ "Congratulations! You've completed the game!";
+		}
 		
 		return this.description;
 	}

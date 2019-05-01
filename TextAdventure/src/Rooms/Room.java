@@ -34,10 +34,17 @@ public abstract class Room implements Space, Serializable
 	private static final long serialVersionUID = 1L;
 
 	//=================================================================================
+	//String to display if the game won flag is flipped
+	//=================================================================================
+	protected final String gameWonMessage = "\n\nYou pull out your cellphone and dial a number. "
+			+ "\"I believe I'm done here Anderson. I'll meet you out front.\" "
+			+ "You put away the cell phone, feeling a sense of relief. ";
+
+	//=================================================================================
 	//The movementDirection hashmap stores a the keys to the connected rooms for this
 	//object.  The innerSpace object is used for viewing Items while in this room.
 	//=================================================================================
-	Map<String, String> movementDirection = new HashMap<>();
+	protected Map<String, String> movementDirection = new HashMap<>();
 	protected Space innerSpace;
 	
 	protected GameState gameState;
@@ -77,14 +84,22 @@ public abstract class Room implements Space, Serializable
 	@Override
 	public DisplayData handleDisplayData(Command command)
 	{
+		DisplayData displayData;
 		//=================================================================================
 		//If innerSpace is null, check it to see if it needs to be set
 		//=================================================================================
 		if (this.innerSpace == null)
 		{
-			DisplayData displayData = this.checkInnerSpace(command);
+			displayData = this.checkInnerSpace(command);
+			
 			if (displayData != null)
+			{
+				//=================================================================================
+				//Check if the game won flag was flipped on this command
+				//=================================================================================
+				this.checkGameWon(displayData);
 				return displayData;
+			}
 		}
 		
 		//=================================================================================
@@ -92,9 +107,27 @@ public abstract class Room implements Space, Serializable
 		//execution in the Item that innerSpace is pointing to.
 		//=================================================================================
 		if (this.innerSpace != null)
-			return this.innerSpace.handleDisplayData(command);
+		{
+			displayData = this.innerSpace.handleDisplayData(command);
+
+			//=================================================================================
+			//Check if the game won flag was flipped on this command
+			//=================================================================================
+			this.checkGameWon(displayData);
+			
+			return displayData;
+		}
 		else
-			return this.executeCommand(command);
+		{
+			displayData = this.executeCommand(command);
+
+			//=================================================================================
+			//Check if the game won flag was flipped on this command
+			//=================================================================================
+			this.checkGameWon(displayData);
+			
+			return displayData;
+		}
 	}
 	
 	/**
@@ -174,39 +207,6 @@ public abstract class Room implements Space, Serializable
 	 */
 	public DisplayData checkInnerSpace(Command command)
 	{
-		//===============================================================
-		//If the command is to look at an item in inventory, do so, and
-		//set the value of the current rooms innerSpace to the Item's space.
-		//===============================================================
-		/*if (command.getVerb().contentEquals("look") == true && command.getSubject().contentEquals("inventory") == true)
-		{
-			if (this.gameState.checkItemSearch(command.getTarget()) == true)
-			{
-				String key = this.gameState.getItemKey(command.getTarget());
-				if (this.gameState.checkInventory(key) == true)
-				{
-					try 
-					{
-						if (this.gameState.checkSpace(key) == true)
-						{
-							this.innerSpace = this.gameState.getSpace(key);
-							return this.innerSpace.displayOnEntry();
-						}
-						else
-							throw new InvalidMapKeyException();
-					} 
-					catch (InvalidMapKeyException e) 
-					{
-						System.out.println("The Space you are attempting to view doesn't exist.");
-						e.printStackTrace();
-					}
-				}
-				else
-					return new DisplayData("", "Item not found in inventory.");
-			}
-			else
-				return new DisplayData("", "Item not found in inventory.");
-		}*/
 		//===============================================================
 		//If the command is to look at an item in inventory, do so, and
 		//set the value of the current rooms innerSpace to the Item's space.
@@ -292,6 +292,37 @@ public abstract class Room implements Space, Serializable
 	{
 		this.innerSpace = null;
 	}
+	
+	/**
+	 * Check to see if the game won message needs to be printed.  If it does, append it to the display data.
+	 * @param displayData  DisplayData The diplay data object we will edit if needed.
+	 * @return             DisplayData The resulting display data object.
+	 */
+	protected DisplayData checkGameWon(DisplayData displayData)
+	{
+		if (this.gameState.checkFlipped("game won") == true && this.gameState.checkFlipped("game won message printed") == false)
+		{
+			this.gameState.flipFlag("game won message printed");
+			displayData.appendToDescription(this.gameWonMessage);
+
+	    	//===============================================================
+			//If the current room is the Old Farmhouse room, set game as
+			//ended, and output the game ended description
+	    	//===============================================================
+			if (this.gameState.getCurrentRoom().equals(this.gameState.getSpace("Old Farmhouse")))
+			{
+				this.gameState.flipFlag("game ended");
+				displayData.appendToDescription("\n\n" + this.fullDescription());
+				
+				//=================================================================================
+				//Change the display image to the current room's display image
+				//=================================================================================
+				displayData = new DisplayData(this.gameWon, displayData.getDescription());
+			}
+		}
+		
+		return displayData;
+	}
 
 	//===============================================================
 	//Getters
@@ -305,4 +336,53 @@ public abstract class Room implements Space, Serializable
 	{
 		return this.name;
 	}
+
+	//===============================================================
+	//Game won ASCII image
+	//===============================================================
+	protected final String gameWon = "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM+//oMMM///yMMNs/:-:/sNMMm///dMMd///dMMMMM///hMM+//hMM+//ym://yM:-./NMMM/--oMs//sMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM-  :MMN`  +Mo   `-`   oMd   hMMh   dMMMMM`  sMM.  oMM.  +m   sM.   .dMM-  +M+  /MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMy`  +m:  `ds  `hMMMh`  sm   hMMh   mMMMMN`  sMM`  oMM.  oN   yM-     oM:  oM/  sMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm.     -mM/  :MMMMM:  /N   dMMd   mMMMMMh  `ms   `mo  :MN   hM:  +:  -.  sMh `NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN:   oMMMh   omNd+   hm   yMMy   mMMMMMMy  `  -  .  -NMm   yM.  oMy`    sMMosMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMs   mMMMMh-       -hMM.   ``   -MMMMMMMMy   .Ns   -NMMd   sM`  +MMm:   sM+  oMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMdyyyNMMMMMMmysosymMMMMMhsooosydMMMMMMMMMMhyymMMyyyNMMMNyyymMyyydMMMMyssmMNssNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMdyssydMMMMMMMMMMMmyssshNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMy-:oooo/-oMMMMMMMm::+ooo/-/NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMdNMMMMMMMdNMMMMMMmmMMMMMMMmmMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm-sNMMMMMMMMMMh:sMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMy` -/+oooo+:` /NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMy+-`    .:omMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNNNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM\r\n" + 
+			"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM";
 }

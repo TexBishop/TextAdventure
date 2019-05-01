@@ -132,6 +132,11 @@ public abstract class CountdownRoom extends Room
 					}
 				}
 
+				//=================================================================================
+				//Check if the game won flag was flipped on this command
+				//=================================================================================
+				this.checkGameWon(displayData);
+
 				return displayData;
 			} 
 			catch (Exception e) 
@@ -140,6 +145,11 @@ public abstract class CountdownRoom extends Room
 				e.printStackTrace();
 			}
 		}
+
+		//=================================================================================
+		//Check if the game won flag was flipped on this command
+		//=================================================================================
+		this.checkGameWon(displayData);
 
 		//=================================================================================
 		//If count down is inactive, return the DisplayData unchanged.

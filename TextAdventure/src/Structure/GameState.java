@@ -117,9 +117,10 @@ public class GameState implements Serializable
 	public DisplayData parseCommand(String commandString)
 	{
 		//===============================================================
-		//Only allow commands to process if the player is currently alive
+		//Only allow commands to process if the player is currently alive,
+		//and the game has not ended
 		//===============================================================
-		if (this.alive == true)
+		if (this.alive == true && this.checkFlipped("game ended") == false)
 		{
 			//===============================================================
 			//Parse the typed command, and turn it into a Command object.
@@ -132,7 +133,12 @@ public class GameState implements Serializable
 			return this.currentRoom.handleDisplayData(command);
 		}
 		else
-			return new DisplayData("", "You are dead. ");
+		{
+			if (this.checkFlipped("game ended") == true)
+				return new DisplayData("", "The game is over. ");
+			else
+				return new DisplayData("", "You are dead. ");
+		}
 	}
 	
 	/**

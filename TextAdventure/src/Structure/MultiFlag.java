@@ -18,7 +18,7 @@ public class MultiFlag extends Flag
 {
 	private static final long serialVersionUID = 1L;
 	private GameState gameState;
-	List<String> flagList = new ArrayList<>();
+	private List<String> flagList = new ArrayList<>();
 
 	/**
 	 * Constructor.
