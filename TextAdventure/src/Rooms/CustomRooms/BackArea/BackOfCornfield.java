@@ -5,11 +5,12 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.BackArea;
 
 import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
+import Structure.Flag;
 import Structure.GameState;
 
 public class BackOfCornfield extends Room 
@@ -67,9 +68,6 @@ public class BackOfCornfield extends Room
 		this.addMovementDirection("path", "Forest Exit");
 		this.addMovementDirection("gate", "Forest Exit");
 		
-		if (this.gameState.checkSpace("Forest Exit") == false)
-			new ForestExit(this.gameState);	
-		
 		//=================================================================================
 		//Create directions that move to Backyard
 		//=================================================================================
@@ -79,9 +77,6 @@ public class BackOfCornfield extends Room
 		this.addMovementDirection("backyard", "Backyard");
 		this.addMovementDirection("west", "Backyard");
 		this.addMovementDirection("trail", "Backyard");
-		
-		if (this.gameState.checkSpace("Backyard") == false)
-			new Backyard(this.gameState);	
 	}
 
 	@Override
@@ -93,7 +88,13 @@ public class BackOfCornfield extends Room
 	@Override
 	protected void createFlags() 
 	{
-		// TODO Auto-generated method stub
+		//=================================================================================
+		//Flag for whether the gate has been unbarred.  Create only if it doesn't already exist.
+		//This flag also used in Forest Exit room.
+		//=================================================================================
+		if (this.gameState.checkFlag("bate unbarred") == false)
+			this.gameState.addFlag("gate unbarred", new Flag(false, "The gate is barred closed with a piece of heavy timber. ", 
+					"It's sitting slightly ajar, the bar once holding it closed lightly off to the side, on the ground. "));
 	}
 
 	@Override
@@ -112,17 +113,17 @@ public class BackOfCornfield extends Room
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//If try to enter forest through the gate, verify that the gate
 			//is unbarred
 			//===============================================================
-			if (command.getSubject().matches("east|gate|forest|path"))
+			if (command.unordered("east|gate|forest|path"))
 			{
 				if (this.gameState.checkFlipped("gate unbarred"))
-					return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+					return this.move(command);
 				else
 					return new DisplayData("", "The gate is barred closed from the other side. You can't get through. ");
 			}
@@ -130,8 +131,8 @@ public class BackOfCornfield extends Room
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -150,20 +151,29 @@ public class BackOfCornfield extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The strip of open ground here is narrow and long, the forest and the cornfield running parallel to one another. "
 						+ "The grass is overgrown, up to your knees. "
 						+ "It looks like there's a trail heading west through the tall grass, skirting around the edge of the corn field, "
 						+ "back towards the farmhouse. ");
 
-			if (command.getSubject().contentEquals("gate"))
+			if (command.unordered("gate"))
 				return new DisplayData("", "The gate is contructed of heavy timber, with several crossbars, and chain link covering the gaps. "
 						+ "It hugged so closely by the foliage, that it appears to be a door through the greenery. " 
 						+ "There's presumable a fence as well, but it's completely invisible beneath the brush. ");
 
-			if (command.getSubject().matches("corn|field|cornfield|stalks"))
+			if (command.unordered("corn|field|cornfield|stalks"))
 				return new DisplayData("", "The corn stalks all look to be dead, brown and yellow in color, no green to be seen. "
 						+ "How strange that is. What could have caused the entire field to die in such a way, all of the corn stalks whole, intact? ");
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -171,6 +181,15 @@ public class BackOfCornfield extends Room
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

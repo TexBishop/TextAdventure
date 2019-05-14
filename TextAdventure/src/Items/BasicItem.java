@@ -80,7 +80,12 @@ public class BasicItem extends Item
 		//given verb has an invalid command.  
 		//===============================================================
 		switch (command.getVerb())
-		{			
+		{				
+		case "search":  //doing this will cause search to execute the go code
+		case "look":
+			if (command.unordered(this.regex))
+				return this.displayOnEntry();
+			
 		default: 
 			//===============================================================
 			//Pass the current command to the room commands when default is reached.

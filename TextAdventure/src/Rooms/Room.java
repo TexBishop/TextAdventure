@@ -18,6 +18,7 @@ package Rooms;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import Structure.Command;
 import Structure.DisplayData;
@@ -45,8 +46,10 @@ public abstract class Room implements Space, Serializable
 	//object.  The innerSpace object is used for viewing Items while in this room.
 	//=================================================================================
 	protected Map<String, String> movementDirection = new HashMap<>();
+	protected String movementRegex = "";
 	protected Space innerSpace;
 	
+	private RoomFactory roomFactory;
 	protected GameState gameState;
 	protected String name;
 	protected String image;
@@ -54,6 +57,7 @@ public abstract class Room implements Space, Serializable
 	
 	public Room(GameState gameState) 
 	{
+		this.roomFactory = new RoomFactory(gameState);
 		this.gameState = gameState;
 		
 		this.setName();
@@ -130,6 +134,14 @@ public abstract class Room implements Space, Serializable
 		}
 	}
 	
+	protected DisplayData move(Command command)
+	{
+		if (this.gameState.checkSpace(this.getMovementDirectionRoom(command.getMatch(this.movementRegex))) == false)
+			this.roomFactory.makeRoom(this.getMovementDirectionRoom(command.getMatch(this.movementRegex)));
+		
+		return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getMatch(this.movementRegex)));
+	}
+	
 	/**
 	 * Add a new movement direction and the Room it leads to, to the hashmap.
 	 * @param direction String The direction to move.
@@ -143,8 +155,18 @@ public abstract class Room implements Space, Serializable
     	//===============================================================
 		try 
 		{
-			if (movementDirection.containsKey(direction) == false)
-				movementDirection.put(direction, roomKey);
+			if (this.movementDirection.containsKey(direction) == false)
+			{
+				this.movementDirection.put(direction, roomKey);
+				
+		    	//===============================================================
+				//Build a regex of the movement direction keys for matching purposes
+		    	//===============================================================
+				if (this.movementRegex.isEmpty())
+					this.movementRegex += direction;
+				else
+					this.movementRegex += "|" + direction;
+			}
 			else
 				throw new InvalidMapKeyException();
 		} 
@@ -208,42 +230,30 @@ public abstract class Room implements Space, Serializable
 	public DisplayData checkInnerSpace(Command command)
 	{
 		//===============================================================
-		//If the command is to look at an item in inventory, do so, and
-		//set the value of the current rooms innerSpace to the Item's space.
+		//If the command contains the inventory or my keywords, check
+		//the command for a match for an inventory item.  If one is found,
+		//set it as innerSpace, and run the command through it.
 		//===============================================================
-		if (command.getSubject().contentEquals("inventory") == true || command.getTarget().contentEquals("inventory") == true)
+		if (command.unordered("inventory|my") == true)
 		{
-			if (this.gameState.checkItemSearch(command.getTarget()) == true || this.gameState.checkItemSearch(command.getSubject()) == true)
+			if (this.gameState.checkItemSearch(command.getMatch(this.gameState.getInventoryRegex())) == true)
 			{
-				String key;
-				if (this.gameState.checkItemSearch(command.getTarget()) == true)
-					key = this.gameState.getItemKey(command.getTarget());
-				else
-					key = this.gameState.getItemKey(command.getSubject());
-					
-				if (this.gameState.checkInventory(key) == true)
+				String key = this.gameState.getItemKey(command.getMatch(this.gameState.getInventoryRegex()));
+				try 
 				{
-					try 
+					if (this.gameState.checkSpace(key) == true)
 					{
-						if (this.gameState.checkSpace(key) == true)
-						{
-							this.innerSpace = this.gameState.getSpace(key);
-							if (command.getVerb().contentEquals("look") == true)
-								return this.innerSpace.displayOnEntry();
-							else
-								return this.innerSpace.handleDisplayData(command);
-						}
-						else
-							throw new InvalidMapKeyException();
-					} 
-					catch (InvalidMapKeyException e) 
-					{
-						System.out.println("The Space you are attempting to view doesn't exist.");
-						e.printStackTrace();
+						this.innerSpace = this.gameState.getSpace(key);
+						return this.innerSpace.handleDisplayData(command);
 					}
+					else
+						throw new InvalidMapKeyException();
+				} 
+				catch (InvalidMapKeyException e) 
+				{
+					System.out.println("The Space you are attempting to view doesn't exist.");
+					e.printStackTrace();
 				}
-				else
-					return new DisplayData("", "Item not found in inventory.");
 			}
 			else
 				return new DisplayData("", "Item not found in inventory.");
@@ -291,6 +301,40 @@ public abstract class Room implements Space, Serializable
 	public void resetInnerSpace()
 	{
 		this.innerSpace = null;
+	}
+	
+	/**
+	 * Check to see if an inventory item was referenced in the command.  If yes, set it as innerSpace and run the command through it.
+	 * @param command  String       The command to check.
+	 * @return         DisplayData  The result of the command.  Null if a reference to an item was not found in the command.
+	 */
+	protected DisplayData inventoryTest(Command command)
+	{
+		if (command.unordered(this.gameState.getInventoryRegex()) == true)
+		{
+			if (this.innerSpace == null)
+			{
+				//===============================================================
+				//If innerSpace is null, set it to the referenced item.
+				//===============================================================
+				this.innerSpace = this.gameState.getSpace(this.gameState.getItemKey(command.getMatch(gameState.getInventoryRegex())));
+				return this.innerSpace.handleDisplayData(command);
+			}
+			else
+			{
+				//===============================================================
+				//If innerSpace is not null, check to see if the referenced item
+				//is already set as innerSpace.  If it is not, change innerSpace's
+				//value to the referenced item.
+				//===============================================================
+				if (Objects.equals(this.innerSpace, this.gameState.getSpace(this.gameState.getItemKey(command.getMatch(gameState.getInventoryRegex())))) == false)
+				{
+					this.innerSpace = this.gameState.getSpace(this.gameState.getItemKey(command.getMatch(gameState.getInventoryRegex())));
+					return this.innerSpace.handleDisplayData(command);
+				}
+			}
+		}
+		return null;
 	}
 	
 	/**

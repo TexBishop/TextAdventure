@@ -20,7 +20,7 @@ public class LostLocket extends Item
 	protected void setName() 
 	{
 		this.name = "Lost Locket";
-		this.gameState.addItemSearch(this.name, "locket", "lost");
+		this.gameState.addItemSynonyms(this, "locket", "lost");
 	}
 
 	@Override
@@ -72,20 +72,14 @@ public class LostLocket extends Item
 	public DisplayData executeCommand(Command command) 
 	{
 		//===============================================================
-		//Provide a case for each verb you wish to function in this room.
-		//Most verbs will require default handling for cases where the
-		//given verb has an invalid command.  
+		//Do not provide default cases for command failure in items.
 		//===============================================================
 		switch (command.getVerb())
 		{			
 		case "pull":
 		case "take":	
 		case "remove":
-			if (command.getSubject().contentEquals("picture") || 
-				command.getSubject().contentEquals("photo") ||
-				command.getSubject().contentEquals("photograph") ||
-				command.getSubject().contentEquals("image") ||
-				command.getSubject().contentEquals("portrait"))
+			if (command.unordered("picture|photo|photograph|image|portrait"))
 			{
 				if (this.gameState.checkFlipped("picture removed") == false)
 				{
@@ -98,14 +92,14 @@ public class LostLocket extends Item
 			}
 			
 		case "look":
-			if (command.getSubject().contentEquals("picture") || 
-				command.getSubject().contentEquals("photo") ||
-				command.getSubject().contentEquals("photograph") ||
-				command.getSubject().contentEquals("image") ||
-				command.getSubject().contentEquals("portrait"))
+			if (command.unordered("picture|photo|photograph|image|portrait"))
 			{
 				return new DisplayData ("", "It's a faded photo of an older woman.  You don't recognize her.");
 			}
+			
+			if (command.unordered(this.regex))
+				return this.displayOnEntry();
+			
 		default: 
 			//===============================================================
 			//Pass the current command to the room commands when default is reached.

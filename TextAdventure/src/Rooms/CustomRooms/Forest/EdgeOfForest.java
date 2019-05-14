@@ -5,7 +5,7 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Items.Item;
 import Items.CustomItems.BottleOfWater;
@@ -74,18 +74,12 @@ public class EdgeOfForest extends Room
 		this.addMovementDirection("house", "Farmhouse Porch");
 		this.addMovementDirection("farmhouse", "Farmhouse Porch");
 		
-		if (this.gameState.checkSpace("Farmhouse Porch") == false)
-			new FarmhousePorch(this.gameState);	
-		
 		//=================================================================================
 		//Create directions that move to Forest Path
 		//=================================================================================
 		this.addMovementDirection("east", "Forest Path");
 		this.addMovementDirection("forest", "Forest Path");
 		this.addMovementDirection("path", "Forest Path");
-		
-		if (this.gameState.checkSpace("Forest Path") == false)
-			new ForestPath(this.gameState);	
 
 		//=================================================================================
 		//Create directions that move to Backyard
@@ -98,9 +92,6 @@ public class EdgeOfForest extends Room
 		this.addMovementDirection("corn", "Backyard");
 		this.addMovementDirection("cornfield", "Backyard");
 		this.addMovementDirection("backyard", "Backyard");
-		
-		if (this.gameState.checkSpace("Backyard") == false)
-			new Backyard(this.gameState);	
 	}
 
 	@Override
@@ -139,14 +130,14 @@ public class EdgeOfForest extends Room
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -163,7 +154,7 @@ public class EdgeOfForest extends Room
 			//===============================================================
 			//Drink some of the water from the basin.
 			//===============================================================
-			if (command.getSubject().contentEquals("water"))
+			if (command.unordered("water"))
 			{
 				if (this.gameState.checkFlipped("water in basin") == true)
 					return new DisplayData("", this.decrementWaterLevel() + "Refreshing. ");
@@ -180,7 +171,7 @@ public class EdgeOfForest extends Room
 			//===============================================================
 			//Reject attempt to take mud
 			//===============================================================
-			if (command.getSubject().contentEquals("mud"))
+			if (command.unordered("mud"))
 				return new DisplayData("", "Why would you want that?");
 
 			//===============================================================
@@ -194,9 +185,7 @@ public class EdgeOfForest extends Room
 			//Use the pump to fill the basin with water.  When it overflows,
 			//it creates mud around the basin.
 			//===============================================================
-			if (command.getSubject().contentEquals("pump") ||
-				command.getSubject().contentEquals("water") ||
-				command.getSubject().contentEquals("handle"))
+			if (command.unordered("pump|water|handle"))
 			{
 				//===============================================================
 				//Flip the flag indicating that the basin has water in it
@@ -240,7 +229,7 @@ public class EdgeOfForest extends Room
 			//Use the water in the basin to turn the empty dasani bottle
 			//into a full dasani bottle.
 			//===============================================================
-			if (command.getSubject().matches("bottle|water|dasani|empty"))
+			if (command.unordered("bottle|water|dasani|empty"))
 			{
 				if (this.gameState.checkFlipped("water in basin") == true)
 				{
@@ -278,23 +267,22 @@ public class EdgeOfForest extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The forest looms large before you here, an inscrutable wall. "
 						+ "You feel a bit of apprehension at the thought of entering the ancient wood, but you aren't sure why. "
 						+ "From this angle, you can see a barn and what looks to be a tool shed behind the house, with a corn field stretching beyond. ");
 
-			if (command.getSubject().contentEquals("forest"))
+			if (command.unordered("forest"))
 				return new DisplayData("", "The edge of the forest is abrupt, immediately dense. It doesn't look like much light is getting "
 						+ "through beneath the canopy.  The path continues on, cutting between the trees bravely. ");
 
-			if (command.getSubject().contentEquals("water") ||
-				command.getSubject().contentEquals("pump"))
+			if (command.unordered("water|pump"))
 				return new DisplayData("", "The old water pump looks to be in good repair.  It probably still works. ");
 
-			if (command.getSubject().contentEquals("basin"))
+			if (command.unordered("basin"))
 				return new DisplayData("", "A small tin trough.  Surprisingly, it looks clean, and in good repair. ");
 
-			if (command.getSubject().contentEquals("mud"))
+			if (command.unordered("mud"))
 			{
 				//===============================================================
 				//Change return message based on whether the ground is muddy
@@ -306,11 +294,30 @@ public class EdgeOfForest extends Room
 			}
 
 			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+
+			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

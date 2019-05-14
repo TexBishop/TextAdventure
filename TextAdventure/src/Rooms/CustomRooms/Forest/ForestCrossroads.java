@@ -5,7 +5,7 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Rooms.Room;
 import Structure.Command;
@@ -69,18 +69,12 @@ public class ForestCrossroads extends Room
 		this.addMovementDirection("west", "Forest Cliff");
 		this.addMovementDirection("cliff", "Forest Cliff");
 		
-		if (this.gameState.checkSpace("Forest Cliff") == false)
-			new ForestCliff(this.gameState);	
-		
 		//=================================================================================
 		//Create directions that move to Cave Entrance
 		//=================================================================================
 		this.addMovementDirection("north", "Cave Entrance");
 		this.addMovementDirection("east", "Cave Entrance");
 		this.addMovementDirection("south", "Cave Entrance");
-		
-		if (this.gameState.checkSpace("Cave Entrance") == false)
-			new CaveEntrance(this.gameState);	
 	}
 
 	@Override
@@ -131,14 +125,13 @@ public class ForestCrossroads extends Room
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//If move, and maze not completed, handle the maze
 			//===============================================================
-			if ((command.getSubject().matches("north|east|south|west|northern|eastern|southern|western") || 
-					command.getTarget().matches("north|east|south|west")) && 
+			if (command.unordered(this.movementRegex) && 
 				this.gameState.checkFlipped("maze completed") == false)
 			{
 				//===============================================================
@@ -146,7 +139,7 @@ public class ForestCrossroads extends Room
 				//the sequence has been completed.  Count being equal to eight
 				//indicates the sequence has been completed.
 				//===============================================================
-				this.handleMaze(command.getSubject());
+				this.handleMaze(command.getMatch(this.movementRegex));
 				if (this.count == 8)
 				{
 					this.gameState.flipFlag("maze completed");
@@ -159,10 +152,10 @@ public class ForestCrossroads extends Room
 				//cliff, else re-enter this room.  Count being equal to zero
 				//indicates the direction choice was incorrect.
 				//===============================================================
-				if (command.getSubject().contentEquals("west") && count == 0)
+				if (command.unordered("west") && count == 0)
 				{
 					this.reentry = false;
-					return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+					return this.move(command);
 				}
 				else
 				{
@@ -174,10 +167,10 @@ public class ForestCrossroads extends Room
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
 			{
 				this.reentry = false;
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+				return this.move(command);
 			}
 
 			//===============================================================
@@ -197,14 +190,23 @@ public class ForestCrossroads extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The forest is dense, the light is dim. You peer carefully down each path, but are unable to "
 						+ "discern anything of note. The crossroads itself is non-descript. "
 						+ "But wait, is that an overgrown sign among the brush there? ");
 
-			if (command.getSubject().contentEquals("sign"))
+			if (command.unordered("sign"))
 				return new DisplayData(this.signImage, "You push aside the brush and look at the rotting sign. "
 						+ "It says, \"BA BA Start - Konami\". What does that mean? ");
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -212,6 +214,15 @@ public class ForestCrossroads extends Room
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

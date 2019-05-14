@@ -20,7 +20,7 @@ public class BottleOfWater extends BreakableItem
 	protected void setName() 
 	{
 		this.name = "Bottle of Water";
-		this.gameState.addItemSearch(this.name, "bottle", "water", "dasani");
+		this.gameState.addItemSynonyms(this, "bottle", "water", "dasani");
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class BottleOfWater extends BreakableItem
 			//Create empty bottle, and add it to inventory
 			//=================================================================================
 			emptyBottle = new BasicItem(this.gameState, "Dasani Bottle (Empty)", "", "An empty plastic Dasani bottle.");
-			this.gameState.addItemSearch(emptyBottle.getName(), "bottle", "dasani");
+			this.gameState.addItemSynonyms(emptyBottle, "bottle", "dasani");
 			this.gameState.addSpace(emptyBottle.getName(), emptyBottle);
 			this.gameState.addToInventory(emptyBottle.getName());
 
@@ -99,9 +99,7 @@ public class BottleOfWater extends BreakableItem
 		case "imbibe":
 		case "consume":
 		case "drink":
-			if (command.getSubject().contentEquals("water") || 
-				command.getSubject().contentEquals("bottle") ||
-				command.getSubject().contentEquals("dasani"))
+			if (command.unordered(this.regex))
 			{
 				displayData = new DisplayData("", "You drink the water. ");
 				this.useItem(displayData);
@@ -110,12 +108,16 @@ public class BottleOfWater extends BreakableItem
 				//Create empty bottle, and add it to inventory
 				//=================================================================================
 				emptyBottle = new BasicItem(this.gameState, "Dasani Bottle (Empty)", "", "An empty plastic Dasani bottle.");
-				this.gameState.addItemSearch(emptyBottle.getName(), "bottle", "dasani");
+				this.gameState.addItemSynonyms(emptyBottle, "bottle", "dasani");
 				this.gameState.addSpace(emptyBottle.getName(), emptyBottle);
 				this.gameState.addToInventory(emptyBottle.getName());
 				
 				return displayData;
 			}
+			
+		case "look":
+			if (command.unordered(this.regex))
+				return this.displayOnEntry();
 			
 		default: 
 			//===============================================================

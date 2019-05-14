@@ -66,9 +66,6 @@ public class OldFarmhouse extends Room
 		this.addMovementDirection("house", "Farmhouse Porch");
 		this.addMovementDirection("farmhouse", "Farmhouse Porch");
 		this.addMovementDirection("forward", "Farmhouse Porch");
-		
-		if (this.gameState.checkSpace("Farmhouse Porch") == false)
-			new FarmhousePorch(this.gameState);	
 	}
 	
 	@Override
@@ -85,7 +82,7 @@ public class OldFarmhouse extends Room
 		//=================================================================================
 		Item welcomeFlyer = new BasicItem(this.gameState, "Welcome Flyer", "", "It's a flyer.  It says, \"Welcome to our game! "
 				+ "Term Project for: Tex Bishop, Jacob Holzmann, Ian Wickham\"");
-		this.gameState.addItemSearch(welcomeFlyer.getName(), "flyer", "welcome");
+		this.gameState.addItemSynonyms(welcomeFlyer, "flyer", "welcome");
 		this.gameState.addSpace(welcomeFlyer.getName(), welcomeFlyer);
 
 		//=================================================================================
@@ -93,7 +90,7 @@ public class OldFarmhouse extends Room
 		//=================================================================================
 		Item balloonString = new BasicItem(this.gameState, "String", "", "An old string that used to hold some balloons to the mailbox.  "
 				+ "It is a few feet long.");
-		this.gameState.addItemSearch(balloonString.getName(), "string");
+		this.gameState.addItemSynonyms(balloonString, "string");
 		this.gameState.addSpace(balloonString.getName(), balloonString);
 	}
 	
@@ -126,12 +123,15 @@ public class OldFarmhouse extends Room
 		//Win condition flags.  Our win condition MultiFlag will depend on these three flags.
 		//=================================================================================
 		this.gameState.addFlag("cube solved", new Flag(false, "", ""));
+		this.gameState.addFlag("jewel obtained", new Flag(false, "", ""));
 
 		//=================================================================================
 		//The win condition multi-flag
 		//=================================================================================
 		MultiFlag gameWon = new MultiFlag(this.gameState, false, "", "");
 		gameWon.addFlag("cube solved");
+		gameWon.addFlag("jewel obtained");
+		gameWon.addFlag("ring obtained");
 		this.gameState.addFlag("game won", gameWon);
 
 		//=================================================================================
@@ -139,6 +139,7 @@ public class OldFarmhouse extends Room
 		//=================================================================================
 		this.gameState.addFlag("game won message printed", new Flag(false, "", ""));
 		this.gameState.addFlag("game ended", new Flag(false, "", ""));
+		this.gameState.addFlag("ring obtained", new Flag(false, "", "The ring sits on your left hand. The very sight of it breaks your heart. "));
 	}
 	
 	@Override
@@ -198,10 +199,18 @@ public class OldFarmhouse extends Room
 			//If the subject of the command is unrecognized, return
 			//a failure message.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.ordered("back"))
 				return this.displayOnEntry();
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+
+			//===============================================================
+			//Change current room and return new room DisplayData.
+			//===============================================================
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
+
+			//===============================================================
+			//Direction not found
+			//===============================================================
 			return new DisplayData("", "Can't go that direction.");
 			
 		case "return":
@@ -215,7 +224,7 @@ public class OldFarmhouse extends Room
 			//Open the mailbox. Flip the mailbox flag. Return success message.
 			//If the subject is not recognized, return a failure message.
 			//===============================================================
-			if (command.getSubject().contentEquals("mailbox") || command.getSubject().contentEquals("mail"))
+			if (command.unordered("mailbox|mail box"))
 			{
 				if (this.gameState.checkFlipped("mailbox open") == false)
 				{
@@ -232,7 +241,7 @@ public class OldFarmhouse extends Room
 			//Take the flyer.  Only possible if the mailbox open flag has
 			//been flipped.
 			//===============================================================
-			if (command.getSubject().contentEquals("flyer"))
+			if (command.unordered("flyer|welcome"))
 			{
 				if (this.gameState.checkFlipped("mailbox open") == true)
 				{
@@ -251,36 +260,32 @@ public class OldFarmhouse extends Room
 			//===============================================================
 			//Take the balloon string.  Can't be done.
 			//===============================================================
-			if (command.getSubject().contentEquals("string"))
+			if (command.unordered("string"))
 				return new DisplayData ("", "The old string is knotted tightly in place, and you can't get it loose.");
 			
 			//===============================================================
 			//Subject not recognized.
 			//===============================================================
 			return new DisplayData("", "Can't take that.");
-			
+		
+		case "cut":
 		case "use":
 			//===============================================================
 			//Use the shard of glass on the string.  Make sure the string
 			//hasn't already been taken when doing so.
 			//===============================================================
-			if (command.getSubject().contentEquals("shard") || command.getSubject().contentEquals("glass"))
+			if (command.unordered("shard|glass", "string"))
 			{
 				if (this.gameState.checkInventory("Shard of Glass") == true)
 				{
-					if (command.getTarget().contentEquals("string"))
+					if (this.gameState.checkFlipped("string taken") == false)
 					{
-						if (this.gameState.checkFlipped("string taken") == false)
-						{
-							this.gameState.addToInventory("String");
-							this.gameState.flipFlag("string taken");
-							return new DisplayData("", "You cut the string free of the mailbox.  It might be useful.");
-						}
-						else
-							return new DisplayData ("", "You've already done that.");
+						this.gameState.addToInventory("String");
+						this.gameState.flipFlag("string taken");
+						return new DisplayData("", "You cut the string free of the mailbox.  It might be useful.");
 					}
 					else
-						return new DisplayData ("", "That doesn't work.");
+						return new DisplayData ("", "You've already done that.");
 				}
 				else
 					return new DisplayData ("", "You don't have that item.");
@@ -297,12 +302,12 @@ public class OldFarmhouse extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|room|area") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The path leading north to the farmhouse is well worn, but it is slowly disappearing beneath "
 						+ "the tall grass and weeds.  The mailbox is nearly overgrown itself.  On the eastern edge of the property lies "
 						+ "a forest.  The old farm road looks deserted in both directions, no traffic visible.");
 			
-			if (command.getSubject().contentEquals("house") || command.getSubject().contentEquals("farmhouse"))
+			if (command.unordered("house|farmhouse|farm house"))
 				return new DisplayData("", "The abandoned farmhouse has a hollow, abandoned atmosphere about it.  You wonder what "
 						+ "may be left inside.");
 
@@ -310,7 +315,7 @@ public class OldFarmhouse extends Room
 			//If look at mailbox, adjust description based on the "mailbox open",
 			//"mailbox empty", and "string taken" flags.
 			//===============================================================
-			if (command.getSubject().contentEquals("mailbox") || command.getSubject().contentEquals("mail"))
+			if (command.unordered("mailbox|mail box"))
 			{
 				String mailboxDescription = "This mailbox has seen better days.  It's rusty and leaning, and the weeds "
 						+ "around its base are tall and dense. ";
@@ -325,7 +330,7 @@ public class OldFarmhouse extends Room
 			//If look at flyer, make sure it is visible, then set it as
 			//the innerSpace.
 			//===============================================================
-			if (command.getSubject().contentEquals("flyer"))
+			if (command.unordered("flyer"))
 			{
 				if (this.gameState.checkFlipped("mailbox open") == true && this.gameState.checkFlipped("flyer taken") == false)
 					return this.setInnerSpace("Welcome Flyer");
@@ -335,20 +340,38 @@ public class OldFarmhouse extends Room
 			//If look at string, make sure it is visible, then set it as
 			//the innerSpace.
 			//===============================================================
-			if (command.getSubject().contentEquals("string"))
+			if (command.unordered("string"))
 			{
 				if (this.gameState.checkFlipped("string taken") == false)
 					return this.setInnerSpace("String");
 			}
 
 			//===============================================================
-			//Subject is unrecognized, return a failure message.
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
+			//===============================================================
+			//No command matches, return failure.
 			//===============================================================
 			return new DisplayData("", "You don't see that here.");
 			
 		default: 
 			//===============================================================
-			//If default is reached, return a failure message.
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+
+			//===============================================================
+			//No command matches, return failure.
 			//===============================================================
 			return new DisplayData("", "Can't do that here.");
 		}

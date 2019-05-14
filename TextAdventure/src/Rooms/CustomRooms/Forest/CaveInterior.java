@@ -5,9 +5,8 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
-import Items.BasicItem;
 import Items.Item;
 import Items.CustomItems.BottleOfWater;
 import Items.CustomItems.PuzzleCube;
@@ -84,9 +83,6 @@ public class CaveInterior extends CountdownRoom
 		this.addMovementDirection("outside", "Cave Entrance");
 		this.addMovementDirection("entrance", "Cave Entrance");
 		this.addMovementDirection("east", "Cave Entrance");
-		
-		if (this.gameState.checkSpace("Cave Entrance") == false)
-			new CaveEntrance(this.gameState);	
 	}
 
 	@Override
@@ -122,14 +118,14 @@ public class CaveInterior extends CountdownRoom
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.ordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -149,13 +145,13 @@ public class CaveInterior extends CountdownRoom
 			//===============================================================
 			//Eat a potato
 			//===============================================================
-			if (command.getSubject().matches("potato|potatoes"))
+			if (command.ordered("potato|potatoes"))
 				return new DisplayData("", "You eat one of the potatoes. It's gritty. The dirt that's still on it doesn't help matters. ");
 
 			//===============================================================
 			//Eat a carrot
 			//===============================================================
-			if (command.getSubject().matches("carrot|carrots"))
+			if (command.ordered("carrot|carrots"))
 				return new DisplayData("", "You eat one of the carrots. It's nice and crunchy, but the dirt soils the flavor a bit. ");
 
 			//===============================================================
@@ -167,7 +163,7 @@ public class CaveInterior extends CountdownRoom
 			//===============================================================
 			//Drink some of the water from the barrel.
 			//===============================================================
-			if (command.getSubject().contentEquals("water"))
+			if (command.ordered("water"))
 				return new DisplayData("", "You drink some of the water from the barrel. It's cool and refreshing. ");
 
 			//===============================================================
@@ -182,7 +178,7 @@ public class CaveInterior extends CountdownRoom
 			//Use the water in the barrel to turn the empty dasani bottle
 			//into a full dasani bottle.
 			//===============================================================
-			if (command.getSubject().matches("bottle|water|dasani|empty"))
+			if (command.ordered("bottle|water|dasani|empty"))
 			{
 				if (this.gameState.checkInventory("Dasani Bottle (Empty)") == true)
 				{
@@ -215,7 +211,7 @@ public class CaveInterior extends CountdownRoom
 			//===============================================================
 			//Try to take a potato or carrot.  Reject attempt.
 			//===============================================================
-			if (command.getSubject().matches("potato|potatoes|carrot|carrots"))
+			if (command.ordered("potato|potatoes|carrot|carrots"))
 				return new DisplayData("", "You don't really want that. They aren't even clean. ");
 
 			//===============================================================
@@ -229,7 +225,7 @@ public class CaveInterior extends CountdownRoom
 			//===============================================================
 			//Give brooch to troll
 			//===============================================================
-			if (command.getSubject().matches("brooch|religious|illuminati"))
+			if (command.ordered("brooch|religious|illuminati"))
 			{
 				//===============================================================
 				//Verify the brooch is in inventory
@@ -259,8 +255,9 @@ public class CaveInterior extends CountdownRoom
 			return new DisplayData("", "He doesn't want that. ");
 			
 		case "stab":
+		case "slash":
 		case "attack":
-			if (command.getSubject().contentEquals("troll"))
+			if (command.ordered("troll"))
 				return this.gameState.death("In a fit of unreasoning hysteria, you attack the huge troll. "
 						+ "Your hit has no effect on him. "
 						+ "Faster than you would have thought possible, he swings his spiked club through the air at you. "
@@ -278,12 +275,12 @@ public class CaveInterior extends CountdownRoom
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.ordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "Someone put some care into creating this living space. "
 						+ "Everything looks hand made, and you can see scars on the rock surfaces from where stalagmites and stalagtites were removed. "
 						+ "Who would do such a thing for this troll? ");
 
-			if (command.getSubject().contentEquals("troll"))
+			if (command.ordered("troll"))
 			{
 				String trollDescription = "This troll looks just like the small figurine you found beneath the large tree earlier, holding the torch. "
 						+ "It's obvious that statue was meant to be a representation of this creature here, in all his grotesque largeness. ";
@@ -299,32 +296,41 @@ public class CaveInterior extends CountdownRoom
 				return new DisplayData(this.trollImage, trollDescription);
 			}
 
-			if (command.getSubject().matches("cookpot|cook|pot"))
+			if (command.ordered("cookpot|cook|pot"))
 				return new DisplayData("", "It reminds you of an old witch's cauldron. Cast iron. "
 						+ "Where in the world do you find something like that in this day and age? "
 						+ "Nothing seems to be in it at the moment. ");
 
-			if (command.getSubject().matches("rocking|chair"))
+			if (command.ordered("rocking|chair"))
 				return new DisplayData("", "It's a hand made rocking chair of extra large proportion. "
 						+ "Your legs wouldn't reach the ground if you sat in it. ");
 
-			if (command.getSubject().contentEquals("table"))
+			if (command.ordered("table"))
 				return new DisplayData("", "It's a large, plain wooden table. Could this be what the carpentry materials near the gate were for? "
 						+ "A bowl filled with potatoes and carrots sits in the center. ");
 
-			if (command.getSubject().contentEquals("torches"))
+			if (command.ordered("torches"))
 				return new DisplayData("", "They look the same as the one you fitted outside the cave entrance. ");
 
-			if (command.getSubject().matches("bedroll|bed|roll"))
+			if (command.ordered("bedroll|bed|roll"))
 				return new DisplayData("", "It looks to be constructed of multiple layers of blankets, with each blanket being multiple other "
 						+ "blankets sewn together. It has the largest pillow you've ever seen. Everything looks hand made. "
 						+ "And, unfortunately, not very clean. ");
 
-			if (command.getSubject().matches("barrel|water"))
+			if (command.ordered("barrel|water"))
 				return new DisplayData("", "It's a banded wooden barrel, filled with fresh, clean water. It's nice and cool. ");
 
-			if (command.getSubject().matches("bowl|potatoes|potato|carrots|carrot"))
+			if (command.ordered("bowl|potatoes|potato|carrots|carrot"))
 				return new DisplayData("", "There isn't anything special about the bowl or the veggies. ");
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -332,6 +338,15 @@ public class CaveInterior extends CountdownRoom
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
