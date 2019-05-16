@@ -1,3 +1,10 @@
+/**
+ * A Text Adventure
+ * @author Tex Bishop
+ * @version 1.2
+ * @date 05-16-2019
+ */
+
 package Rooms.CustomRooms;
 
 import Items.BasicItem;
@@ -80,8 +87,8 @@ public class OldFarmhouse extends Room
 		//=================================================================================
 		//Create welcome flyer
 		//=================================================================================
-		Item welcomeFlyer = new BasicItem(this.gameState, "Welcome Flyer", "", "It's a flyer.  It says, \"Welcome to our game! "
-				+ "Term Project for: Tex Bishop, Jacob Holzmann, Ian Wickham\"");
+		Item welcomeFlyer = new BasicItem(this.gameState, "Welcome Flyer", "", "It's a flyer.  It says, \"Welcome to my game! "
+				+ "Term Project for: Tex Bishop\"");
 		this.gameState.addItemSynonyms(welcomeFlyer, "flyer", "welcome");
 		this.gameState.addSpace(welcomeFlyer.getName(), welcomeFlyer);
 
