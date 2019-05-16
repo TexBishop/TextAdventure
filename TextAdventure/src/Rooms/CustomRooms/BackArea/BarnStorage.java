@@ -27,7 +27,7 @@ public class BarnStorage extends CountdownRoom
 	@Override
 	protected void setName() 
 	{
-		this.name = "Barn Storage";
+		this.name = "BarnStorage";
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class CaveInterior extends CountdownRoom
 	@Override
 	protected void setName() 
 	{
-		this.name = "Cave Interior";
+		this.name = "CaveInterior";
 	}
 
 	@Override
@@ -79,10 +79,10 @@ public class CaveInterior extends CountdownRoom
 		//=================================================================================
 		//Create directions that move to Cave Entrance
 		//=================================================================================
-		this.addMovementDirection("cave", "Cave Entrance");
-		this.addMovementDirection("outside", "Cave Entrance");
-		this.addMovementDirection("entrance", "Cave Entrance");
-		this.addMovementDirection("east", "Cave Entrance");
+		this.addMovementDirection("cave", "CaveEntrance");
+		this.addMovementDirection("outside", "CaveEntrance");
+		this.addMovementDirection("entrance", "CaveEntrance");
+		this.addMovementDirection("east", "CaveEntrance");
 	}
 
 	@Override
@@ -133,7 +133,7 @@ public class CaveInterior extends CountdownRoom
 			return new DisplayData("", "Can't go that direction. ");
 			
 		case "leave":
-			return this.gameState.setCurrentRoom("Cave Entrance");
+			return this.gameState.setCurrentRoom("CaveEntrance");
 
 		case "return":
 			//===============================================================

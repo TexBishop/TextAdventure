@@ -12,6 +12,7 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+
 import Items.BasicItem;
 import Items.Item;
 
@@ -19,7 +20,7 @@ public class LivingRoom extends Room
 {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	public LivingRoom(GameState gameState) 
 	{
 		super(gameState);
@@ -28,7 +29,7 @@ public class LivingRoom extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Living Room";
+		this.name = "LivingRoom";
 	}
 
 	@Override
@@ -40,22 +41,13 @@ public class LivingRoom extends Room
 	@Override
 	public String fullDescription() 
 	{
-		if(this.gameState.checkFlipped("rug moved") == true)
-		{
-			this.description = "You step into the living room. Below a window on the far wall a long, "
-				+ "broken-in couch rests, across from a low table where surely a television must "
-				+ "have been. Along the third wall there is a bookshelf, with few books littered "
-				+ "on the shelves. The plush rug is pulled back to the couch, and a steel safe is "
-				+ "visible, inlaid into the floor. A four-digit combination lock is on the front. "
-				+ "There are two doorways leading to the entryway and the kitchen.";
-		}
-		else
-			this.description = "As you step into the living room, you feel the soft texture of a woven "
-				+ "wool rug under your feet, faded with what must be generations of wear. Below a window"
-				+ "on the far wall a long, broken-in couch rests, across from a low table where surely "
-				+ "a television must have been. Along the third wall there is a bookshelf, with few books "
-				+ "littered on the shelves. There are two doorways leading to the entryway and the kitchen.";
-		
+		this.description = "You step into the living room. "
+				+ "There's an old, musty couch against one wall, covered with rips. "
+				+ "Beneath the couch, covering nearly half the room, is a dank, mildewed rug. "
+				+ this.gameState.getFlag("rug moved").toString()
+				+ "A small, busted table that probably once held a television is on the opposite side of the room, two of its legs missing. "
+				+ "You can see the kitchen through a doorway on one side, and the entryway through another. ";
+
 		return this.description;
 	}
 
@@ -79,18 +71,19 @@ public class LivingRoom extends Room
 	protected void createItems() 
 	{
 		//=================================================================================
-		//Create paperclip
+		//Create copper wire
 		//=================================================================================
-		Item paperclip = new BasicItem(this.gameState, "Paperclip", "", "A paperclip. Why are you picking up garbage? ");
-		this.gameState.addItemSynonyms(paperclip, "paperclip", "paper clip", "clip");
-		this.gameState.addSpace(paperclip.getName(), paperclip);
+		Item copperWire = new BasicItem(this.gameState, "Copper Wire", "", "A loose length of copper wire. Why are you picking up garbage? ");
+		this.gameState.addItemSynonyms(copperWire, "copper wire", "copper", "wire");
+		this.gameState.addSpace(copperWire.getName(), copperWire);
 
 		//=================================================================================
 		//Create giant ruby
 		//=================================================================================	
-		Item huuuuugeRuby = new BasicItem(this.gameState, "Giant Ruby", "", "It is a giant ruby. It weighs a million.");
-		this.gameState.addItemSynonyms(huuuuugeRuby, "ruby", "gem", "gemstone");
-		this.gameState.addSpace(huuuuugeRuby.getName(), huuuuugeRuby);
+		Item rubySkull = new BasicItem(this.gameState, "Ruby Skull", "", "It's a skull carved from Ruby, about the size of a fist. "
+				+ "Such a huge gemstone, it must be worth a fortune! ");
+		this.gameState.addItemSynonyms(rubySkull, "ruby", "skull", "ruby skull", "gemstone");
+		this.gameState.addSpace(rubySkull.getName(), rubySkull);
 	}
 
 	@Override
@@ -103,9 +96,9 @@ public class LivingRoom extends Room
 		//Flag will return on toString() if it has not been flipped (false).  The third field
 		//is the string the Flag will return on toString() if it has been flipped (true).
 		//=================================================================================
-		this.gameState.addFlag("rug moved", new Flag(false, "", "Rug moved."));
-		this.gameState.addFlag("couch searched", new Flag(false, "", "Couch searched."));
-		this.gameState.addFlag("paperclip taken", new Flag(false, "", "Paperclip taken."));
+		this.gameState.addFlag("rug moved", new Flag(false, "", "Part of the rug is thrown back, revealing a safe set into the floor. "));
+		this.gameState.addFlag("couch searched", new Flag(false, "", ""));
+		this.gameState.addFlag("wire taken", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -120,18 +113,28 @@ public class LivingRoom extends Room
 		switch (command.getVerb())
 		{
 		case "fold":
-		case "move":  //doing this will cause move to execute the go code
-			if(command.unordered("rug"))
+		case "remove":
+		case "move":
+			if(command.unordered("rug|carpet"))
 			{
 				if(this.gameState.checkFlipped("rug moved") == false)
 				{	
 					this.gameState.flipFlag("rug moved");
-					return new DisplayData("", "You move the rug to the side. Underneath, you uncover a safe "
-						+ "laid into the floor. a four combination lock is visible, next to a large handle.");
+					return new DisplayData("", "You throw back the rug, hoping for a lost item or trapdoor underneath. "
+							+ "Instead, what you find is a safe embedded into the floor. "
+							+ "What is something like this doing in a farm house? "
+							+ "Such a thing seems out of place here, in these rural surroundings. ");
 				}
 				else
 					return new DisplayData("", "You have already moved the rug.");
 			}
+			
+			//===============================================================
+			//Allow 'move' to continue into the 'go' code, but not the other
+			//synonyms.  Return a failure message.
+			//===============================================================
+			if (command.getVerb().matches("fold|remove"))
+				return new DisplayData("", "That doesn't work. ");
 			
 		case "go": 
 			//===============================================================
@@ -163,15 +166,15 @@ public class LivingRoom extends Room
 			//===============================================================
 			//Take the paperclip from couch
 			//===============================================================
-			if (command.unordered("paperclip|paper clip|clip"))
+			if (command.unordered("copper wire|copper|wire"))
 			{
 				if (this.gameState.checkFlipped("couch searched"))
 				{
 					if (this.gameState.checkFlipped("paperclip taken") == false)
 					{
-						this.gameState.addToInventory("Paperclip");
-						this.gameState.flipFlag("paperclip taken");
-						return new DisplayData("", "paperclip taken.");
+						this.gameState.addToInventory("Copper Wire");
+						this.gameState.flipFlag("wire taken");
+						return new DisplayData("", "You take the copper wire.");
 					}
 					else
 						return new DisplayData("", "You've already taken that.");
@@ -185,27 +188,70 @@ public class LivingRoom extends Room
 			//===============================================================
 			return new DisplayData("", "Can't take that.");
 			
+		case "7852":
+		case "key":
+		case "punch":
+		case "input":
+		case "press":
+		case "put":
+		case "enter":
 		case "open":
 		case "unlock":
 			//===============================================================
-			//If default is reached, return a failure message.
+			//Input the correct code into the safe
+			//===============================================================
+			if (command.unordered("7852"))
+			{
+				if (this.gameState.checkFlipped("rug moved") == true)
+				{
+					if (this.gameState.checkFlipped("power restored") == true)
+					{
+						if (this.gameState.checkInventory("Note with Number") == true)
+						{
+							if (this.gameState.checkFlipped("ruby skull obtained") == false)
+							{
+							this.gameState.addToInventory("Ruby Skull");
+							this.gameState.flipFlag("ruby skull obtained");
+							return new DisplayData("", "You enter the code, and hear a click. It's unlocked! "
+									+ "Pulling the door open, you see a glint of red inside. "
+									+ "Looking closely, you see a sparkling red skull, about the size of a fist. "
+									+ "It looks like it's been carved from a huge ruby. Wow! "
+									+ "This thing must be worth a fortune! "
+									+ "The moment you touch it, you feel a shock run through you, and a rush of memory. "
+									+ "You suddenly remember your purpose in coming here. This was quite a find. ");
+							}
+							else
+								return new DisplayData("", "The safe is already open. It's empty. ");
+						}
+						else
+							return new DisplayData("", "You think you know the code, but it doesn't work. You're going to need to find it somewhere. ");
+					}
+					else
+						return new DisplayData("", "You try to open it, but it's locked. It has a keypad to enter a code, "
+								+ "but it doesn't currently have any power. It's unresponsive. ");
+				}
+				else
+					return new DisplayData("", "You don't see that here.");
+			}
+			
+			//===============================================================
+			//Unsuccessful attempt to open safe
 			//===============================================================
 			if (command.unordered("safe"))
 			{
 				if (this.gameState.checkFlipped("rug moved") == true)
-				{
-					if (this.gameState.checkFlipped("phone answered") == false)
+				{	
+					if (this.gameState.checkFlipped("power restored") == true)
 					{
-						this.gameState.addToInventory("Giant Ruby");
-						this.gameState.flipFlag("jewel obtained");
-						return new DisplayData("", "Remembering the code you heard from the voice in the "
-								+ "telephone in the master bedroom, you enter the passcode 7852. You turn "
-								+ "the handle, and it opens with a thunk. Inside, you find the largest ruby "
-								+ "anyone has ever seen, and, before you stop to think, you grab it and shove "
-								+ "it in your bag. ");
+						if (this.gameState.checkFlipped("ruby skull obtained") == false)
+							return new DisplayData("", "You try to open it, but it's locked. "
+									+ "You'll have to find the correct code to open it. ");
+						else
+							return new DisplayData("", "The safe is already open. It's empty. ");
 					}
 					else
-						return new DisplayData("", "You've already taken that.");
+						return new DisplayData("", "You try to open it, but it's locked. It has a keypad to enter a code, "
+								+ "but it doesn't currently have any power. It's unresponsive. ");
 				}
 				else
 					return new DisplayData("", "You don't see that here.");
@@ -214,7 +260,7 @@ public class LivingRoom extends Room
 			//===============================================================
 			//Subject not recognized.
 			//===============================================================
-			return new DisplayData ("", "Can't do that here.");
+			return new DisplayData ("", "That doesn't do anything. ");
 
 		case "search":  //doing this will cause search to execute the look code
 		case "look":
@@ -223,31 +269,39 @@ public class LivingRoom extends Room
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
 			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
-				return new DisplayData("", "Spiderwebs are visible in every corner of this room. "
-						+ "Stains on the wallpaper give away years of water damage, seeping through the foundation.");
+				return new DisplayData("", "A thick layer of dust covers everthing. "
+						+ "Multiple tracks from what may be a stray dog are visible in the dust, running between the entryway and the couch. "
+						+ "Cobwebs fill the nooks and crannies, also covered in dust. ");
 			
-			if (command.unordered("table"))
-				return new DisplayData("", "A table of solid construction; a thin film of dust lines the surface.");
+			if (command.unordered("table|stand|tv|television"))
+				return new DisplayData("", "An old tv stand, it now lies on its side, splintered. Two of its legs are missing. ");
 			
-			//===============================================================
-			//searches couch, and flips couch searched flag.
-			//===============================================================
-			if (command.unordered("couch"))
+			if (command.unordered("couch|sofa"))
 			{
 				this.gameState.flipFlag("couch searched");
-				return new DisplayData("", "Depressions in the cushions are visible even from a distance. Scratches in the cloth on "
-						+ "base of the frame reveal the couch's soft tissue. Reaching in between the couch cushions, you find an old paperclip.");
+				return new DisplayData("", "It's covered in rips, stuffing coming out and springs exposed. "
+						+ "Caked with years of filth, it has an animal smell about it which almost puts you off of examining it. "
+						+ "Pulling the cushions back, all you find hiding underneath is an old, frayed length of copper wire. ");
+			}
+			
+			if (command.ordered("under|beneath", "rug|carpet"))
+			{
+				if(this.gameState.checkFlipped("rug moved") == false)
+				{	
+					this.gameState.flipFlag("rug moved");
+					return new DisplayData("", "You throw back the rug, hoping for a lost item or trapdoor underneath. "
+							+ "Instead, what you find is a safe embedded into the floor. "
+							+ "What is something like this doing in a farm house? "
+							+ "Such a thing seems out of place here, in these rural surroundings. ");
+				}
+				else
+					return new DisplayData("", "You have already moved the rug.");
 			}
 				
 			if (command.unordered("rug|floor"))
-				return new DisplayData("", "This rug has seen better days. A corner of the rug is fraying, in an area of heavy traffic. "
-						+ "You notice a crease across an area of the rug, where it seems it has previously been folded away.");
+				return new DisplayData("", "This rug has seen better days. "
+						+ "It's so covered in filth and mildew that you can only guess at its original color. ");
 			
-			if (command.unordered("bookshelf|book|shelf"))
-				return new DisplayData("", "Various books are strewn on all shelves, lazily tossed. One recounts of the author's "
-						+ "memory of his life during the Roaring Twenties, another is titled 'How to Read a Book', and still "
-						+ "another belongs to the Witcher series. Someone was a fan.");
-
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
 			//inventory item.  If yes, run the command through it.  If the

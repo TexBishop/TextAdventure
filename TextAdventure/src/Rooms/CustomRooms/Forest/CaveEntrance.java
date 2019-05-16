@@ -26,7 +26,7 @@ public class CaveEntrance extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Cave Entrance";
+		this.name = "CaveEntrance";
 	}
 
 	@Override
@@ -70,26 +70,26 @@ public class CaveEntrance extends Room
 		//=================================================================================
 		//Create directions that move to Forest Crossroads
 		//=================================================================================
-		this.addMovementDirection("south", "Forest Crossroads");
-		this.addMovementDirection("path", "Forest Crossroads");
+		this.addMovementDirection("south", "ForestCrossroads");
+		this.addMovementDirection("path", "ForestCrossroads");
 
 		//=================================================================================
 		//Create directions that move to Cave Interior
 		//=================================================================================
-		this.addMovementDirection("west", "Cave Interior");
-		this.addMovementDirection("cave", "Cave Interior");
-		this.addMovementDirection("door", "Cave Interior");
-		this.addMovementDirection("entrance", "Cave Interior");
-		this.addMovementDirection("inside", "Cave Interior");
+		this.addMovementDirection("west", "CaveInterior");
+		this.addMovementDirection("cave", "CaveInterior");
+		this.addMovementDirection("door", "CaveInterior");
+		this.addMovementDirection("entrance", "CaveInterior");
+		this.addMovementDirection("inside", "CaveInterior");
 		
 		//=================================================================================
 		//Create directions that move to Forest Exit
 		//=================================================================================
-		this.addMovementDirection("north", "Forest Exit");
-		this.addMovementDirection("stair", "Forest Exit");
-		this.addMovementDirection("stairs", "Forest Exit");
-		this.addMovementDirection("staircase", "Forest Exit");
-		this.addMovementDirection("up", "Forest Exit");
+		this.addMovementDirection("north", "ForestExit");
+		this.addMovementDirection("stair", "ForestExit");
+		this.addMovementDirection("stairs", "ForestExit");
+		this.addMovementDirection("staircase", "ForestExit");
+		this.addMovementDirection("up", "ForestExit");
 	}
 
 	@Override

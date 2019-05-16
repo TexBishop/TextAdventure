@@ -28,7 +28,7 @@ public class EdgeOfForest extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Edge of Forest";	
+		this.name = "EdgeOfForest";	
 	}
 
 	@Override
@@ -69,17 +69,17 @@ public class EdgeOfForest extends Room
 		//=================================================================================
 		//Create directions that move to Farmhouse Porch
 		//=================================================================================
-		this.addMovementDirection("west", "Farmhouse Porch");
-		this.addMovementDirection("porch", "Farmhouse Porch");
-		this.addMovementDirection("house", "Farmhouse Porch");
-		this.addMovementDirection("farmhouse", "Farmhouse Porch");
+		this.addMovementDirection("west", "FarmhousePorch");
+		this.addMovementDirection("porch", "FarmhousePorch");
+		this.addMovementDirection("house", "FarmhousePorch");
+		this.addMovementDirection("farmhouse", "FarmhousePorch");
 		
 		//=================================================================================
 		//Create directions that move to Forest Path
 		//=================================================================================
-		this.addMovementDirection("east", "Forest Path");
-		this.addMovementDirection("forest", "Forest Path");
-		this.addMovementDirection("path", "Forest Path");
+		this.addMovementDirection("east", "ForestPath");
+		this.addMovementDirection("forest", "ForestPath");
+		this.addMovementDirection("path", "ForestPath");
 
 		//=================================================================================
 		//Create directions that move to Backyard

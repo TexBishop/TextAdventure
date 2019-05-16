@@ -77,5 +77,13 @@ public class Flag implements Serializable
 			return false;
 		return true;
 	}
+	
+	/**
+	 * Resets the flag to its unflipped value.
+	 */
+	public void reset()
+	{
+		this.toggle = this.polarity;
+	}
 
 }

@@ -84,8 +84,8 @@ public class ToolShed extends CountdownRoom
 		//=================================================================================
 		//Create directions that move to the basement
 		//=================================================================================
-		this.addMovementDirection("down", "Shed Basement");
-		this.addMovementDirection("trapdoor", "Shed Basement");
+		this.addMovementDirection("down", "ShedBasement");
+		this.addMovementDirection("trapdoor", "ShedBasement");
 	}
 
 	@Override

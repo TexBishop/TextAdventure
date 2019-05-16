@@ -227,7 +227,7 @@ public class GameState implements Serializable
 	public boolean checkFlipped(String key)
 	{
 		try 
-		{
+		{	
 			if (flagMap.containsKey(key) == true)
 				return flagMap.get(key).isFlipped();
 			else

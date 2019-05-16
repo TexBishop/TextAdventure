@@ -27,7 +27,7 @@ public class ShedBasement extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Shed Basement";
+		this.name = "ShedBasement";
 	}
 
 	@Override

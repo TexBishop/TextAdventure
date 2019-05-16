@@ -27,7 +27,7 @@ public class ForestExit extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Exit";
+		this.name = "ForestExit";
 	}
 
 	@Override
@@ -70,21 +70,21 @@ public class ForestExit extends Room
 		//=================================================================================
 		//Create directions that move to Cave Entrance
 		//=================================================================================
-		this.addMovementDirection("cave", "Cave Entrance");
-		this.addMovementDirection("south", "Cave Entrance");
-		this.addMovementDirection("southern", "Cave Entrance");
-		this.addMovementDirection("stair", "Cave Entrance");
-		this.addMovementDirection("stairs", "Cave Entrance");
-		this.addMovementDirection("staircase", "Cave Entrance");
-		this.addMovementDirection("down", "Cave Entrance");
+		this.addMovementDirection("cave", "CaveEntrance");
+		this.addMovementDirection("south", "CaveEntrance");
+		this.addMovementDirection("southern", "CaveEntrance");
+		this.addMovementDirection("stair", "CaveEntrance");
+		this.addMovementDirection("stairs", "CaveEntrance");
+		this.addMovementDirection("staircase", "CaveEntrance");
+		this.addMovementDirection("down", "CaveEntrance");
 
 		//=================================================================================
 		//Create directions that move to Back of Cornfield
 		//=================================================================================
-		this.addMovementDirection("west", "Back of Cornfield");
-		this.addMovementDirection("western", "Back of Cornfield");
-		this.addMovementDirection("exit", "Back of Cornfield");
-		this.addMovementDirection("gate", "Back of Cornfield");
+		this.addMovementDirection("west", "BackOfCornfield");
+		this.addMovementDirection("western", "BackOfCornfield");
+		this.addMovementDirection("exit", "BackOfCornfield");
+		this.addMovementDirection("gate", "BackOfCornfield");
 	}
 
 	@Override

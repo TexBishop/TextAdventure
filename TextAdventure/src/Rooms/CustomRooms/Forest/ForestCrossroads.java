@@ -28,7 +28,7 @@ public class ForestCrossroads extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Crossroads";
+		this.name = "ForestCrossroads";
 	}
 
 	@Override
@@ -66,15 +66,15 @@ public class ForestCrossroads extends Room
 		//=================================================================================
 		//Create directions that move to Forest Cliff
 		//=================================================================================
-		this.addMovementDirection("west", "Forest Cliff");
-		this.addMovementDirection("cliff", "Forest Cliff");
+		this.addMovementDirection("west", "ForestCliff");
+		this.addMovementDirection("cliff", "ForestCliff");
 		
 		//=================================================================================
 		//Create directions that move to Cave Entrance
 		//=================================================================================
-		this.addMovementDirection("north", "Cave Entrance");
-		this.addMovementDirection("east", "Cave Entrance");
-		this.addMovementDirection("south", "Cave Entrance");
+		this.addMovementDirection("north", "CaveEntrance");
+		this.addMovementDirection("east", "CaveEntrance");
+		this.addMovementDirection("south", "CaveEntrance");
 	}
 
 	@Override

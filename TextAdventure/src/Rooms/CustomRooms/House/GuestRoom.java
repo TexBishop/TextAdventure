@@ -28,7 +28,7 @@ public class GuestRoom extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Guest Room";
+		this.name = "GuestRoom";
 	}
 
 	@Override
@@ -53,8 +53,8 @@ public class GuestRoom extends Room
 		//=================================================================================
 		//Create directions that move to Upstairs Hallway
 		//=================================================================================
-		this.addMovementDirection("hallway", "Upstairs Hallway");
-		this.addMovementDirection("hall", "Upstairs Hallway");
+		this.addMovementDirection("hallway", "UpstairsHallway");
+		this.addMovementDirection("hall", "UpstairsHallway");
 	}
 
 	@Override

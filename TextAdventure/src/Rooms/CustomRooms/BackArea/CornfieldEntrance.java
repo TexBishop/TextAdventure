@@ -26,7 +26,7 @@ public class CornfieldEntrance extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Cornfield Entrance";
+		this.name = "CornfieldEntrance";
 	}
 
 	@Override
@@ -67,10 +67,10 @@ public class CornfieldEntrance extends Room
 		//=================================================================================
 		//Movement to the cornfields center
 		//=================================================================================
-		this.addMovementDirection("forward", "Cornfield Center");
-		this.addMovementDirection("corn", "Cornfield Center");
-		this.addMovementDirection("cornfield", "Cornfield Center");
-		this.addMovementDirection("center", "Cornfield Center");
+		this.addMovementDirection("forward", "CornfieldCenter");
+		this.addMovementDirection("corn", "CornfieldCenter");
+		this.addMovementDirection("cornfield", "CornfieldCenter");
+		this.addMovementDirection("center", "CornfieldCenter");
 	}
 
 	@Override

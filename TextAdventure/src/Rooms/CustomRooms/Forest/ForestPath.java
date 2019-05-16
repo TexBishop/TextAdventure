@@ -27,7 +27,7 @@ public class ForestPath extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Path";
+		this.name = "ForestPath";
 	}
 
 	@Override
@@ -62,24 +62,24 @@ public class ForestPath extends Room
 		//=================================================================================
 		//Create directions that move to Edge of Forest
 		//=================================================================================
-		this.addMovementDirection("west", "Edge of Forest");
-		this.addMovementDirection("edge", "Edge of Forest");
-		this.addMovementDirection("farm", "Edge of Forest");
-		this.addMovementDirection("house", "Edge of Forest");
-		this.addMovementDirection("farmhouse", "Edge of Forest");
-		this.addMovementDirection("path", "Edge of Forest");
+		this.addMovementDirection("west", "EdgeOfForest");
+		this.addMovementDirection("edge", "EdgeOfForest");
+		this.addMovementDirection("farm", "EdgeOfForest");
+		this.addMovementDirection("house", "EdgeOfForest");
+		this.addMovementDirection("farmhouse", "EdgeOfForest");
+		this.addMovementDirection("path", "EdgeOfForest");
 		
 		//=================================================================================
 		//Create directions that move to Forest Clearing
 		//=================================================================================
-		this.addMovementDirection("right", "Forest Clearing");
-		this.addMovementDirection("clearing", "Forest Clearing");
+		this.addMovementDirection("right", "ForestClearing");
+		this.addMovementDirection("clearing", "ForestClearing");
 		
 		//=================================================================================
 		//Create directions that move to Forest Cliff
 		//=================================================================================
-		this.addMovementDirection("left", "Forest Cliff");
-		this.addMovementDirection("cliff", "Forest Cliff");
+		this.addMovementDirection("left", "ForestCliff");
+		this.addMovementDirection("cliff", "ForestCliff");
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class ForestPath extends Room
 				//===============================================================
 				//If right path hasn't been unlocked, loop back to this room
 				//===============================================================
-				if (this.getMovementDirectionRoom(command.getMatch(this.movementRegex)).contentEquals("Forest Clearing"))
+				if (this.getMovementDirectionRoom(command.getMatch(this.movementRegex)).contentEquals("ForestClearing"))
 				{
 					if (this.gameState.checkFlipped("right path switch") ==  true)
 						return this.move(command);
@@ -183,7 +183,7 @@ public class ForestPath extends Room
 				//===============================================================
 				//If left path hasn't been unlocked, loop back to this room
 				//===============================================================
-				if (this.getMovementDirectionRoom(command.getMatch(this.movementRegex)).contentEquals("Forest Cliff"))
+				if (this.getMovementDirectionRoom(command.getMatch(this.movementRegex)).contentEquals("ForestCliff"))
 				{
 					if (this.gameState.checkFlipped("left path switch") ==  true)
 					{

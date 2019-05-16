@@ -54,18 +54,18 @@ public class Backyard extends Room
 		//=================================================================================
 		//Create directions that move to Edge of Forest
 		//=================================================================================
-		this.addMovementDirection("southeast", "Edge of Forest");
-		this.addMovementDirection("forest", "Edge of Forest");
-		this.addMovementDirection("edge", "Edge of Forest");
-		this.addMovementDirection("path", "Edge of Forest");
+		this.addMovementDirection("southeast", "EdgeOfForest");
+		this.addMovementDirection("forest", "EdgeOfForest");
+		this.addMovementDirection("edge", "EdgeOfForest");
+		this.addMovementDirection("path", "EdgeOfForest");
 		
 		//=================================================================================
 		//Create directions that move to Farmhouse Porch
 		//=================================================================================
-		this.addMovementDirection("south", "Farmhouse Porch");
-		this.addMovementDirection("porch", "Farmhouse Porch");
-		this.addMovementDirection("front", "Farmhouse Porch");
-		this.addMovementDirection("around", "Farmhouse Porch");
+		this.addMovementDirection("south", "FarmhousePorch");
+		this.addMovementDirection("porch", "FarmhousePorch");
+		this.addMovementDirection("front", "FarmhousePorch");
+		this.addMovementDirection("around", "FarmhousePorch");
 
 		//=================================================================================
 		//Create directions that move to the tool shed
@@ -83,18 +83,18 @@ public class Backyard extends Room
 		//=================================================================================
 		//Create directions that move to the cornfield
 		//=================================================================================
-		this.addMovementDirection("entrance", "Cornfield Entrance");
-		this.addMovementDirection("cornfield", "Cornfield Entrance");
-		this.addMovementDirection("corn field", "Cornfield Entrance");
-		this.addMovementDirection("field", "Cornfield Entrance");
+		this.addMovementDirection("entrance", "CornfieldEntrance");
+		this.addMovementDirection("cornfield", "CornfieldEntrance");
+		this.addMovementDirection("corn field", "CornfieldEntrance");
+		this.addMovementDirection("field", "CornfieldEntrance");
 
 		//=================================================================================
 		//Create directions that move to the back of the cornfield
 		//=================================================================================
-		this.addMovementDirection("back", "Back of Cornfield");
-		this.addMovementDirection("rear", "Back of Cornfield");
-		this.addMovementDirection("north", "Back of Cornfield");
-		this.addMovementDirection("trail", "Back of Cornfield");
+		this.addMovementDirection("back", "BackOfCornfield");
+		this.addMovementDirection("rear", "BackOfCornfield");
+		this.addMovementDirection("north", "BackOfCornfield");
+		this.addMovementDirection("trail", "BackOfCornfield");
 		
 		//=================================================================================
 		//Create directions that move to Kitchen

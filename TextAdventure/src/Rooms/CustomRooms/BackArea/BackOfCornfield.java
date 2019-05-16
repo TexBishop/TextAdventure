@@ -25,7 +25,7 @@ public class BackOfCornfield extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Back of Cornfield";
+		this.name = "BackOfCornfield";
 	}
 
 	@Override
@@ -63,10 +63,10 @@ public class BackOfCornfield extends Room
 		//=================================================================================
 		//Create directions that move to Forest Exit
 		//=================================================================================
-		this.addMovementDirection("forest", "Forest Exit");
-		this.addMovementDirection("east", "Forest Exit");
-		this.addMovementDirection("path", "Forest Exit");
-		this.addMovementDirection("gate", "Forest Exit");
+		this.addMovementDirection("forest", "ForestExit");
+		this.addMovementDirection("east", "ForestExit");
+		this.addMovementDirection("path", "ForestExit");
+		this.addMovementDirection("gate", "ForestExit");
 		
 		//=================================================================================
 		//Create directions that move to Backyard

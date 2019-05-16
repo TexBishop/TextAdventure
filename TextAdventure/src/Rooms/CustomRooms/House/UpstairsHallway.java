@@ -18,7 +18,7 @@ public class UpstairsHallway extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Upstairs Hallway";	
+		this.name = "UpstairsHallway";	
 	}
 
 	@Override
@@ -39,14 +39,14 @@ public class UpstairsHallway extends Room
 		//=================================================================================
 		//Create directions that move to Guest Room
 		//=================================================================================
-		this.addMovementDirection("guest", "Guest Room");
-		this.addMovementDirection("right", "Guest Room");
+		this.addMovementDirection("guest", "GuestRoom");
+		this.addMovementDirection("right", "GuestRoom");
 		
 		//=================================================================================
 		//Create directions that move to Master Bedroom
 		//=================================================================================
-		this.addMovementDirection("master", "Master Bedroom");
-		this.addMovementDirection("left", "Master Bedroom");
+		this.addMovementDirection("master", "MasterBedroom");
+		this.addMovementDirection("left", "MasterBedroom");
 	}
 	
 	@Override

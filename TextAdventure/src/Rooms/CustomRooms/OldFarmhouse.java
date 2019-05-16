@@ -21,7 +21,7 @@ public class OldFarmhouse extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Old Farmhouse";	
+		this.name = "OldFarmhouse";	
 		this.image = this.whiteHouseImage;
 	}
 
@@ -61,11 +61,11 @@ public class OldFarmhouse extends Room
 		//=================================================================================
 		//Create directions that move to Farmhouse Porch
 		//=================================================================================
-		this.addMovementDirection("north", "Farmhouse Porch");
-		this.addMovementDirection("porch", "Farmhouse Porch");
-		this.addMovementDirection("house", "Farmhouse Porch");
-		this.addMovementDirection("farmhouse", "Farmhouse Porch");
-		this.addMovementDirection("forward", "Farmhouse Porch");
+		this.addMovementDirection("north", "FarmhousePorch");
+		this.addMovementDirection("porch", "FarmhousePorch");
+		this.addMovementDirection("house", "FarmhousePorch");
+		this.addMovementDirection("farmhouse", "FarmhousePorch");
+		this.addMovementDirection("forward", "FarmhousePorch");
 	}
 	
 	@Override
@@ -130,7 +130,7 @@ public class OldFarmhouse extends Room
 		//=================================================================================
 		MultiFlag gameWon = new MultiFlag(this.gameState, false, "", "");
 		gameWon.addFlag("cube solved");
-		gameWon.addFlag("jewel obtained");
+		gameWon.addFlag("ruby skull obtained");
 		gameWon.addFlag("ring obtained");
 		this.gameState.addFlag("game won", gameWon);
 

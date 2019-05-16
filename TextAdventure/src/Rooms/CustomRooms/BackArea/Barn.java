@@ -92,9 +92,9 @@ public class Barn extends CountdownRoom
 		//=================================================================================
 		//Create directions for the barn storage
 		//=================================================================================
-		this.addMovementDirection("door", "Barn Storage");
-		this.addMovementDirection("left", "Barn Storage");
-		this.addMovementDirection("storage", "Barn Storage");
+		this.addMovementDirection("door", "BarnStorage");
+		this.addMovementDirection("left", "BarnStorage");
+		this.addMovementDirection("storage", "BarnStorage");
 	}
 
 	@Override

@@ -7,6 +7,8 @@
 
 package Rooms.CustomRooms.House;
 
+import Items.BasicItem;
+import Items.Item;
 import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
@@ -26,7 +28,7 @@ public class MasterBedroom extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Master Bedroom";
+		this.name = "MasterBedroom";
 	}
 
 	@Override
@@ -59,14 +61,19 @@ public class MasterBedroom extends Room
 		//=================================================================================
 		//Create directions that move to Upstairs Hallway
 		//=================================================================================
-		this.addMovementDirection("hallway", "Upstairs Hallway");
-		this.addMovementDirection("hall", "Upstairs Hallway");
+		this.addMovementDirection("hallway", "UpstairsHallway");
+		this.addMovementDirection("hall", "UpstairsHallway");
 	}
 
 	@Override
 	protected void createItems() 
 	{
-		//default
+		//=================================================================================
+		//Create note with code
+		//=================================================================================
+		Item note = new BasicItem(this.gameState, "Note with Number", "", "A piece of scrap paper with the number '7852' written on it. ");
+		this.gameState.addItemSynonyms(note, "note", "number");
+		this.gameState.addSpace(note.getName(), note);
 	}
 
 	@Override
@@ -119,19 +126,17 @@ public class MasterBedroom extends Room
 			//===============================================================
 			if (command.unordered("phone|telephone"))
 			{
-				if(this.gameState.checkFlipped("power restored") == true)
-				{
-					if(this.gameState.checkFlipped("phone answered") == false)
-					{	
-						this.gameState.flipFlag("phone answered");
-						return new DisplayData("", "You pick up the phone. A gravelly voice "
-								+ "whispers in your ear: 7852. The line then goes silent.");
-					}
-					else
-						return new DisplayData("", "You pick up the phone, but there is nothing to hear.");
+				if(this.gameState.checkFlipped("phone answered") == false)
+				{	
+					this.gameState.flipFlag("phone answered");
+					this.gameState.addToInventory("Note with Number");
+					return new DisplayData("", "You pick up the phone. A gravelly voice "
+							+ "whispers in your ear: 7852. The line then goes dead...  "
+							+ "What was that? Maybe it's important. "
+							+ "You search around for a scrap of paper and pull out a pen, writing it down. ");
 				}
 				else
-					return new DisplayData("", "You pick up the phone, but there is nothing to hear.");
+					return new DisplayData("", "You pick up the phone, but it's dead. ");
 			}
 			
 			//===============================================================

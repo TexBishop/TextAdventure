@@ -28,7 +28,7 @@ public class DiningRoom extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Dining Room";
+		this.name = "DiningRoom";
 	}
 
 	@Override

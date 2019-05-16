@@ -60,14 +60,14 @@ public class Kitchen extends CountdownRoom
 		//=================================================================================
 		//Create directions that move to Living Room
 		//=================================================================================
-		this.addMovementDirection("livingroom", "Living Room");
-		this.addMovementDirection("living room", "Living Room");
+		this.addMovementDirection("livingroom", "LivingRoom");
+		this.addMovementDirection("living room", "LivingRoom");
 
 		//=================================================================================
 		//Create directions that move to Dining Room
 		//=================================================================================
-		this.addMovementDirection("diningroom", "Dining Room");
-		this.addMovementDirection("dining room", "Dining Room");
+		this.addMovementDirection("diningroom", "DiningRoom");
+		this.addMovementDirection("dining room", "DiningRoom");
 	}
 
 	@Override

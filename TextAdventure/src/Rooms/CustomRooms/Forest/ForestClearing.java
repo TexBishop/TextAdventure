@@ -27,7 +27,7 @@ public class ForestClearing extends CountdownRoom
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Clearing";
+		this.name = "ForestClearing";
 	}
 
 	@Override
@@ -82,9 +82,9 @@ public class ForestClearing extends CountdownRoom
 		//=================================================================================
 		//Create directions that move to Forest Path
 		//=================================================================================
-		this.addMovementDirection("west", "Forest Path");
-		this.addMovementDirection("tree", "Forest Path");
-		this.addMovementDirection("path", "Forest Path");
+		this.addMovementDirection("west", "ForestPath");
+		this.addMovementDirection("tree", "ForestPath");
+		this.addMovementDirection("path", "ForestPath");
 	}
 
 	@Override

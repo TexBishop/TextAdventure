@@ -27,7 +27,7 @@ public class CornfieldCenter extends CountdownRoom
 	@Override
 	protected void setName() 
 	{
-		this.name = "Cornfield Center";
+		this.name = "CornfieldCenter";
 	}
 
 	@Override
@@ -96,17 +96,17 @@ public class CornfieldCenter extends CountdownRoom
 		//=================================================================================
 		//Create directions that move to Cornfield Entrance
 		//=================================================================================
-		this.addMovementDirection("edge", "Cornfield Entrance");
-		this.addMovementDirection("entrance", "Cornfield Entrance");
-		this.addMovementDirection("corn", "Cornfield Entrance");
-		this.addMovementDirection("cornfield", "Cornfield Entrance");
+		this.addMovementDirection("edge", "CornfieldEntrance");
+		this.addMovementDirection("entrance", "CornfieldEntrance");
+		this.addMovementDirection("corn", "CornfieldEntrance");
+		this.addMovementDirection("cornfield", "CornfieldEntrance");
 
 		//=================================================================================
 		//Create directions that move to Back of Cornfield
 		//=================================================================================
-		this.addMovementDirection("path", "Back of Cornfield");
-		this.addMovementDirection("forest", "Back of Cornfield");
-		this.addMovementDirection("north", "Back of Cornfield");
+		this.addMovementDirection("path", "BackOfCornfield");
+		this.addMovementDirection("forest", "BackOfCornfield");
+		this.addMovementDirection("north", "BackOfCornfield");
 	}
 
 	@Override

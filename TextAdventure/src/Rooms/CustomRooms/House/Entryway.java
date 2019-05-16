@@ -12,6 +12,7 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.MultiFlag;
 import Items.BasicItem;
 import Items.Item;
 
@@ -40,15 +41,11 @@ public class Entryway extends Room
 	@Override
 	public String fullDescription() 
 	{
-		this.description = "You stand in the entryway. A ragged screen door leads to the front porch, with a rusty coat hanger on the left. "
-				+	"An ornate grandfather clock stands on the other side of the door; the delicate carvings decorating the clock "
-				+	"seem out of place for such a decrepit home. In front of you is a door leading to the living room. On the right "
-				+	"is the dining room. On the left, crooked, weathered stairs lead up a dark hallway. ";
-
-		if(this.gameState.checkFlipped("painting removed") == false)
-			this.description += "On the wall beyond the stairway lies a painting.";
-		else
-			this.description += "On the wall beyond the stairway a breaker box is visible, with a painting resting against the wall below.";
+		this.description = "You stand in an entry hallway. The door leading to the front porch stands open, no longer wanting to close properly. "
+				+	"An old, busted up grandfather clock stands just beyond the door, its once grand countenance now sadly destroyed. "
+				+   this.gameState.getFlag("painting removed").toString()
+				+	"Directly ahead of you is a door leading to the living room. On the right, a open archway leading to the dining room. "
+				+	"On the left, warped, weathered stairs lead up to the second floor. ";
 
 		return this.description;
 	}
@@ -59,33 +56,33 @@ public class Entryway extends Room
 		//=================================================================================
 		//Create directions that move to Farmhouse Porch
 		//=================================================================================
-		this.addMovementDirection("outside", "Farmhouse Porch");
-		this.addMovementDirection("porch", "Farmhouse Porch");
-		this.addMovementDirection("leave", "Farmhouse Porch");
-		this.addMovementDirection("exit", "Farmhouse Porch");
+		this.addMovementDirection("outside", "FarmhousePorch");
+		this.addMovementDirection("porch", "FarmhousePorch");
+		this.addMovementDirection("leave", "FarmhousePorch");
+		this.addMovementDirection("exit", "FarmhousePorch");
 
 		//=================================================================================
 		//Create directions that move to Living Room
 		//=================================================================================
-		this.addMovementDirection("livingroom", "Living Room");
-		this.addMovementDirection("living room", "Living Room");
-		this.addMovementDirection("straight", "Living Room");
-		this.addMovementDirection("forward", "Living Room");
+		this.addMovementDirection("livingroom", "LivingRoom");
+		this.addMovementDirection("living room", "LivingRoom");
+		this.addMovementDirection("straight", "LivingRoom");
+		this.addMovementDirection("forward", "LivingRoom");
 
 		//=================================================================================
 		//Create directions that move to Dining Room
 		//=================================================================================
-		this.addMovementDirection("diningroom", "Dining Room");
-		this.addMovementDirection("dining room", "Dining Room");
-		this.addMovementDirection("right", "Dining Room");
+		this.addMovementDirection("diningroom", "DiningRoom");
+		this.addMovementDirection("dining room", "DiningRoom");
+		this.addMovementDirection("right", "DiningRoom");
 
 		//=================================================================================
 		//Create directions that move to Upstairs Hallway
 		//=================================================================================
-		this.addMovementDirection("upstairs", "Upstairs Hallway");
-		this.addMovementDirection("stairs", "Upstairs Hallway");
-		this.addMovementDirection("stairway", "Upstairs Hallway");
-		this.addMovementDirection("left", "Upstairs Hallway");
+		this.addMovementDirection("upstairs", "UpstairsHallway");
+		this.addMovementDirection("stairs", "UpstairsHallway");
+		this.addMovementDirection("stairway", "UpstairsHallway");
+		this.addMovementDirection("left", "UpstairsHallway");
 	}
 
 	@Override
@@ -102,10 +99,25 @@ public class Entryway extends Room
 	@Override
 	protected void createFlags() 
 	{
-		this.gameState.addFlag("screwdriver taken", new Flag(false, "", "Screwdriver taken."));
-		this.gameState.addFlag("painting removed", new Flag(false, "", "Painting removed."));
-		this.gameState.addFlag("paperclip installed", new Flag(false, "", "Paperclip installed."));
-		this.gameState.addFlag("power restored", new Flag(false, "", "Power restored."));
+		this.gameState.addFlag("screwdriver taken", new Flag(false, "", ""));
+		this.gameState.addFlag("wire installed", new Flag(false, "", ""));
+		this.gameState.addFlag("master switch on", new Flag(false, "", ""));
+		this.gameState.addFlag("painting removed", new Flag(false, "On the wall beyond the stairway lies a painting. ", 
+				"On the wall beyond the stairway a breaker box is visible, with a painting resting against the wall below. "));
+
+		//=================================================================================
+		//Flags used in multiple rooms beyond this point
+		//=================================================================================
+		this.gameState.addFlag("generator started", new Flag(false, "", ""));
+
+		//=================================================================================
+		//This multiflag represents the house receiving working power
+		//=================================================================================
+		MultiFlag power = new MultiFlag(this.gameState, false, "", "");
+		power.addFlag("wire installed");
+		power.addFlag("master switch on");
+		power.addFlag("generator started");
+		this.gameState.addFlag("power restored", power);
 	}
 
 	@Override
@@ -148,6 +160,16 @@ public class Entryway extends Room
 		case "pick":
 		case "take":
 			//===============================================================
+			//Take stairs, move accordingly
+			//===============================================================
+			if (command.unordered("stairway|stairs|stair") == true &&
+				command.getVerb().matches("grab|pick") == false)
+			{
+				if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+					return this.move(command);
+			}
+			
+			//===============================================================
 			//Take the screwdriver from the clock
 			//===============================================================
 			if (command.unordered("screwdriver|flathead"))
@@ -156,23 +178,28 @@ public class Entryway extends Room
 				{
 					this.gameState.addToInventory("Flathead Screwdriver");
 					this.gameState.flipFlag("screwdriver taken");
-					return new DisplayData("", "You open the clock's glass door, and take the screwdriver.");
+					return new DisplayData("", "Careful not to cut yourself on the broken glass, you fish the screwdriver out of the old clock. ");
 				}
 				else
 					return new DisplayData("", "You've already taken that.");
 			}			
 
+			//===============================================================
+			//Intentionally allow Take commands to bleed into "remove", so
+			//that "Take painging off of wall" will catch the painting code.
+			//===============================================================
+
 		case "remove":
 			//===============================================================
-			//remove the painting from the wall
+			//Remove the painting from the wall
 			//===============================================================
 			if (command.unordered("painting"))
 			{
 				if (this.gameState.checkFlipped("painting removed") == false)
 				{
 					this.gameState.flipFlag("painting removed");
-					return new DisplayData("", "You take the painting off the wall and set it on the floor, to reveal "
-							+ "a breaker box from behind it.");
+					return new DisplayData("", "You remove the painting from the wall, setting it on the floor. "
+							+ "Behind the painting is a breaker box. ");
 				}
 				else
 					return new DisplayData("", "You've already done that.");
@@ -188,23 +215,24 @@ public class Entryway extends Room
 			//===============================================================
 			//pulling the switch
 			//===============================================================
-			if (command.unordered("lever|switch"))
+			if (command.unordered("master|fuse"))
 			{
 				if (this.gameState.checkFlipped("painting removed") == true)
 				{
-					if (this.gameState.checkFlipped("paperclip installed") == true)
+					if (this.gameState.checkFlipped("master switch on") == false)
 					{
-						if (this.gameState.checkFlipped("power restored") == false)
-						{
-							this.gameState.flipFlag("power restored");
-							return new DisplayData("", "You pull the switch down. With a eerie whurr and a few sparks, power surges throughout the house!");
-						}
+						this.gameState.flipFlag("master switch on");
+						if (this.gameState.checkFlipped("generator started") == false)
+							return new DisplayData("", "You flip the Master switch to the 'On' position. Nothing noticable happens. ");
 						else
-							return new DisplayData("", "Power has already been restored.");
+							return new DisplayData("", "You flip the Master switch to the 'On' position. "
+									+ "You see a spark come from the exposed wire. ");
 					}
 					else
-						return new DisplayData("", "You pull the switch down; nothing happens.");
-
+					{
+						this.gameState.getFlag("master switch on").reset();
+						return new DisplayData("", "You flip the Master switch back to the 'Off' position. ");
+					}
 				}
 				else
 					return new DisplayData("", "You don't see that here.");
@@ -217,19 +245,33 @@ public class Entryway extends Room
 
 		case "place":
 		case "repair":
+		case "fix":
+		case "bridge":
 		case "use":
 			//===============================================================
-			//Use paperclip on wire
+			//Use copper wire to repair cut wire
 			//===============================================================
-			if (command.unordered("paperclip|paper clip|clip", "wire|wires|breaker|box"))
+			if (command.ordered("copper wire|copper|wire", "wires|wire|breaker|box") ||
+				command.ordered("wires|wire|breaker|box", "copper wire|copper|wire"))
 			{
-				if (this.gameState.checkFlipped("paperclip installed") == false)
+				if (this.gameState.checkFlipped("wire installed") == false)
 				{
-					if (this.gameState.checkInventory("Paperclip") == true)
+					if (this.gameState.checkInventory("Copper Wire") == true)
 					{
-						this.gameState.removeFromInventory("Paperclip");
-						this.gameState.flipFlag("paperclip installed");
-						return new DisplayData("", "You twist the paperclip around the ends of both wires. This won't start a fire.");
+						if (this.gameState.checkFlipped("master switch on") == true &&
+							this.gameState.checkFlipped("generator started") == true)
+						{
+							return this.gameState.death("You realize your mistake as soon as you touch the exposed wire. "
+									+ "It feels hot as the electricity courses through you, and your eyeballs warm as they cook. "
+									+ "Your sight fades. ");
+						}
+						else
+						{
+							this.gameState.removeFromInventory("Copper Wire");
+							this.gameState.flipFlag("wire installed");
+							return new DisplayData("", "You use the bit of copper wire you found to fix the cut wire, bridging the gap. "
+									+ "It should have a proper connection now. ");
+						}
 					}
 					else
 						return new DisplayData ("", "You don't have that item.");
@@ -250,27 +292,25 @@ public class Entryway extends Room
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
 			if (command.unordered("around|area|room|hall") || command.getSentence().contentEquals("search"))
-				return new DisplayData("", "Looking more closely at the painting, you notice that it isn't resting flat against the wall.");
+				return new DisplayData("", "The entryway is full of dead leaves and refuse. This front door must have been standing "
+						+ "open like this for quite a while now, for this much debris to make it's way in here. "
+						+ "The wallpaper is faded and spotted with black mold. This place is in bad shape. ");
 
 			if (command.unordered("painting"))
-				return new DisplayData("", "It is an image of a galleon ship, sailing on open sea. A square red cross "
-						+ "is displayed on the main sail.");
-
-			if (command.unordered("coat|hanger|coathanger"))
-				return new DisplayData("", "A sturdy iron structure, its rustic design feels right at home. Not sure "
-						+ "how much use it would get on a farm, however.");
+				return new DisplayData("", "It's a reproduction of the classic 'American Gothic' painting, by Grant Wood. "
+						+ "It was probably nice at one point, but some vandal has since defaced it with a marker, "
+						+ "and it's torn in several places. You see a glint of metal through one of the rips. ");
 
 			//===============================================================
 			// description of clock whether or not screwdriver has been taken
 			//===============================================================
 			if (command.unordered("clock|grandfather"))
 			{	
-				String description = "The ornate design of this grandfather clock feels out of "
-						+ "place in a ramshackle house such as this. ";
+				String description = "Once grand, this old clock now sits in shambles. The glass is busted. The frame is splintered. "
+						+ "The face is gone, and the mechanism is half taken apart, pieces rusted and strewn about. ";
 
 				if (this.gameState.checkFlipped("screwdriver taken") == false)
-					description += "Through the glass of the door on the front, you notice "
-							+ "a flathead screwdriver resting inside.";
+					description += "In the debris at the bottom of the clock's interior, you notice an old screwdriver. ";
 
 				return new DisplayData("", description);
 			}
@@ -278,13 +318,24 @@ public class Entryway extends Room
 			//===============================================================
 			//inspecting the circuit breaker, with or without paperclip installed
 			//===============================================================
-			if (command.unordered("circuit|breaker|box") && this.gameState.checkFlipped("painting removed") == true)
-				if(this.gameState.checkFlipped("paperclip installed") == true)
-					return new DisplayData("", "The paperclip is now coiled around the ends of each side of the wire; "
-							+ "the connection looks secure.");
+			if (command.unordered("fuse|circuit|breaker|box"))
+			{
+				if (this.gameState.checkFlipped("painting removed") == true)
+				{
+					String description = "It's a typical breaker box, full of fuses. Each fuse has a label, marking what it controls. "
+							+ "Off to the side of the rows of fuses is one that's larger than the others, labeled 'Master'. ";
+					
+					if(this.gameState.checkFlipped("wire installed") == true)
+						description += "Through the hole in the panel, you see the wire you repaired. It looks intact. ";
+					else
+						description += "A hole in the panel exposes a bundle of wires that are likely important. "
+								+ "It looks like someone has cut one of the wires for some reason, its two ends left dangling. ";
+					
+					return new DisplayData("", description);
+				}
 				else
-					return new DisplayData("", "You open the breaker box. Inside you find a large switch, and a severed wire, "
-							+ "it's two sides barely separated from their frayed ends.");
+					return new DisplayData("", "You don't see a breaker box here. ");
+			}
 
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
