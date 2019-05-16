@@ -1,8 +1,8 @@
 /**
- * Group Project II: a Text Adventure
- * @author Tex Bishop, Ian Wickham, Jacob Holzmann
- * @version 1.0
- * @due 05-01-2019
+ * A Text Adventure
+ * @author Tex Bishop
+ * @version 1.2
+ * @date 05-16-2019
  */
 
 package Structure;
@@ -12,9 +12,6 @@ package Structure;
  */
 public class InvalidMapKeyException extends RuntimeException 
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public InvalidMapKeyException()

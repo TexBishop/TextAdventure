@@ -1,8 +1,8 @@
 /**
- * Group Project II: a Text Adventure
+ * A Text Adventure
  * @author Tex Bishop
- * @version 1.0
- * @date 05-12-2019
+ * @version 1.2
+ * @date 05-16-2019
  */
 
 package Rooms;
