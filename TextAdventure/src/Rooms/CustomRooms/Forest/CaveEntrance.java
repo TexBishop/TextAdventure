@@ -5,7 +5,7 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Items.Item;
 import Rooms.Room;
@@ -26,7 +26,7 @@ public class CaveEntrance extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Cave Entrance";
+		this.name = "CaveEntrance";
 	}
 
 	@Override
@@ -70,35 +70,26 @@ public class CaveEntrance extends Room
 		//=================================================================================
 		//Create directions that move to Forest Crossroads
 		//=================================================================================
-		this.addMovementDirection("south", "Forest Crossroads");
-		this.addMovementDirection("path", "Forest Crossroads");
-		
-		if (this.gameState.checkSpace("Forest Crossroads") == false)
-			new ForestCrossroads(this.gameState);	
+		this.addMovementDirection("south", "ForestCrossroads");
+		this.addMovementDirection("path", "ForestCrossroads");
 
 		//=================================================================================
 		//Create directions that move to Cave Interior
 		//=================================================================================
-		this.addMovementDirection("west", "Cave Interior");
-		this.addMovementDirection("cave", "Cave Interior");
-		this.addMovementDirection("door", "Cave Interior");
-		this.addMovementDirection("entrance", "Cave Interior");
-		this.addMovementDirection("inside", "Cave Interior");
-		
-		if (this.gameState.checkSpace("Cave Interior") == false)
-			new CaveInterior(this.gameState);	
+		this.addMovementDirection("west", "CaveInterior");
+		this.addMovementDirection("cave", "CaveInterior");
+		this.addMovementDirection("door", "CaveInterior");
+		this.addMovementDirection("entrance", "CaveInterior");
+		this.addMovementDirection("inside", "CaveInterior");
 		
 		//=================================================================================
 		//Create directions that move to Forest Exit
 		//=================================================================================
-		this.addMovementDirection("north", "Forest Exit");
-		this.addMovementDirection("stone", "Forest Exit");
-		this.addMovementDirection("stair", "Forest Exit");
-		this.addMovementDirection("staircase", "Forest Exit");
-		this.addMovementDirection("up", "Forest Exit");
-		
-		if (this.gameState.checkSpace("Forest Exit") == false)
-			new ForestExit(this.gameState);	
+		this.addMovementDirection("north", "ForestExit");
+		this.addMovementDirection("stair", "ForestExit");
+		this.addMovementDirection("stairs", "ForestExit");
+		this.addMovementDirection("staircase", "ForestExit");
+		this.addMovementDirection("up", "ForestExit");
 	}
 
 	@Override
@@ -137,16 +128,16 @@ public class CaveEntrance extends Room
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 			
 			//===============================================================
 			//If go into cave
 			//===============================================================
-			if (command.getSubject().matches("west|cave|door|entrance|inside"))
+			if (command.unordered("west|cave|door|entrance|inside"))
 			{
 				if (this.gameState.checkFlipped("cave door open"))
-					return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+					return this.move(command);
 				else
 					return new DisplayData("", "The door is closed. You aren't sure how to open it. ");
 			}
@@ -154,8 +145,8 @@ public class CaveEntrance extends Room
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -173,8 +164,8 @@ public class CaveEntrance extends Room
 			//===============================================================
 			//If take or climb up|stair|staircase, then move to forest exit
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Take command not recognized
@@ -188,7 +179,7 @@ public class CaveEntrance extends Room
 			//===============================================================
 			//Place a torch in the sconce
 			//===============================================================
-			if (command.getSubject().matches("torch|unlit|lit"))
+			if (command.unordered("torch|unlit|lit"))
 			{
 				//===============================================================
 				//Verify that there isn't already a torch in the sconce
@@ -239,9 +230,7 @@ public class CaveEntrance extends Room
 			//===============================================================
 			//If the command is to light the torch using the holy zippo
 			//===============================================================
-			if (command.getSubject().contentEquals("torch") ||
-				(command.getSubject().matches("holy|zippo") && command.getTarget().contentEquals("torch")) ||
-				command.getSubject().contentEquals("holy") && command.getTarget().contentEquals("zippo"))
+			if (command.unordered("torch"))
 			{
 				//===============================================================
 				//Verify that the torch has been placed in the sconce
@@ -283,13 +272,13 @@ public class CaveEntrance extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The outer edges of the area of packed dirt, give way immediately to dense foliage and large trees. "
 						+ "The cliff face with its curious oaken door stand out, as the lone break in the greenery. "
 						+ "However, on the northern edge of the area, you do see a piece of stone sticking out from under the brush, "
 						+ "and it looks squarish, hewn, not a natural shape. ");
 
-			if (command.getSubject().contentEquals("door"))
+			if (command.unordered("door"))
 			{
 				String doorDescription = "";
 
@@ -317,17 +306,17 @@ public class CaveEntrance extends Room
 				return new DisplayData("", doorDescription);
 			}
 
-			if (command.getSubject().contentEquals("cliff"))
+			if (command.unordered("cliff"))
 				return new DisplayData("", "This portion of the cliff is much like the other, sheer and without handholds. "
 						+ "It's taller here, though you aren't sure by how much, as the canopy hides the top from view. "
 						+ "The door is the only thing of note. ");
 
-			if (command.getSubject().contentEquals("stone"))
+			if (command.unordered("stone"))
 				return new DisplayData("", "Moving aside the foliage, you find that the stone is the first step of a hewn stone staircase, "
 						+ "heading upward, possibly towards the top of the cliff. The foliage almost completely hides it from view at the edges "
 						+ "of the area of packed dirt, but it looks to be clear enough to traverse easily beyond that point. ");
 
-			if (command.getSubject().matches("sconce|torch"))
+			if (command.unordered("sconce|torch"))
 			{
 				//===============================================================
 				//Different descriptions based on whether the torch is placed, and
@@ -343,6 +332,15 @@ public class CaveEntrance extends Room
 				else
 					return new DisplayData("", "It's a bracket for holding a torch about an inch and a half thick. It's currently empty. ");
 			}
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -350,6 +348,15 @@ public class CaveEntrance extends Room
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

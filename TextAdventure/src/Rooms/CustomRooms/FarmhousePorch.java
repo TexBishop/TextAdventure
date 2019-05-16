@@ -28,7 +28,7 @@ public class FarmhousePorch extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Farmhouse Porch";
+		this.name = "FarmhousePorch";
 	}
 
 	@Override
@@ -71,21 +71,16 @@ public class FarmhousePorch extends Room
 		//=================================================================================
 		//Create directions that move to Old Farmhouse
 		//=================================================================================
-		this.addMovementDirection("south", "Old Farmhouse");
-		this.addMovementDirection("mail", "Old Farmhouse");
-		this.addMovementDirection("mailbox", "Old Farmhouse");
-		this.addMovementDirection("path", "Old Farmhouse");
-		if (this.gameState.checkSpace("Old Farmhouse") == false)
-			new OldFarmhouse(this.gameState);
+		this.addMovementDirection("south", "OldFarmhouse");
+		this.addMovementDirection("mail", "OldFarmhouse");
+		this.addMovementDirection("mailbox", "OldFarmhouse");
+		this.addMovementDirection("path", "OldFarmhouse");
 		
 		//=================================================================================
 		//Create directions that move to Edge of Forest
 		//=================================================================================
-		this.addMovementDirection("east", "Edge of Forest");
-		this.addMovementDirection("forest", "Edge of Forest");
-		
-		if (this.gameState.checkSpace("Edge of Forest") == false)
-			new EdgeOfForest(this.gameState);	
+		this.addMovementDirection("east", "EdgeOfForest");
+		this.addMovementDirection("forest", "EdgeOfForest");
 
 		//=================================================================================
 		//Create directions that move to Backyard
@@ -95,8 +90,16 @@ public class FarmhousePorch extends Room
 		this.addMovementDirection("backyard", "Backyard");
 		this.addMovementDirection("back", "Backyard");
 		
-		if (this.gameState.checkSpace("Backyard") == false)
-			new Backyard(this.gameState);	
+		//=================================================================================
+		//Create directions that move to Entryway
+		//=================================================================================
+		this.addMovementDirection("entryway", "Entryway");
+		this.addMovementDirection("foyer", "Entryway");
+		this.addMovementDirection("entrance", "Entryway");
+		this.addMovementDirection("inside", "Entryway");
+		this.addMovementDirection("door", "Entryway");
+		this.addMovementDirection("house", "Entryway");
+		this.addMovementDirection("farmhouse", "Entryway");
 	}
 
 	@Override
@@ -111,9 +114,9 @@ public class FarmhousePorch extends Room
 		//=================================================================================
 		//Create shard of glass
 		//=================================================================================
-		Item glassShard = new BasicItem(this.gameState, "Shard of Glass", "", "A shard of glass taken from a shattered"
+		Item glassShard = new BasicItem(this.gameState, "Shard of Glass", "", "A shard of glass taken from a shattered "
 				+ "window.  It's very sharp.");
-		this.gameState.addItemSearch(glassShard.getName(), "glass", "shard");
+		this.gameState.addItemSynonyms(glassShard, "glass", "shard");
 		this.gameState.addSpace(glassShard.getName(), glassShard);
 
 		//=================================================================================
@@ -154,15 +157,15 @@ public class FarmhousePorch extends Room
 			//===============================================================
 			//If go back, but not to backyard, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back") &&
-				!(command.getTarget().contentEquals("house") || command.getTarget().contentEquals("yard") || command.getTarget().contentEquals("farmhouse")))
+			if (command.unordered("back") &&
+				command.unordered("house|yard|farmhouse|farm house") == false)
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -179,24 +182,17 @@ public class FarmhousePorch extends Room
 			//===============================================================
 			//Take the one of the paths.  Changes room.
 			//===============================================================
-			if (command.getSubject().contentEquals("path"))
+			if (command.unordered("forest", "path") ||
+				command.unordered("mailbox|mail box", "path"))
 			{
-				if (command.getTarget().contentEquals("mail") || command.getTarget().contentEquals("mailbox"))
-				{
-					if (this.checkMovementDirection(command.getSubject()) == true)
-						return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
-				}
-				else
-				if (command.getTarget().contentEquals("forest"))
-					if (this.checkMovementDirection(command.getSubject()) == true)
-						return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+				if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+					return this.move(command);
 			}
 				
 			//===============================================================
 			//Take a shard of glass from a window.
 			//===============================================================
-			if (command.getSubject().contentEquals("glass") || command.getSubject().contentEquals("shard") ||
-					(command.getSubject().contentEquals("piece") && command.getTarget().contentEquals("glass")))
+			if (command.unordered("glass|shard"))
 			{
 				if (this.gameState.checkFlipped("shard taken") == false)
 				{
@@ -211,7 +207,7 @@ public class FarmhousePorch extends Room
 			//===============================================================
 			//Take the locket from the nest
 			//===============================================================
-			if (command.getSubject().contentEquals("locket"))
+			if (command.unordered("locket"))
 			{
 				if (this.gameState.checkFlipped("locket found"))
 				{
@@ -242,26 +238,26 @@ public class FarmhousePorch extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around") || command.getSubject().contentEquals("porch"))
+			if (command.unordered("around|porch|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The porch is in poor repair, with multiple holes and loose boards strewn about. "
 						+ "It looks like some sort of small animal had a nest built in a corner among some debris, but it is now "
 						+ "long abandoned, like the rest of the farmhouse.");
 			
-			if (command.getSubject().contentEquals("door"))
+			if (command.unordered("door"))
 				return new DisplayData("", "The door is standing ajar.  The frame has warped to the point that the door knob no "
 						+ "longer latches properly.  Trying to close it simply results in it slowly swinging back open.");
 			
-			if (command.getSubject().contentEquals("windows") || command.getSubject().contentEquals("window"))
+			if (command.unordered("window|windows"))
 				return new DisplayData("", "The windows are shattered and filthy.  The shards of remaining glass look sharp.");
 			
-			if (command.getSubject().contentEquals("boards") || command.getSubject().contentEquals("debris"))
+			if (command.unordered("boards|debris"))
 				return new DisplayData("", "You find nothing of interest.");
 
 			//===============================================================
 			//If look at nest, flip locket found Flag, and modify the
 			//descriptive based on whether the locket has been taken or not.
 			//===============================================================
-			if (command.getSubject().contentEquals("nest"))
+			if (command.unordered("nest"))
 			{
 				this.gameState.flipFlag("locket found");
 				String description = "It seems to be an old rodent nest. ";
@@ -274,7 +270,7 @@ public class FarmhousePorch extends Room
 			//If look at locket, make sure it is visible, then set it as
 			//the innerSpace.
 			//===============================================================
-			if (command.getSubject().contentEquals("locket"))
+			if (command.unordered("locket"))
 			{
 				if (this.gameState.getFlag("locket found").isFlipped() == true)
 					if (this.gameState.getFlag("locket taken").isFlipped() == false)
@@ -282,11 +278,30 @@ public class FarmhousePorch extends Room
 			}
 
 			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+
+			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
 			return new DisplayData("", "You don't see that here.");
 			
 		default: 
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

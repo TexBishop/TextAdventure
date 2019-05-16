@@ -5,16 +5,18 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.BackArea;
 
+import Items.BasicItem;
+import Items.Item;
 import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
+import Structure.Flag;
 import Structure.GameState;
 
 public class Backyard extends Room 
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public Backyard(GameState gameState) 
@@ -38,8 +40,8 @@ public class Backyard extends Room
 	public String fullDescription() 
 	{
 		this.description = "A size-able yard stretches behind the house, packed dirt with sparse grass. "
-				+ "An old red barn sits off to the left, the door standing wide open. It looks to be in as poor a state as the farmhouse. "
-				+ "Off to the right is a tool shed, the door closed. It seems newer than the other buildings here. Odd. "
+				+ "An old red barn sits off to the left, the doors closed shut. It looks to be in as poor a state as the farmhouse. "
+				+ "Off to the right is a tool shed, the door also closed. It seems newer than the other buildings here. Odd. "
 				+ "Behind those two buildings stretches a corn field, which seems to be dead. "
 				+ "You see a back door leading into the house. ";
 		
@@ -52,36 +54,76 @@ public class Backyard extends Room
 		//=================================================================================
 		//Create directions that move to Edge of Forest
 		//=================================================================================
-		this.addMovementDirection("southeast", "Edge of Forest");
-		this.addMovementDirection("forest", "Edge of Forest");
-		this.addMovementDirection("edge", "Edge of Forest");
-		this.addMovementDirection("path", "Edge of Forest");
-		
-		if (this.gameState.checkSpace("Edge of Forest") == false)
-			new EdgeOfForest(this.gameState);	
+		this.addMovementDirection("southeast", "EdgeOfForest");
+		this.addMovementDirection("forest", "EdgeOfForest");
+		this.addMovementDirection("edge", "EdgeOfForest");
+		this.addMovementDirection("path", "EdgeOfForest");
 		
 		//=================================================================================
 		//Create directions that move to Farmhouse Porch
 		//=================================================================================
-		this.addMovementDirection("south", "Farmhouse Porch");
-		this.addMovementDirection("porch", "Farmhouse Porch");
-		this.addMovementDirection("front", "Farmhouse Porch");
-		this.addMovementDirection("around", "Farmhouse Porch");
+		this.addMovementDirection("south", "FarmhousePorch");
+		this.addMovementDirection("porch", "FarmhousePorch");
+		this.addMovementDirection("front", "FarmhousePorch");
+		this.addMovementDirection("around", "FarmhousePorch");
+
+		//=================================================================================
+		//Create directions that move to the tool shed
+		//=================================================================================
+		this.addMovementDirection("toolshed", "ToolShed");
+		this.addMovementDirection("tool shed", "ToolShed");
+		this.addMovementDirection("shed", "ToolShed");
+		this.addMovementDirection("tool", "ToolShed");
+
+		//=================================================================================
+		//Create directions that move to the barn
+		//=================================================================================
+		this.addMovementDirection("barn", "Barn");
+
+		//=================================================================================
+		//Create directions that move to the cornfield
+		//=================================================================================
+		this.addMovementDirection("entrance", "CornfieldEntrance");
+		this.addMovementDirection("cornfield", "CornfieldEntrance");
+		this.addMovementDirection("corn field", "CornfieldEntrance");
+		this.addMovementDirection("field", "CornfieldEntrance");
+
+		//=================================================================================
+		//Create directions that move to the back of the cornfield
+		//=================================================================================
+		this.addMovementDirection("back", "BackOfCornfield");
+		this.addMovementDirection("rear", "BackOfCornfield");
+		this.addMovementDirection("north", "BackOfCornfield");
+		this.addMovementDirection("trail", "BackOfCornfield");
 		
-		if (this.gameState.checkSpace("Farmhouse Porch") == false)
-			new FarmhousePorch(this.gameState);	
+		//=================================================================================
+		//Create directions that move to Kitchen
+		//=================================================================================
+		this.addMovementDirection("kitchen", "Kitchen");
+		this.addMovementDirection("door", "Kitchen");
+		this.addMovementDirection("inside", "Kitchen");
+		this.addMovementDirection("house", "Kitchen");
+		this.addMovementDirection("farmhouse", "Kitchen");
 	}
 
 	@Override
 	protected void createItems() 
 	{
-		// TODO Auto-generated method stub
+		//=================================================================================
+		//Create silver knife
+		//=================================================================================
+		Item silveredKnife = new BasicItem(this.gameState, "Silvered Knife", "", "A kitchen knife which has had its blade suffused with silver. Youd know this process"
+				+ "is done by keeping it strong. "
+				+ "It should be effective, as long as you dont mind getting up close. Though why its been suffused with silver is beyond you...");
+		silveredKnife.setRegex("silvered|knife");
+		this.gameState.addItemSynonyms(silveredKnife, "silvered", "knife");
+		this.gameState.addSpace(silveredKnife.getName(), silveredKnife);
 	}
 
 	@Override
 	protected void createFlags() 
 	{
-		// TODO Auto-generated method stub
+		this.gameState.addFlag("Knife Taken", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -98,16 +140,22 @@ public class Backyard extends Room
 		case "move":  //doing this will cause move to execute the go code
 		case "go": 
 			//===============================================================
+			//If go to back of cornfield
+			//===============================================================
+			if (command.unordered("back", "cornfield|corn field|field"))
+				return this.move(command);
+			
+			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -120,44 +168,90 @@ public class Backyard extends Room
 			//===============================================================
 			return this.displayOnEntry();
 
+		case "grab":
+		case "take":
+			//===============================================================
+			//Take the Silvered Knife.
+			//===============================================================
+			if (command.unordered("silvered|knife"))
+			{
+				if (this.gameState.checkFlipped("Knife Taken") == false)
+				{
+					this.gameState.addToInventory("Silvered Knife");
+					this.gameState.flipFlag("Knife Taken");
+					return new DisplayData("", "Silvered Knife taken.");
+				}
+				else
+					return new DisplayData("", "You've already taken that.");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData("", "You don't see that here.");
+			
 		case "search":  //doing this will cause search to execute the look code
 		case "look":
 			//===============================================================
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The back of the house looks just as bad as the front, though the door seems to be in better repair at least. "
 						+ "An old, cast iron barbeque pit is sitting next to the back door.  It looks like a custom job, made out of an old barrel, "
 						+ "with a smoking cabinet attached to the top for making jerky. "
-						+ "The forest is an inscrutable wall to the east. From here, you can see a path leading into it from the front of the house. ");
+						+ "The forest is an inscrutable wall to the east. From here, you can see a path leading into it from the front of the house. "
+						+ "You also notice a trail heading around the side of the cornfield, towards its rear. ");
 			
-			if (command.getSubject().contentEquals("barn"))
-				return new DisplayData("", "");
+			if (command.unordered("barn"))
+				return new DisplayData("", "The old structure is still standing, but you aren't sure how much longer that will last, considering "
+						+ "the way it's starting to lean. "
+						+ "It's painted a typical barn red, but the paint is faded and peeling now. The door is standing open. ");
 			
-			if (command.getSubject().contentEquals("tool") || command.getSubject().contentEquals("shed"))
-				return new DisplayData("", "");
+			if (command.unordered("toolshed|tool shed"))
+				return new DisplayData("", "The ToolShed itself looks suprisingly well kept. The paint is not pelling, the wood not rotting, nor the hinges rusted. "
+						+ "Attempting to peer through the windows proves to be a useless effort as the glass seems to be tinted. "
+						+ "Why in the hell would someone tint the windows of a toolshed, yet leave it unlocked? ");
 			
-			if (command.getSubject().contentEquals("corn") || command.getSubject().contentEquals("cornfield") || command.getSubject().contentEquals("field"))
+			if (command.unordered("corn|cornfield|field"))
 				return new DisplayData("", "The corn stalks all look to be dead, brown and yellow in color, no green to be seen. "
 						+ "How strange that is. What could have caused the entire field to die in such a way, all of the corn stalks whole, intact? ");
 			
-			if (command.getSubject().contentEquals("barbeque") || command.getSubject().contentEquals("bbq") || command.getSubject().contentEquals("pit"))
-				return new DisplayData("", "");
+			if (command.unordered("barbeque|bbq|pit"))
+				return new DisplayData("", "The BBQ barrel looks well used, but neglected. No succulent meat has come from here in a while. "
+						+ "Upon further examination, you spot what appears to be a silver knife hanging in the smoke cabinet");
 			
-			if (command.getSubject().contentEquals("door") || command.getSubject().contentEquals("back"))
+			if (command.unordered("back|door"))
 				return new DisplayData("", "It's closed.  It looks to be of solid oak, not the flimsy paneling most doors are made from nowadays.");
 			
-			if (command.getSubject().contentEquals("forest"))
+			if (command.unordered("forest"))
 				return new DisplayData("", "The edge of the forest is abrupt, immediately dense. It doesn't look like much light is getting"
 						+ "through beneath the canopy.  A path enters the wood a few hundred feet away, cutting between the trees bravely. ");
 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

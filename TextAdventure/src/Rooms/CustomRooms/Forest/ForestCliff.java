@@ -5,12 +5,11 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
-import Structure.Flag;
 import Structure.GameState;
 
 public class ForestCliff extends Room 
@@ -25,7 +24,7 @@ public class ForestCliff extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Cliff";
+		this.name = "ForestCliff";
 	}
 
 	@Override
@@ -60,11 +59,8 @@ public class ForestCliff extends Room
 		//=================================================================================
 		//Create directions that move to Forest Crossroads
 		//=================================================================================
-		this.addMovementDirection("east", "Forest Crossroads");
-		this.addMovementDirection("path", "Forest Crossroads");
-		
-		if (this.gameState.checkSpace("Forest Crossroads") == false)
-			new ForestCrossroads(this.gameState);	
+		this.addMovementDirection("east", "ForestCrossroads");
+		this.addMovementDirection("path", "ForestCrossroads");
 	}
 
 	@Override
@@ -76,15 +72,7 @@ public class ForestCliff extends Room
 	@Override
 	protected void createFlags() 
 	{
-		//===============================================================
-		//Flag to determine if this is the player's first time visiting
-		//this room.
-		//===============================================================
-		this.gameState.addFlag("ForestCliff first visit", new Flag(true, "", "The path begins to narrow, the foliage closing in. "
-				+ "It steadily worsens, until it becomes necessary to push through the brush, the path barely visible. "
-				+ "Suddenly, you feel yourself falling, the ground dropping out from under you. "
-				+ "After a few stunned moments, you pick yourself up off the ground. "
-				+ "Thankfully, the fall doesn't seem to have caused you any injury, just a few bumps and bruises. "));
+		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -104,21 +92,21 @@ public class ForestCliff extends Room
 			//===============================================================
 			//If try to climb cliff, return failure
 			//===============================================================
-			if (command.getSubject().contentEquals("up") ||
+			if (command.unordered("up") ||
 				command.getVerb().contentEquals("climb"))
 				return new DisplayData("", "You don't see any way up. ");
 			
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -137,15 +125,24 @@ public class ForestCliff extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|room|area") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "The path is visible again, thankfully, but it doesn't look like you can go back the way you came. "
 						+ "You'll just have to find another way back. The forest seems even thicker and darker here, unfortunately. ");
 
-			if (command.getSubject().contentEquals("cliff"))
+			if (command.unordered("cliff"))
 				return new DisplayData(this.cliffCarvingImage, "It's a sheer rock face, no handholds visible. "
 						+ "It looks like there used to be an old rope ladder. You can see bits of it left dangling at the top of the cliff, "
 						+ "but it has long since rotted away.  A few old bits of it are lying among the scrub.  They crumble apart at your touch. "
 						+ "You notice something carved on the face of the cliff, but you aren't sure what it is. ");
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -153,6 +150,15 @@ public class ForestCliff extends Room
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

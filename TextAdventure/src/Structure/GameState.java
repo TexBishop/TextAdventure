@@ -27,10 +27,15 @@ public class GameState implements Serializable
 	//to file, using serialization.
 	//===============================================================
 	private static final long serialVersionUID = 1L;
+
+	//===============================================================
+	//Space/Flag name used as key for the hashmaps that contain an object
+	//===============================================================
 	protected Map<String, Flag> flagMap = new HashMap<>();
 	protected Map<String, Space> spaceMap = new HashMap<>();
 	private Map<String, Item> inventory = new HashMap<>();
-	private Map<String, String> itemSearchMap = new HashMap<>();
+	private Map<String, String> itemSynonyms = new HashMap<>();
+	private String inventoryRegex = "";
 	private CommandParser commandParser = new CommandParser();
 	private Space currentRoom;
 	private boolean alive = true;
@@ -157,6 +162,16 @@ public class GameState implements Serializable
 	//===============================================================
 	
 	/**
+	 * Check if a flag exists in the flag hashmap
+	 * @param name  String   The name of the flag to check.
+	 * @return      boolean  The result of the check.
+	 */
+	public boolean checkFlag(String name)
+	{
+		return this.flagMap.containsKey(name);
+	}
+	
+	/**
 	 * Add a flag to the flag hashmap.
 	 * @param gameState GameState The current GameState object the application is working from.
 	 * @param name String The key to assign the flag to in the hashmap.
@@ -212,7 +227,7 @@ public class GameState implements Serializable
 	public boolean checkFlipped(String key)
 	{
 		try 
-		{
+		{	
 			if (flagMap.containsKey(key) == true)
 				return flagMap.get(key).isFlipped();
 			else
@@ -328,7 +343,10 @@ public class GameState implements Serializable
 				if (this.inventory.containsKey(name) == false) 
 				{
 					if (this.spaceMap.get(name) instanceof Item)
+					{
 						this.inventory.put(name, (Item) this.spaceMap.get(name));
+						this.addToInventoryRegex((Item) this.spaceMap.get(name));
+					}
 					else
 						throw new RuntimeException();
 				}
@@ -403,14 +421,38 @@ public class GameState implements Serializable
 	 */
 	public void removeFromInventory(String key)
 	{
+		//===============================================================
+		//Remove the item's synonyms from the regex String
+		//If it isn't the last synonym listed
+		//in the regex, add the '|' to the substring, for removal.  If it
+		//is the last sysnonym listed, check to see if it is the first
+		//synonym listed.  If it is not, remove the '|' character
+		//preceding it.
+		//===============================================================
+		String substring = ((Item) this.spaceMap.get(key)).getRegex();
+		int index = this.inventoryRegex.indexOf(substring);
+
+		if (index + substring.length() != this.inventoryRegex.length())
+			substring = substring + "|";
+		else
+		{
+			if (0 < index)
+				substring = "|" + substring;
+		}
+
+		this.inventoryRegex = this.inventoryRegex.replace(substring, "");
+
+		//===============================================================
+		//Remove item from inventory and spaceMap
+		//===============================================================
 		this.inventory.remove(key);
 		this.spaceMap.remove(key);
 
 		//===============================================================
-		//Remove all entries in itemSearchMap that contain links to this
+		//Remove all entries in itemSynonyms that contain links to this
 		//item.
 		//===============================================================
-		this.itemSearchMap.values().removeAll(Collections.singleton(key));
+		this.itemSynonyms.values().removeAll(Collections.singleton(key));
 
 		//===============================================================
 		//If innerSpace is currently set to this deleted item, reset
@@ -421,24 +463,57 @@ public class GameState implements Serializable
 	}
 	
 	/**
+	 * Return the regex String representing the synonyms of all inventory items
+	 * @return  String  the regex
+	 */
+	public String getInventoryRegex()
+	{
+		return this.inventoryRegex;
+	}
+	
+	/**
+	 * Add synonyms for the passed item to the inventory regex String.
+	 * @param value  Item  The item you wish to add to the regex.
+	 */
+	private void addToInventoryRegex(Item item)
+	{
+		//===============================================================
+		//Add the item regex to the inventory regex
+		//===============================================================
+		if (this.inventoryRegex.isEmpty())
+			this.inventoryRegex += item.getRegex();
+		else
+			this.inventoryRegex += "|" + item.getRegex();
+	}
+	
+	/**
 	 * Add alternate keywords as names for an item that can be used in commands.
-	 * @param name   String The name / key of the item.
+	 * @param name   Item   The item to add synonyms to.
 	 * @param words  String The words to use as synonyms.
 	 */
-	public void addItemSearch(String name, String ...words)
+	public void addItemSynonyms(Item item, String ...words)
 	{
 		for (String word : words)
 		{
 			try 
 			{
-				if (this.itemSearchMap.containsKey(word) == false)
-					this.itemSearchMap.put(word, name);
+				if (this.itemSynonyms.containsKey(word) == false)
+				{
+					this.itemSynonyms.put(word, item.getName());
+					//===============================================================
+					//Also, build regex for the item using the synonyms
+					//===============================================================
+					if (item.getRegex().isEmpty())
+						item.setRegex(word);
+					else
+						item.setRegex(item.getRegex() + "|" + word);
+				}
 				else
 					throw new InvalidMapKeyException();
 			} 
 			catch (InvalidMapKeyException e) 
 			{
-				System.out.println("Inventory Item synonym " + word + " already exists in the hashmap for Item " + this.itemSearchMap.get(word));
+				System.out.println("Inventory Item synonym " + word + " already exists in the hashmap for Item " + this.itemSynonyms.get(word));
 				e.printStackTrace();
 			}
 		}
@@ -451,7 +526,7 @@ public class GameState implements Serializable
 	 */
 	public boolean checkItemSearch(String key)
 	{
-		return this.itemSearchMap.containsKey(key);
+		return this.itemSynonyms.containsKey(key);
 	}
 	
 	/**
@@ -464,7 +539,7 @@ public class GameState implements Serializable
 		try 
 		{
 			if (this.checkItemSearch(key) == true)
-				return this.itemSearchMap.get(key);
+				return this.itemSynonyms.get(key);
 			else
 				throw new InvalidMapKeyException();
 		} 

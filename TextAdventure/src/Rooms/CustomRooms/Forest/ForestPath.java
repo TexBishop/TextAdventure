@@ -5,7 +5,7 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Items.BasicItem;
 import Items.Item;
@@ -27,7 +27,7 @@ public class ForestPath extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Path";
+		this.name = "ForestPath";
 	}
 
 	@Override
@@ -62,33 +62,24 @@ public class ForestPath extends Room
 		//=================================================================================
 		//Create directions that move to Edge of Forest
 		//=================================================================================
-		this.addMovementDirection("west", "Edge of Forest");
-		this.addMovementDirection("edge", "Edge of Forest");
-		this.addMovementDirection("farm", "Edge of Forest");
-		this.addMovementDirection("house", "Edge of Forest");
-		this.addMovementDirection("farmhouse", "Edge of Forest");
-		this.addMovementDirection("path", "Edge of Forest");
-		
-		if (this.gameState.checkSpace("Edge of Forest") == false)
-			new EdgeOfForest(this.gameState);	
+		this.addMovementDirection("west", "EdgeOfForest");
+		this.addMovementDirection("edge", "EdgeOfForest");
+		this.addMovementDirection("farm", "EdgeOfForest");
+		this.addMovementDirection("house", "EdgeOfForest");
+		this.addMovementDirection("farmhouse", "EdgeOfForest");
+		this.addMovementDirection("path", "EdgeOfForest");
 		
 		//=================================================================================
 		//Create directions that move to Forest Clearing
 		//=================================================================================
-		this.addMovementDirection("right", "Forest Clearing");
-		this.addMovementDirection("clearing", "Forest Clearing");
-		
-		if (this.gameState.checkSpace("Forest Clearing") == false)
-			new ForestClearing(this.gameState);	
+		this.addMovementDirection("right", "ForestClearing");
+		this.addMovementDirection("clearing", "ForestClearing");
 		
 		//=================================================================================
 		//Create directions that move to Forest Cliff
 		//=================================================================================
-		this.addMovementDirection("left", "Forest Cliff");
-		this.addMovementDirection("cliff", "Forest Cliff");
-		
-		if (this.gameState.checkSpace("Forest Cliff") == false)
-			new ForestCliff(this.gameState);	
+		this.addMovementDirection("left", "ForestCliff");
+		this.addMovementDirection("cliff", "ForestCliff");
 	}
 
 	@Override
@@ -99,13 +90,23 @@ public class ForestPath extends Room
 		//=================================================================================
 		Item illuminatiBrooch = new BasicItem(this.gameState, "Religious Brooch", this.broochImage, "A brooch. It looks like some sort of religious symbol, "
 				+ "a pyramid with an eye inside of it.");
-		this.gameState.addItemSearch(illuminatiBrooch.getName(), "religious", "brooch");
+		this.gameState.addItemSynonyms(illuminatiBrooch, "religious", "brooch", "illuminati");
 		this.gameState.addSpace(illuminatiBrooch.getName(), illuminatiBrooch);
 	}
 
 	@Override
 	protected void createFlags() 
 	{
+		//===============================================================
+		//Flag to determine if this is the player's first time visiting
+		//this room.
+		//===============================================================
+		this.gameState.addFlag("ForestCliff first visit", new Flag(true, "", "The path begins to narrow, the foliage closing in. "
+				+ "It steadily worsens, until it becomes necessary to push through the brush, the path barely visible. "
+				+ "Suddenly, you feel yourself falling, the ground dropping out from under you. "
+				+ "After a few stunned moments, you pick yourself up off the ground. "
+				+ "Thankfully, the fall doesn't seem to have caused you any injury, just a few bumps and bruises. "));
+		
 		//===============================================================
 		//Flag to determine if this is the player's first time visiting
 		//this room.
@@ -159,21 +160,21 @@ public class ForestPath extends Room
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
 			{
 				//===============================================================
 				//If right path hasn't been unlocked, loop back to this room
 				//===============================================================
-				if (this.getMovementDirectionRoom(command.getSubject()).contentEquals("Forest Clearing"))
+				if (this.getMovementDirectionRoom(command.getMatch(this.movementRegex)).contentEquals("ForestClearing"))
 				{
 					if (this.gameState.checkFlipped("right path switch") ==  true)
-						return this.gameState.setCurrentRoom("Forest Clearing");
+						return this.move(command);
 					else
 						return new DisplayData(this.forestPathImage, "You come upon a fork in the path, that looks strikingly similar to the "
 								+ "fork you just left. " + this.fullDescription());
@@ -182,7 +183,7 @@ public class ForestPath extends Room
 				//===============================================================
 				//If left path hasn't been unlocked, loop back to this room
 				//===============================================================
-				if (this.getMovementDirectionRoom(command.getSubject()).contentEquals("Forest Cliff"))
+				if (this.getMovementDirectionRoom(command.getMatch(this.movementRegex)).contentEquals("ForestCliff"))
 				{
 					if (this.gameState.checkFlipped("left path switch") ==  true)
 					{
@@ -190,7 +191,7 @@ public class ForestPath extends Room
 						//If Forest Cliff has already been visited, prevent entering
 						//===============================================================
 						if (this.gameState.checkFlipped("ForestCliff first visit") == false)
-							return this.gameState.setCurrentRoom("Forest Cliff");
+							return this.move(command);
 						else
 							return new DisplayData("", "Remembering the overgrown path, and sudden fall, you decide against going that direction again. ");
 					}
@@ -202,7 +203,7 @@ public class ForestPath extends Room
 				//===============================================================
 				//If choice wasn't to go left or right, execute move normally
 				//===============================================================
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+				return this.move(command);
 			}
 
 			//===============================================================
@@ -222,8 +223,7 @@ public class ForestPath extends Room
 			//===============================================================
 			//If combinations successfully set
 			//===============================================================
-			if (command.getVerb().contentEquals("469") || command.getSubject().contentEquals("469") ||
-			   (command.getSubject().contentEquals("combination") && command.getTarget().contentEquals("469")))
+			if (command.unordered("469"))
 			{
 				this.gameState.flipFlag("combination correct");
 				return new DisplayData("", "You set the combination to 469. There's a faint clicking sound. "
@@ -241,8 +241,7 @@ public class ForestPath extends Room
 			//===============================================================
 			//If command is to pour water into the basin
 			//===============================================================
-			if ((command.getSubject().matches("water|dasani|bottle") && command.getTarget().contentEquals("basin")) ||
-				(command.getSubject().contentEquals("basin") && command.getTarget().matches("water|dasani|bottle")))
+			if (command.unordered("water|dasani|bottle", "basin"))
 			{
 				//===============================================================
 				//Verify that the player has water in inventory
@@ -264,7 +263,7 @@ public class ForestPath extends Room
 						//=================================================================================
 						//Use the Bottle of Water, which will cause it to break, and create an empty bottle
 						//=================================================================================
-						DisplayData bottleData = this.gameState.getSpace("Bottle of Water").executeCommand(new Command("execute usage", "", ""));
+						DisplayData bottleData = this.gameState.getSpace("Bottle of Water").executeCommand(new Command("execute usage", ""));
 						
 						return new DisplayData("", displayData.getDescription() + bottleData.getDescription());
 					 }
@@ -286,9 +285,7 @@ public class ForestPath extends Room
 			//===============================================================
 			//If the command is to light the torch using the holy zippo
 			//===============================================================
-			if (command.getSubject().contentEquals("torch") ||
-				(command.getSubject().matches("holy|zippo") && command.getTarget().contentEquals("torch")) ||
-				command.getSubject().contentEquals("holy") && command.getTarget().contentEquals("zippo"))
+			if (command.unordered("torch"))
 			{
 				//===============================================================
 				//Verify that the left path switch hasn't already been thrown
@@ -325,7 +322,7 @@ public class ForestPath extends Room
 			//===============================================================
 			//If the command is to take the brooch
 			//===============================================================
-			if (command.getSubject().matches("brooch|religious"))
+			if (command.unordered("brooch|religious"))
 			{
 				this.gameState.flipFlag("brooch taken");
 				this.gameState.flipFlag("brooch in inventory");
@@ -344,7 +341,7 @@ public class ForestPath extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "This stretch of forest is much like the rest, aside from the massive tree at the fork of the path. "
 						+ "The huge oak dominates the area, like a gnarled monarch. "
 						+ "It's so captivating, you almost don't notice the two small figurines seated at its foot, "
@@ -355,7 +352,7 @@ public class ForestPath extends Room
 			//whether or not the combination has been correctly entered, and
 			//whether the brooch has been taken.
 			//===============================================================
-			if (command.getSubject().matches("huge|tree|oak"))
+			if (command.ordered("huge|tree|oak"))
 			{
 				if (this.gameState.getFlag("combination correct").isFlipped() == true)
 					return new DisplayData(this.treeCombinationImage, "It's immense, obviously ancient, much older than the other trees around you. "
@@ -365,19 +362,28 @@ public class ForestPath extends Room
 							+ this.gameState.getFlag("combination correct").toString());
 			}
 
-			if (command.getSubject().matches("figures|figurines|statues|idols"))
+			if (command.ordered("figures|figurines|statues|idols"))
 				return new DisplayData(this.figurineImage, "There are two figures.  The one on the left is some sort of grotesque troll, holding "
 						+ "a torch in one hand, and a triangular symbol with an eye on it, in the other hand. "
 						+ "The one on the right is a kneeling woman, holding a large basin up in front of her. "
 						+ "Some sort of religious idols, possibly? They're unfamiliar to you. ");
 
-			if (command.getSubject().contentEquals("torch"))
+			if (command.ordered("torch"))
 				return new DisplayData("", "The figurine is made of some sort of stone, but the torch is made of wood, inserted into a slot "
 						+ "in the troll's hand. It's tip is wrapped with oily cloth. You think it might be an actual, miniature torch. ");
 
-			if (command.getSubject().contentEquals("basin"))
+			if (command.ordered("basin"))
 				return new DisplayData("", "The figurine is made of stone, as is the basin. If this is indeed a religious idol, it is likely "
 						+ "meant to hold some sort of offering. ");
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -385,6 +391,15 @@ public class ForestPath extends Room
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

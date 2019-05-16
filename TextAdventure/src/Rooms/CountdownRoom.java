@@ -126,7 +126,7 @@ public abstract class CountdownRoom extends Room
 					//timer message to the display data
 					//=================================================================================
 					if (command.getVerb().contentEquals("go") == false ||
-						(command.getVerb().contentEquals("go") && this.checkMovementDirection(command.getSubject()) == false))
+						(command.getVerb().contentEquals("go") && this.checkMovementDirection(command.getMatch(this.movementRegex)) == false))
 					{
 						displayData.appendToDescription(" " + this.messages.get(this.timer - 1));
 					}

@@ -5,7 +5,7 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Items.Item;
 import Items.CustomItems.Torch;
@@ -27,7 +27,7 @@ public class ForestExit extends Room
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Exit";
+		this.name = "ForestExit";
 	}
 
 	@Override
@@ -70,27 +70,21 @@ public class ForestExit extends Room
 		//=================================================================================
 		//Create directions that move to Cave Entrance
 		//=================================================================================
-		this.addMovementDirection("cave", "Cave Entrance");
-		this.addMovementDirection("south", "Cave Entrance");
-		this.addMovementDirection("southern", "Cave Entrance");
-		this.addMovementDirection("stone", "Cave Entrance");
-		this.addMovementDirection("stair", "Cave Entrance");
-		this.addMovementDirection("staircase", "Cave Entrance");
-		this.addMovementDirection("down", "Cave Entrance");
-		
-		if (this.gameState.checkSpace("Cave Entrance") == false)
-			new CaveEntrance(this.gameState);	
+		this.addMovementDirection("cave", "CaveEntrance");
+		this.addMovementDirection("south", "CaveEntrance");
+		this.addMovementDirection("southern", "CaveEntrance");
+		this.addMovementDirection("stair", "CaveEntrance");
+		this.addMovementDirection("stairs", "CaveEntrance");
+		this.addMovementDirection("staircase", "CaveEntrance");
+		this.addMovementDirection("down", "CaveEntrance");
 
 		//=================================================================================
 		//Create directions that move to Back of Cornfield
 		//=================================================================================
-		this.addMovementDirection("west", "Back of Cornfield");
-		this.addMovementDirection("western", "Back of Cornfield");
-		this.addMovementDirection("exit", "Back of Cornfield");
-		this.addMovementDirection("gate", "Back of Cornfield");
-		
-		if (this.gameState.checkSpace("Back of Cornfield") == false)
-			new BackOfCornfield(this.gameState);	
+		this.addMovementDirection("west", "BackOfCornfield");
+		this.addMovementDirection("western", "BackOfCornfield");
+		this.addMovementDirection("exit", "BackOfCornfield");
+		this.addMovementDirection("gate", "BackOfCornfield");
 	}
 
 	@Override
@@ -103,13 +97,15 @@ public class ForestExit extends Room
 	protected void createFlags() 
 	{
 		//=================================================================================
-		//Flag for whether the gate has been unbarred
+		//Flag for whether the gate has been unbarred.  Create only if it doesn't already exist.
+		//This flag also used in Back of Cornfield room.
 		//=================================================================================
-		this.gameState.addFlag("gate unbarred", new Flag(false, "The gate is barred closed with a piece of heavy timber. ", 
-				"It's sitting slightly ajar, the bar once holding it closed lightly off to the side, on the ground. "));
+		if (this.gameState.checkFlag("bate unbarred") == false)
+			this.gameState.addFlag("gate unbarred", new Flag(false, "The gate is barred closed with a piece of heavy timber. ", 
+					"It's sitting slightly ajar, the bar once holding it closed lightly off to the side, on the ground. "));
 
 		//=================================================================================
-		//Flag for whether the gate has been unbarred
+		//Flag for whether the troll scene where he unbars the gate has ran or not
 		//=================================================================================
 		this.gameState.addFlag("troll scene ran", new Flag(false, "", ""));
 	}
@@ -130,17 +126,17 @@ public class ForestExit extends Room
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.ordered("back"))
 				return this.displayOnEntry();
 			
 			//===============================================================
 			//If exit forest to back of cornfield, only allow if gate has
 			//been unbarred
 			//===============================================================
-			if (command.getSubject().matches("west|exit|gate|western"))
+			if (command.ordered("west|exit|gate|western"))
 			{
 				if (this.gameState.checkFlipped("gate unbarred"))
-					return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+					return this.move(command);
 				else
 					return new DisplayData("", "The gate is barred closed. ");
 			}
@@ -148,8 +144,8 @@ public class ForestExit extends Room
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -168,7 +164,7 @@ public class ForestExit extends Room
 			//===============================================================
 			//Attempt to unbar the gate.  Results in failure.
 			//===============================================================
-			if (command.getSubject().matches("gate|bar|timber"))
+			if (command.ordered("gate|bar|timber"))
 				return new DisplayData("", "You try to lift the heavy timber barring the gate from its seating, but it's just too heavy for you. ");
 
 			//===============================================================
@@ -182,13 +178,13 @@ public class ForestExit extends Room
 			//===============================================================
 			//If take stair|staircase, then move to cave entrance
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getMatch(this.movementRegex)));
 
 			//===============================================================
 			//Take a torch
 			//===============================================================
-			if (command.getSubject().contentEquals("torch"))
+			if (command.ordered("torch"))
 			{
 				//===============================================================
 				//Verify that the player doesn't already have a torch
@@ -222,12 +218,12 @@ public class ForestExit extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.ordered("around|area|room") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "This area looks like it saw a fair bit of use at one time. "
 						+ "There are still some old bootprints visible in the dirt, and some rather large bare footprints... "
 						+ "There are a couple of sawhorses off to one side, with a few old rotted boards, and a smallish wooden box. ");
 
-			if (command.getSubject().matches("gate|barred"))
+			if (command.ordered("gate|barred"))
 			{
 				//===============================================================
 				//Adjust description based on whether the gate is still barred
@@ -242,15 +238,24 @@ public class ForestExit extends Room
 					return new DisplayData("", gateDescription + "A heavy piece of timber bars the gate closed. ");
 			}
 
-			if (command.getSubject().matches("box|wooden"))
+			if (command.ordered("box|wooden"))
 				return new DisplayData("", "It looks like a small wooden crate. Looking inside, you see several old torches. "
 						+ "They still look good, probably preserved from the elements by the oil they're soaked with. ");
 
-			if (command.getSubject().matches("saw|horse|horses|sawhorse|sawhorses"))
+			if (command.ordered("saw|horse|horses|sawhorse|sawhorses"))
 				return new DisplayData("", "Someone was doing some carpentry here once upon a time. The sawhorses are a bit rickety now, but not rotten. ");
 
-			if (command.getSubject().matches("rotted|boards"))
+			if (command.ordered("rotted|boards"))
 				return new DisplayData("", "They're old and rotted, no strength left in them. They're of no use. ");
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
@@ -258,6 +263,15 @@ public class ForestExit extends Room
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

@@ -5,7 +5,7 @@
  * @due 05-01-2019
  */
 
-package Rooms.CustomRooms;
+package Rooms.CustomRooms.Forest;
 
 import Items.BasicItem;
 import Items.Item;
@@ -27,7 +27,7 @@ public class ForestClearing extends CountdownRoom
 	@Override
 	protected void setName() 
 	{
-		this.name = "Forest Clearing";
+		this.name = "ForestClearing";
 	}
 
 	@Override
@@ -82,12 +82,9 @@ public class ForestClearing extends CountdownRoom
 		//=================================================================================
 		//Create directions that move to Forest Path
 		//=================================================================================
-		this.addMovementDirection("west", "Forest Path");
-		this.addMovementDirection("tree", "Forest Path");
-		this.addMovementDirection("path", "Forest Path");
-		
-		if (this.gameState.checkSpace("Forest Path") == false)
-			new ForestPath(this.gameState);	
+		this.addMovementDirection("west", "ForestPath");
+		this.addMovementDirection("tree", "ForestPath");
+		this.addMovementDirection("path", "ForestPath");
 	}
 
 	@Override
@@ -98,7 +95,7 @@ public class ForestClearing extends CountdownRoom
 		//=================================================================================
 		Item holyZippo = new BasicItem(this.gameState, "Holy Zippo", "", "A zippo lighter with the \"eye within a pyramid\" symbol on it. "
 				+ "You came by it in a rather unusual fashion... Could it possibly have special properities? ");
-		this.gameState.addItemSearch(holyZippo.getName(), "holy", "zippo", "lighter");
+		this.gameState.addItemSynonyms(holyZippo, "holy", "zippo", "lighter");
 		this.gameState.addSpace(holyZippo.getName(), holyZippo);
 	}
 
@@ -138,14 +135,14 @@ public class ForestClearing extends CountdownRoom
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
-			if (command.getSubject().contentEquals("back"))
+			if (command.unordered("back"))
 				return this.displayOnEntry();
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
-			if (this.checkMovementDirection(command.getSubject()) == true)
-				return this.gameState.setCurrentRoom(this.getMovementDirectionRoom(command.getSubject()));
+			if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				return this.move(command);
 
 			//===============================================================
 			//Go / Move command not recognized
@@ -164,8 +161,7 @@ public class ForestClearing extends CountdownRoom
 			//===============================================================
 			//If command is to pour water into the basin
 			//===============================================================
-			if ((command.getSubject().matches("water|dasani|bottle") && command.getTarget().contentEquals("basin")) ||
-				(command.getSubject().contentEquals("basin") && command.getTarget().matches("water|dasani|bottle")))
+			if (command.unordered("water|dasani|bottle", "basin"))
 			{
 				//===============================================================
 				//Verify that the player has water in inventory
@@ -185,7 +181,7 @@ public class ForestClearing extends CountdownRoom
 						//=================================================================================
 						//Use the Bottle of Water, which will cause it to break, and create an empty bottle
 						//=================================================================================
-						DisplayData bottleData = this.gameState.getSpace("Bottle of Water").executeCommand(new Command("execute usage", "", ""));
+						DisplayData bottleData = this.gameState.getSpace("Bottle of Water").executeCommand(new Command("execute usage", ""));
 						
 						return new DisplayData("", displayData.getDescription() + bottleData.getDescription());
 					 }
@@ -226,7 +222,7 @@ public class ForestClearing extends CountdownRoom
 			//Take the lighter.  Can only be done if the "praying complete"
 			//flag has been flipped, and the "zippo taken" flag has not.
 			//===============================================================
-			if (command.getSubject().matches("zippo|lighter|shiny"))
+			if (command.unordered("zippo|lighter|shiny"))
 			{
 				if (this.gameState.checkFlipped("praying completed") == true)
 				{
@@ -255,12 +251,12 @@ public class ForestClearing extends CountdownRoom
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.getSubject().contentEquals("around"))
+			if (command.unordered("around|room|area") || command.getSentence().contentEquals("search"))
 				return new DisplayData("", "While this seems like a nice, sunny spot in the middle of this shadowy forest, "
 						+ "it has a heavy feeling around it, a sense of foreboding, that ruins the image. "
 						+ "The encroaching forest at the edges of the clearing seems particularly dense here, for some reason. ");
 
-			if (command.getSubject().contentEquals("altar"))
+			if (command.unordered("altar"))
 			{
 				String description = "It looks to be a construction of a brick column, with a concrete slab on top. "
 						+ "In the center of the slab is a hollowed out basin, a couple of hands across. "
@@ -275,16 +271,35 @@ public class ForestClearing extends CountdownRoom
 				return new DisplayData("", description);
 			}
 
-			if (command.getSubject().matches("statue|statues|figure|figures|figurine|figurines"))
+			if (command.unordered("statue|statues|figure|figures|figurine|figurines"))
 				return new DisplayData("", "These statues are much larger than the one beneath the huge tree, "
 						+ "and they have no basins, but seem otherwise identical. They seem to be hewn from concrete. ");
 
+
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			DisplayData displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
 			return new DisplayData("", "You don't see that here.");
 
 		default: 
+			//===============================================================
+			//If default is reached, check to see if the command contained an 
+			//inventory item.  If yes, run the command through it.  If the
+			//result is not null, return it.
+			//===============================================================
+			displayData = this.inventoryTest(command);
+			if (displayData != null)
+				return displayData;
+			
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================

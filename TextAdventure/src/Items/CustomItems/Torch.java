@@ -30,7 +30,7 @@ public class Torch extends Item
 		//===============================================================
 		this.name = "Torch";
 		this.state = "(unlit)";
-		this.gameState.addItemSearch(this.name, "torch", "lit", "unlit");
+		this.gameState.addItemSynonyms(this, "torch", "unlit", "lit");
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class Torch extends Item
 			//===============================================================
 			//Put out the torch
 			//===============================================================
-			if (command.getSubject().matches("lit|torch") || command.getTarget().matches("lit|torch"))
+			if (command.unordered("lit|torch"))
 			{
 				//===============================================================
 				//Verify that the torch is lit
@@ -103,7 +103,7 @@ public class Torch extends Item
 			//===============================================================
 			//Light the torch
 			//===============================================================
-			if (command.getSubject().matches("unlit|torch") || command.getTarget().matches("unlit|torch"))
+			if (command.unordered("unlit|torch"))
 			{
 				//===============================================================
 				//Verify that the torch isn't already lit
@@ -124,6 +124,10 @@ public class Torch extends Item
 				else
 					return new DisplayData("", "The torch is already lit. ");
 			}
+			
+		case "look":
+			if (command.unordered(this.regex))
+				return this.displayOnEntry();
 			
 		default: 
 			//===============================================================

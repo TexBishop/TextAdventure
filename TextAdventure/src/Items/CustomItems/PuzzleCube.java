@@ -13,6 +13,7 @@ public class PuzzleCube extends Item
 	public PuzzleCube(GameState gameState) 
 	{
 		super(gameState);
+		this.regex = "puzzle|cube|puzzlecube|puzzle cube";
 		this.image = this.cubeImage;
 	}
 
@@ -20,7 +21,7 @@ public class PuzzleCube extends Item
 	protected void setName() 
 	{
 		this.name = "Puzzle Cube";
-		this.gameState.addItemSearch(this.name, "puzzle", "cube", "puzzlecube");
+		this.gameState.addItemSynonyms(this, "puzzlecube", "puzzle cube", "puzzle", "cube");
 	}
 
 	@Override
@@ -82,19 +83,15 @@ public class PuzzleCube extends Item
 			//Provide cases for either the shape then circle, or circle
 			//then shape, in the command.
 			//===============================================================
-			if ((command.getSubject().matches("center|circle") && command.getTarget().matches("cross|cog|diamond|square|triangle|triangular|star")) ||
-				(command.getSubject().matches("cross|cog|diamond|square|triangle|triangular|star") && command.getTarget().matches("center|circle")) ||
-				(command.getSubject().matches("small|large") && command.getTarget().matches("center|circle")))
+			if (command.unordered("center|circle", "cross|cog|diamond|square|triangle|triangular|star") ||
+				command.unordered("small|large", "center|circle"))
 			{
 				//===============================================================
 				//If the wrong side is used, or the correct side is used, but at
 				//the wrong time.
 				//===============================================================
-				if (command.getTarget().matches("cross|cog|diamond|square|triangle|triangular") ||
-					command.getSubject().matches("cross|cog|diamond|square|triangle|triangular") ||
-					command.getSubject().contentEquals("small") ||
-					(command.getTarget().contentEquals("star") && this.gameState.checkFlipped("star pressed") == true) ||
-					(command.getSubject().matches("star|large") && this.gameState.checkFlipped("star pressed") == true))
+				if (command.unordered("cross|cog|diamond|square|triangle|triangular|small") ||
+				    (command.unordered("star|large") && this.gameState.checkFlipped("star pressed") == true))
 					return this.gameState.death("You press in the center circle. There's a click. "
 							+ "You feel a pain in your finger, that lances up your arm, straight into your head. "
 							+ "The pain intensifies, spreading throughout your body. "
@@ -104,8 +101,7 @@ public class PuzzleCube extends Item
 				//===============================================================
 				//If the correct side is used, at the correct time
 				//===============================================================
-				if ((command.getTarget().contentEquals("star") && this.gameState.checkFlipped("star pressed") == false) ||
-					(command.getSubject().matches("star|large") && this.gameState.checkFlipped("star pressed") == false))
+				if (command.unordered("star|large") && this.gameState.checkFlipped("star pressed") == false)
 				{
 					this.gameState.flipFlag("star pressed");
 					return new DisplayData("", "The circle depresses inward. On the opposite side, the cog begins to extrude. "
@@ -117,7 +113,7 @@ public class PuzzleCube extends Item
 			//If the player presses the cog after turning the cog, complete
 			//the puzzle
 			//===============================================================
-			if (command.getSubject().contentEquals("cog") && this.gameState.checkFlipped("cog turned") == true)
+			if (command.unordered("cog") && this.gameState.checkFlipped("cog turned") == true)
 			{
 				if (this.gameState.checkFlipped("cog pressed") == false)
 				{
@@ -140,7 +136,7 @@ public class PuzzleCube extends Item
 			//===============================================================
 			//If the player turns the cog
 			//===============================================================
-			if (command.getSubject().contentEquals("cog"))
+			if (command.unordered("cog"))
 			{
 				//===============================================================
 				//Verify that the cog is extruded
@@ -150,7 +146,7 @@ public class PuzzleCube extends Item
 					//===============================================================
 					//If the player turns it the wrong direction
 					//===============================================================
-					if (command.getTarget().matches("left|counterclockwise|counter-clockwise"))
+					if (command.unordered("left|counterclockwise|counter clockwise"))
 						return this.gameState.death("You turn the cog counter-clockwise, until you hear a click. It stops turning. "
 								+ "Your hand suddenly goes numb, then your arm, then the rest of your body, all in quick succession. "
 								+ "Your flesh begins wither away before your eyes, and you slowly lose conciousness. ");
@@ -158,7 +154,7 @@ public class PuzzleCube extends Item
 					//===============================================================
 					//If the player turns it the correct direction
 					//===============================================================
-					if (command.getTarget().matches("right|clockwise"))
+					if (command.unordered("right|clockwise"))
 					{
 						this.gameState.flipFlag("cog turned");
 						return new DisplayData("", "You turn the cog clockwise, until you hear a click. It stops turning. ");
@@ -184,6 +180,10 @@ public class PuzzleCube extends Item
 			//If the player tries to solve the puzzle indirectly
 			//===============================================================
 			return new DisplayData("", "You aren't sure how to do that. ");
+			
+		case "look":
+			if (command.unordered(this.regex))
+				return this.displayOnEntry();
 			
 		default: 
 			//===============================================================

@@ -31,6 +31,7 @@ public abstract class Item implements Space, Serializable
 	protected String image;
 	protected String description;
 	protected String state;
+	protected String regex = "";
 	
 	public Item(GameState gameState) 
 	{
@@ -68,8 +69,23 @@ public abstract class Item implements Space, Serializable
 		return this.name;
 	}
 	
+	public void setState(String state)
+	{
+		this.state = state;
+	}
+	
 	public String getState()
 	{
 		return this.state;
+	}
+	
+	public void setRegex(String regex)
+	{
+		this.regex = regex;
+	}
+	
+	public String getRegex()
+	{
+		return this.regex;
 	}
 }
