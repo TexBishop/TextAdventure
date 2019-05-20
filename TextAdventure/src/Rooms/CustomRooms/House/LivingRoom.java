@@ -12,11 +12,11 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
-
+import Structure.GasLeak;
 import Items.BasicItem;
 import Items.Item;
 
-public class LivingRoom extends Room 
+public class LivingRoom extends Room implements GasLeak
 {
 
 	private static final long serialVersionUID = 1L;
@@ -24,6 +24,7 @@ public class LivingRoom extends Room
 	public LivingRoom(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 
 	@Override
@@ -49,6 +50,12 @@ public class LivingRoom extends Room
 				+ "You can see the kitchen through a doorway on one side, and the entryway through another. ";
 
 		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 1);
 	}
 
 	@Override
@@ -98,7 +105,7 @@ public class LivingRoom extends Room
 		//=================================================================================
 		this.gameState.addFlag("rug moved", new Flag(false, "", "Part of the rug is thrown back, revealing a safe set into the floor. "));
 		this.gameState.addFlag("couch searched", new Flag(false, "", ""));
-		this.gameState.addFlag("wire taken", new Flag(false, "", ""));
+		this.gameState.addFlag("wire taken", new Flag(false, "Pulling the cushions back, all you find hiding underneath is an old, frayed length of copper wire. ", ""));
 	}
 
 	@Override
@@ -115,6 +122,9 @@ public class LivingRoom extends Room
 		case "fold":
 		case "remove":
 		case "move":
+			//===============================================================
+			//Move rug
+			//===============================================================
 			if(command.unordered("rug|carpet"))
 			{
 				if(this.gameState.checkFlipped("rug moved") == false)
@@ -126,7 +136,7 @@ public class LivingRoom extends Room
 							+ "Such a thing seems out of place here, in these rural surroundings. ");
 				}
 				else
-					return new DisplayData("", "You have already moved the rug.");
+					return new DisplayData("", "You have already moved the rug. ");
 			}
 			
 			//===============================================================
@@ -137,6 +147,13 @@ public class LivingRoom extends Room
 				return new DisplayData("", "That doesn't work. ");
 			
 		case "go": 
+			//===============================================================
+			//'enter' is a synonym for go.
+			//If 'enter' is used for safe, redirect command to code entry.
+			//===============================================================
+			if (command.unordered("enter", "safe|7852"))
+				return this.executeCommand(new Command("enter", command.getSentence()));
+			
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
@@ -152,7 +169,7 @@ public class LivingRoom extends Room
 			//===============================================================
 			//Go / Move command not recognized
 			//===============================================================
-			return new DisplayData("", "Can't go that direction.");
+			return new DisplayData("", "Can't go that direction. ");
 
 		case "return":
 			//===============================================================
@@ -170,23 +187,23 @@ public class LivingRoom extends Room
 			{
 				if (this.gameState.checkFlipped("couch searched"))
 				{
-					if (this.gameState.checkFlipped("paperclip taken") == false)
+					if (this.gameState.checkFlipped("wire taken") == false)
 					{
 						this.gameState.addToInventory("Copper Wire");
 						this.gameState.flipFlag("wire taken");
-						return new DisplayData("", "You take the copper wire.");
+						return new DisplayData("", "You take the copper wire. ");
 					}
 					else
-						return new DisplayData("", "You've already taken that.");
+						return new DisplayData("", "You've already taken that. ");
 				}
 				else
-					return new DisplayData("", "You don't see that here.");
+					return new DisplayData("", "You don't see that here. ");
 			}			
 
 			//===============================================================
 			//Subject not recognized.
 			//===============================================================
-			return new DisplayData("", "Can't take that.");
+			return new DisplayData("", "Can't take that. ");
 			
 		case "7852":
 		case "key":
@@ -231,7 +248,7 @@ public class LivingRoom extends Room
 								+ "but it doesn't currently have any power. It's unresponsive. ");
 				}
 				else
-					return new DisplayData("", "You don't see that here.");
+					return new DisplayData("", "You don't see that here. ");
 			}
 			
 			//===============================================================
@@ -254,7 +271,7 @@ public class LivingRoom extends Room
 								+ "but it doesn't currently have any power. It's unresponsive. ");
 				}
 				else
-					return new DisplayData("", "You don't see that here.");
+					return new DisplayData("", "You don't see that here. ");
 			}
 
 			//===============================================================
@@ -281,7 +298,7 @@ public class LivingRoom extends Room
 				this.gameState.flipFlag("couch searched");
 				return new DisplayData("", "It's covered in rips, stuffing coming out and springs exposed. "
 						+ "Caked with years of filth, it has an animal smell about it which almost puts you off of examining it. "
-						+ "Pulling the cushions back, all you find hiding underneath is an old, frayed length of copper wire. ");
+						+ this.gameState.getFlag("wire taken").toString());
 			}
 			
 			if (command.ordered("under|beneath", "rug|carpet"))
@@ -295,12 +312,20 @@ public class LivingRoom extends Room
 							+ "Such a thing seems out of place here, in these rural surroundings. ");
 				}
 				else
-					return new DisplayData("", "You have already moved the rug.");
+					return new DisplayData("", "You have already moved the rug. ");
 			}
 				
 			if (command.unordered("rug|floor"))
 				return new DisplayData("", "This rug has seen better days. "
 						+ "It's so covered in filth and mildew that you can only guess at its original color. ");
+
+			if (this.gameState.checkFlipped("rug moved"))
+			{
+				if (command.unordered("safe"))
+					return new DisplayData("", "It's a small electronic safe, with a keypad for lock code input. It's an old design. "
+							+ "It seems to be set directly into the concrete of the foundation. "
+							+ "It may be small, but there's no chance you can move this thing. ");
+			}
 			
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
@@ -314,7 +339,7 @@ public class LivingRoom extends Room
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");	
+			return new DisplayData("", "You don't see that here. ");	
 
 		default: 
 			//===============================================================
@@ -329,7 +354,7 @@ public class LivingRoom extends Room
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't do that here.");
+			return new DisplayData("", "Can't do that here. ");
 		}
 	}
 

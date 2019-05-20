@@ -14,15 +14,16 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.GasLeak;
 
-public class MasterBedroom extends Room 
+public class MasterBedroom extends Room implements GasLeak
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public MasterBedroom(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 
 	@Override
@@ -40,19 +41,22 @@ public class MasterBedroom extends Room
 	@Override
 	public String fullDescription() 
 	{
-		if(this.gameState.checkFlipped("power restored") == true && this.gameState.checkFlipped("phone answered") == false)
-		{
-			this.description = "Immediately as you enter the master bedroom you are greeted "
-					+ "with the clanging sound of a phone ringing. You look across the room "
-					+ "and see the culprit; an old rotary dial telephone sitting haughtily on "
-					+ "a nightstand. Right next to it, a king-size bed takes up most of the room.";
-		}
-		else
-			this.description = "You step into the master bedroom, and almost stumble into the king-size "
-					+ "bed taking up most of the room. Next to the bed, there is a nightstand, with a "
-					+ "handsome old-fashioned telephone.";
+		this.description = "This room is cleaner than the others you've seen here. "
+				+ "Still, it's obvious no one has been here for a while, looking at the dust covering everything. "
+				+ "An old stained mattress leans against the far wall, no bed frame available for it. "
+				+ "There's a window on one wall, overlooking the front yard. "
+				+ "Underneath the window lies an old rotary phone. ";
 		
+		if (this.gameState.checkFlipped("phone answered") == false)
+			this.description += this.gameState.getFlag("phone observed").toString();
+
 		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 4);
 	}
 
 	@Override
@@ -63,6 +67,8 @@ public class MasterBedroom extends Room
 		//=================================================================================
 		this.addMovementDirection("hallway", "UpstairsHallway");
 		this.addMovementDirection("hall", "UpstairsHallway");
+		this.addMovementDirection("leave", "UpstairsHallway");
+		this.addMovementDirection("exit", "UpstairsHallway");
 	}
 
 	@Override
@@ -79,7 +85,8 @@ public class MasterBedroom extends Room
 	@Override
 	public void createFlags() 
 	{
-		this.gameState.addFlag("phone answered", new Flag(false, "", "Phone answered."));
+		this.gameState.addFlag("phone answered", new Flag(false, "Suddenly, the phone starts ringing, startling you. ", ""));
+		this.gameState.addFlag("phone observed", new Flag(false, "", "The phone is ringing. "));
 	}
 	
 	
@@ -95,6 +102,8 @@ public class MasterBedroom extends Room
 		switch (command.getVerb())
 		{
 		case "move":  //doing this will cause move to execute the look code
+		case "leave":
+		case "exit":
 		case "go": 
 			//===============================================================
 			//If go back, return base room DisplayData.
@@ -111,7 +120,7 @@ public class MasterBedroom extends Room
 			//===============================================================
 			//Go / Move command not recognized
 			//===============================================================
-			return new DisplayData("", "Can't go that direction.");
+			return new DisplayData("", "Can't go that direction. ");
 			
 		case "return":
 			//===============================================================
@@ -126,57 +135,70 @@ public class MasterBedroom extends Room
 			//===============================================================
 			if (command.unordered("phone|telephone"))
 			{
-				if(this.gameState.checkFlipped("phone answered") == false)
-				{	
-					this.gameState.flipFlag("phone answered");
-					this.gameState.addToInventory("Note with Number");
-					return new DisplayData("", "You pick up the phone. A gravelly voice "
-							+ "whispers in your ear: 7852. The line then goes dead...  "
-							+ "What was that? Maybe it's important. "
-							+ "You search around for a scrap of paper and pull out a pen, writing it down. ");
+				if (this.gameState.checkFlipped("phone observed") == true)
+				{
+					if(this.gameState.checkFlipped("phone answered") == false)
+					{	
+						this.gameState.flipFlag("phone answered");
+						this.gameState.addToInventory("Note with Number");
+						return new DisplayData("", "You pick up the phone. A gravelly voice "
+								+ "whispers in your ear: 7852. The line then goes dead...  "
+								+ "What was that? Maybe it's important. "
+								+ "You search around for a scrap of paper and pull out a pen, writing it down. "
+								+ "Only after do you wonder how a phone with no line was able to function. ");
+					}
+					else
+						return new DisplayData("", "You pick up the phone, but it's dead. ");
 				}
 				else
-					return new DisplayData("", "You pick up the phone, but it's dead. ");
+					return new DisplayData("", "You put the phone up to your ear. The line is dead. "
+							+ "You notice that it doesn't have a wire. ");
 			}
 			
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			return new DisplayData("", "You don't see that here. ");
 			
 		case "search":  //synonyms
 		case "look":
 			//===============================================================
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
-			//===============================================================
-			if (command.unordered("bed|mattress"))
-				return new DisplayData("", "Such a shame that a huge, high-quality matress "
-						+ "such as this would be abandoned as it was. It has been left to "
-						+ "the pests that now inhabit the place.");
+			//===============================================================	
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
+				return new DisplayData("", "Looking around the room, you notice that there isn't a closet. "
+						+ "Maybe that's a modern thing. This farmhouse is pretty old. "
+						+ "It smells like mothballs in here. ");
 			
-			if (command.unordered("phone|telephone|nightstand"))
-				if(this.gameState.checkFlipped("power restored") == true)
+			if (command.unordered("window|front yard|yard"))
+				return new DisplayData("", "The window is so dirty that it's difficult to make anything out through it, not that there's "
+						+ "much to see out there anyways. Just the unkempt lawn and the mailbox. ");
+			
+			if (command.unordered("mattress"))
+				return new DisplayData("", "It's huge, king sized. "
+						+ "You can see why it was left behind, deep impressions worn into it from years of use, with frayed areas aplenty. "
+						+ "It's covered with a multitude of old, unidentifiable stains. ");
+			
+			if (command.unordered("telephone|phone|rotary"))
+			{
+				if (this.gameState.checkFlipped("phone observed") == false)
 				{
-					if(this.gameState.checkFlipped("phone answered") == false)
-					{	
-						return new DisplayData("", "The noise of the phone ring is truly horrible. "
-								+ "Answer it before you go deaf.");
-					}
-					else
-						return new DisplayData("", "A classy rotary dial phone. I hear they are indestructible. "
-								+ "It sits on a wooden nightstand. ");
+					this.gameState.flipFlag("phone observed");
+					return new DisplayData("", "It's an old rotary phone, like you'd see in an old movie. It's heavy. "
+							+ "There's no wire for it, but it wouldn't have any service anyways. "
+							+ this.gameState.getFlag("phone answered").toString());
 				}
 				else
-					return new DisplayData("", "A classy rotary dial phone. I hear they are indestructible. "
-							+ "It sits on a wooden nightstand. ");
-			
-			//===============================================================
-			//look around
-			//===============================================================		
-			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
-				return new DisplayData("", "On the far wall, there is a large curtained window "
-						+ "with a sprawling view of cornfields. Beyond them, there a forest begins.");
+				{
+					if (this.gameState.checkFlipped("phone answered") == false)
+						return new DisplayData("", "It's an old rotary phone, like you'd see in an old movie. It's heavy. "
+								+ "There's no wire for it, but it's still ringing, somehow. ");
+					else
+						return new DisplayData("", "It's an old rotary phone, like you'd see in an old movie. It's heavy. "
+								+ "There's no wire for it, but that didn't stop it from working earlier. ");
+				}
+			}
 
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
@@ -190,7 +212,7 @@ public class MasterBedroom extends Room
 			//===============================================================
 			//No command matches, return failure.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			return new DisplayData("", "You don't see that here. ");
 			
 		default: 
 			//===============================================================
@@ -205,7 +227,7 @@ public class MasterBedroom extends Room
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't do that here.");
+			return new DisplayData("", "Can't do that here. ");
 		}
 	}
 

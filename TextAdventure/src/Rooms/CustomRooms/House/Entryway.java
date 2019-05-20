@@ -12,11 +12,12 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.GasLeak;
 import Structure.MultiFlag;
 import Items.BasicItem;
 import Items.Item;
 
-public class Entryway extends Room 
+public class Entryway extends Room implements GasLeak
 {
 
 	private static final long serialVersionUID = 1L;
@@ -24,6 +25,7 @@ public class Entryway extends Room
 	public Entryway(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 
 	@Override
@@ -48,6 +50,12 @@ public class Entryway extends Room
 				+	"On the left, warped, weathered stairs lead up to the second floor. ";
 
 		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 2);
 	}
 
 	@Override
@@ -108,15 +116,16 @@ public class Entryway extends Room
 		//=================================================================================
 		//Flags used in multiple rooms beyond this point
 		//=================================================================================
-		this.gameState.addFlag("generator started", new Flag(false, "", ""));
 
 		//=================================================================================
-		//This multiflag represents the house receiving working power
+		//These flags are used for the house receiving working power
 		//=================================================================================
+		this.gameState.addFlag("generator started", new Flag(false, "", ""));
+		
 		MultiFlag power = new MultiFlag(this.gameState, false, "", "");
-		power.addFlag("wire installed");
-		power.addFlag("master switch on");
-		power.addFlag("generator started");
+		power.addFlag("wire installed", true);
+		power.addFlag("master switch on", true);
+		power.addFlag("generator started", true);
 		this.gameState.addFlag("power restored", power);
 	}
 
@@ -148,7 +157,7 @@ public class Entryway extends Room
 			//===============================================================
 			//Go / Move command not recognized
 			//===============================================================
-			return new DisplayData("", "Can't go that direction.");
+			return new DisplayData("", "Can't go that direction. ");
 
 		case "return":
 			//===============================================================
@@ -181,7 +190,7 @@ public class Entryway extends Room
 					return new DisplayData("", "Careful not to cut yourself on the broken glass, you fish the screwdriver out of the old clock. ");
 				}
 				else
-					return new DisplayData("", "You've already taken that.");
+					return new DisplayData("", "You've already taken that. ");
 			}			
 
 			//===============================================================
@@ -202,7 +211,7 @@ public class Entryway extends Room
 							+ "Behind the painting is a breaker box. ");
 				}
 				else
-					return new DisplayData("", "You've already done that.");
+					return new DisplayData("", "You've already done that. ");
 			}			
 
 			//===============================================================
@@ -221,12 +230,27 @@ public class Entryway extends Room
 				{
 					if (this.gameState.checkFlipped("master switch on") == false)
 					{
-						this.gameState.flipFlag("master switch on");
 						if (this.gameState.checkFlipped("generator started") == false)
-							return new DisplayData("", "You flip the Master switch to the 'On' position. Nothing noticable happens. ");
+							return new DisplayData("", "You flip the Master switch back and forth, but nothing happens. There's no power. ");
 						else
+						{
+							//===============================================================
+							//If there are lethal levels of gas, trigger death
+							//===============================================================
+							this.gameState.flipFlag("master switch on");
+							if (this.isLevelLethal(gameState, this.getName()))
+								return this.gameState.death("You flip the Master switch to the 'On' position. "
+										+ "A spark comes from the exposed wire. "
+										+ "You have only a second to realize your mistake, before the gas you've been smelling in the air ignites. "
+										+ "The room is enveloped in flame, blasting you with hellish fury. "
+										+ "Thankfully, the pain only lasts a moment... ");
+
+							//===============================================================
+							//Else, you just see a spark
+							//===============================================================
 							return new DisplayData("", "You flip the Master switch to the 'On' position. "
 									+ "You see a spark come from the exposed wire. ");
+						}
 					}
 					else
 					{
@@ -235,18 +259,19 @@ public class Entryway extends Room
 					}
 				}
 				else
-					return new DisplayData("", "You don't see that here.");
+					return new DisplayData("", "You don't see that here. ");
 			}			
 
 			//===============================================================
 			//No command matches, return failure.
 			//===============================================================
-			return new DisplayData("", "Can't take that.");
+			return new DisplayData("", "Can't take that. ");
 
 		case "place":
 		case "repair":
 		case "fix":
 		case "bridge":
+		case "reconnect":
 		case "use":
 			//===============================================================
 			//Use copper wire to repair cut wire
@@ -274,16 +299,32 @@ public class Entryway extends Room
 						}
 					}
 					else
-						return new DisplayData ("", "You don't have that item.");
+						return new DisplayData ("", "You don't have that item. ");
 				}
 				else
-					return new DisplayData ("", "You have already done that.");
+					return new DisplayData ("", "You have already done that. ");
+			}
+
+			//===============================================================
+			//Try to repair wire without the copper wire
+			//===============================================================
+			if (command.unordered("wire"))
+			{
+				if (this.gameState.checkFlipped("master switch on") == true &&
+						this.gameState.checkFlipped("generator started") == true)
+					{
+						return this.gameState.death("You realize your mistake as soon as you touch the exposed wire. "
+								+ "It feels hot as the electricity courses through you, and your eyeballs warm as they cook. "
+								+ "Your sight fades. ");
+					}
+				else
+					return new DisplayData("", "You try to reconnect the wire, but the ends aren't long enough to reach one another. ");
 			}
 
 			//===============================================================
 			//No command matches, return failure.
 			//===============================================================
-			return new DisplayData ("", "Can't do that here.");
+			return new DisplayData ("", "Can't do that here. ");
 
 		case "search":  //doing this will cause search to execute the look code
 		case "look":
@@ -349,7 +390,7 @@ public class Entryway extends Room
 			//===============================================================
 			//No command matches, return failure.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			return new DisplayData("", "You don't see that here. ");
 
 		default: 
 			//===============================================================
@@ -364,7 +405,7 @@ public class Entryway extends Room
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't do that here.");
+			return new DisplayData("", "Can't do that here. ");
 		}
 	}
 

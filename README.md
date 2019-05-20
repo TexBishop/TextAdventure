@@ -30,10 +30,8 @@ Section 1 – User Interaction
 	•	The inventory window will list the player’s current inventory list   
 	•	The Help window will contain a list of instructions for playing the game   
 3.	Commands   
-	•	Commands will be divided into three parts: verb, subject and target   
-	•	The verb should be the first word in a command   
-	•	The first noun will be the subject, the second the target   
-	•	To interact with items currently in inventory, the word “inventory” must be included as the subject or the target   
+	•	Commands can be written freeform without structure, aside from one rule:  The verb should be the first word in the command   
+	•	If the user is having trouble getting an inventory item to do something, focus can be forced to the inventory using the keywords "inventory" or "my", and the item.   
 
 
 Section 2 – System

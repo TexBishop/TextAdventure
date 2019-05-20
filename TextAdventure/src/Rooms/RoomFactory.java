@@ -9,14 +9,16 @@ package Rooms;
 
 import Structure.GameState;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
 /**
  * Used to instantiate rooms
  * @author Tex Bishop
  */
-public class RoomFactory 
+public class RoomFactory implements Serializable
 {
+	private static final long serialVersionUID = 1L;
 	private GameState gameState;
 	
 	public RoomFactory(GameState gameState)

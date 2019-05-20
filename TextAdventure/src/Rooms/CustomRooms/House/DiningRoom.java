@@ -12,17 +12,18 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.GasLeak;
 import Items.BasicItem;
 import Items.Item;
 
-public class DiningRoom extends Room 
+public class DiningRoom extends Room implements GasLeak
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public DiningRoom(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 
 	@Override
@@ -40,12 +41,19 @@ public class DiningRoom extends Room
 	@Override
 	public String fullDescription() 
 	{
-		this.description = "As you step into the dining room, you immediately recognize a large table"
-				+ "taking up much of the room, and three large candles illuminating the dark room with a "
-				+ "faint orange glow. A small dresser squats in one of the corners. There are doorways to "
-				+ "the entryway and the kitchen.";
+		this.description = "You step into the dining room. "
+				+ "You're surprised to find that there's actually a table here, and it isn't broken. "
+				+ "Its surface isn't in great shape, but it's all in one piece, and looks sturdy. "
+				+ "Built into one wall is a china cabinet, with shelves up top and a couple of drawers beneath. "
+				+ "You see the kitchen through a doorway on one side, and the entryway through another. ";
 		
 		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 1);
 	}
 
 	@Override
@@ -70,22 +78,15 @@ public class DiningRoom extends Room
 		//=================================================================================
 		//Create door key
 		//=================================================================================
-		Item doorkey = new BasicItem(this.gameState, "Door Key", "", "An old key, belongs to a door. ");
-		this.gameState.addItemSynonyms(doorkey, "door key", "key");
+		Item doorkey = new BasicItem(this.gameState, "Plain Key", "", "A plain, generic key. It says 'Master' on it. ");
+		this.gameState.addItemSynonyms(doorkey, "plain key", "master key");
 		this.gameState.addSpace(doorkey.getName(), doorkey);
 	}
 
 	@Override
 	public void createFlags() 
 	{
-		//=================================================================================
-		//Create Flags and add them to the Flag hashmap.  The first string field in addFlag()
-		//is the key name for the Flag in the hashmap.  In the Flag constructor, the first
-		//field is the Flag's starting boolean value.  The second field is the string the
-		//Flag will return on toString() if it has not been flipped (false).  The third field
-		//is the string the Flag will return on toString() if it has been flipped (true).
-		//=================================================================================
-		this.gameState.addFlag("drawer opened", new Flag(false, "", "Drawer opened"));
+		this.gameState.addFlag("drawer opened", new Flag(false, "", ""));
 		this.gameState.addFlag("key taken", new Flag(false, "", ""));
 	}
 	
@@ -118,7 +119,7 @@ public class DiningRoom extends Room
 			//===============================================================
 			//Go / Move command not recognized
 			//===============================================================
-			return new DisplayData("", "Can't go that direction.");
+			return new DisplayData("", "Can't go that direction. ");
 			
 		case "return":
 			//===============================================================
@@ -138,47 +139,47 @@ public class DiningRoom extends Room
 				{
 					if (this.gameState.checkFlipped("key taken") == false)
 					{
-						this.gameState.addToInventory("Door Key");
+						this.gameState.addToInventory("Plain Key");
 						this.gameState.flipFlag("key taken");
-						return new DisplayData("", "Key taken.");
+						return new DisplayData("", "You take the key. You wonder what it might go to. ");
 					}
 					else
-						return new DisplayData("", "You've already taken that.");
+						return new DisplayData("", "You've already taken that. ");
 				}
 				else
-					return new DisplayData("", "You don't see that here.");
+					return new DisplayData("", "You don't see that here ");
 			}			
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't take that.");
+			return new DisplayData("", "Can't take that. ");
 			
 		case "force":
+		case "lever":
+		case "leverage":
+		case "wedge":
+		case "pop":
 		case "use":
 			//===============================================================
 			//use the flathead screwdriver to open the drawer
 			//===============================================================
-			if (command.unordered("flathead|screwdriver"))
+			if (command.unordered("flathead|screwdriver", "drawers|drawer"))
 			{
 				if (this.gameState.checkInventory("Flathead Screwdriver") == true)
 				{
-					if (command.unordered("dresser|drawer"))
+					if (this.gameState.checkFlipped("drawer opened") == false)
 					{
-						if (this.gameState.checkFlipped("drawer opened") == false)
-						{
-							this.gameState.flipFlag("drawer opened");
-							return new DisplayData("", "Wedging the screwdriver under the top drawer, "
-									+ "you manage to pry it open. Within the drawer, you find a key.");
-						}
-						else
-							return new DisplayData ("", "You've already done that.");
+						this.gameState.flipFlag("drawer opened");
+						return new DisplayData("", "Wedging the screwdriver into a gap in the bottom drawer, you try to force it open. "
+								+ "Success! The drawer breaks free from whatever was holding it closed. "
+								+ "Peering inside, you find that your efforts may have proven useful. You see a key. ");
 					}
 					else
-						return new DisplayData ("", "That doesn't work.");
+						return new DisplayData ("", "You've already done that. ");
 				}
 				else
-					return new DisplayData ("", "You don't have that item.");
+					return new DisplayData ("", "You don't have a screwdriver. ");
 			}
 
 			//===============================================================
@@ -186,33 +187,66 @@ public class DiningRoom extends Room
 			//===============================================================
 			return new DisplayData ("", "Can't do that here.");
 			
+		case "open":
+			//===============================================================
+			//Open drawer
+			//===============================================================
+			if (command.unordered("drawers|drawer"))
+			{
+				if(this.gameState.checkFlipped("drawer opened") == true)
+				{
+					if (this.gameState.checkFlipped("key taken") == true)
+						return new DisplayData("", "Both drawers are empty. ");
+					else
+						return new DisplayData("", "The top drawer is empty, but there's a key in the bottom drawer. ");
+				}
+				else
+					return new DisplayData("", "The top drawer seems to be empty. The bottom drawer is stuck; you can't get it open. ");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData ("", "Can't do that here. ");
+			
 		case "search":  //doing this will cause search to execute the look code
 		case "look":
-			//===============================================================
-			//If look around, return descriptive.
-			//If look at 'subject', return descriptive for that subject.
-			//===============================================================
-			if (command.unordered("table|candle|candles"))
-				return new DisplayData("", "A film of dust lines the surface of the table. Various dead insects are littered on the surface; "
-						+ "it is obvious it has not been cleaned in a hot minute. And yet, the candles are lit. You begin to wonder if you truly are alone...");
-			
-			//===============================================================
-			//If look drawer is unopened/opened
-			//===============================================================
-			if (command.unordered("dresser"))
-				if(this.gameState.checkFlipped("drawer opened") == true)
-					return new DisplayData("", "An old wooden dresser, its empty drawers remain pulled.");
-				else
-					return new DisplayData("", "A sturdy wooden dresser; You try to open the top drawer, but it won't budge... "
-						+ "You manage to open the bottom two drawers, only to find strewn within them dead cockroaches and moths.");
-			
 			//===============================================================
 			//look around
 			//===============================================================	
 			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
-				return new DisplayData("", "Moths litter the table around the candles. A chain hangs from the ceiling from the "
-						+ "center of the table, where a chandelier used to be.");
-
+				return new DisplayData("", "Leaves and debris have made their way in here as well, but there isn't as much mildew here. "
+						+ "Dust covers everything, including the multitudes of cobwebs. Other than the table, there really isn't much here. ");
+			
+			//===============================================================
+			//If look around, return descriptive.
+			//If look at 'subject', return descriptive for that subject.
+			//===============================================================
+			if (command.unordered("table"))
+				return new DisplayData("", "It's surface is in poor shape, scratched, scraped and well worn in areas, along with a liberal coat "
+						+ "of dirt and grime. Despite that, it still seems solid and sturdy. "
+						+ "Trying to lift one corner, to get a feel for its weight, you find that it doesn't move. "
+						+ "Looking more closely, you see that it's been nailed to the floor. That would explain why it's still here. "
+						+ "They didn't leave any chairs for it though. ");
+			
+			//===============================================================
+			//Look at cabinet or drawer
+			//===============================================================
+			if (command.unordered("china|cabinet|shelf|shelves|drawers|drawer"))
+			{
+				String description = "It's a set of shelves set into the wall, with two drawers also set into the wall, beneath the shelves. "
+						+ "You see some hinges that indicate that there were some cabinet doors for the shelves at some point, but they're gone now. ";
+				if(this.gameState.checkFlipped("drawer opened") == true)
+				{
+					if (this.gameState.checkFlipped("key taken") == true)
+						return new DisplayData("", description + "Both drawers are empty. ");
+					else
+						return new DisplayData("", description + "The top drawer is empty, but there's a key in the bottom drawer. ");
+				}
+				else
+					return new DisplayData("", description + "The top drawer seems to be empty. The bottom drawer is stuck; you can't get it open. ");
+			}
+			
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
 			//inventory item.  If yes, run the command through it.  If the
@@ -225,7 +259,7 @@ public class DiningRoom extends Room
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			return new DisplayData("", "You don't see that here. ");
 			
 		default: 
 			//===============================================================
@@ -240,7 +274,7 @@ public class DiningRoom extends Room
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't do that here.");
+			return new DisplayData("", "Can't do that here. ");
 		}
 	}
 

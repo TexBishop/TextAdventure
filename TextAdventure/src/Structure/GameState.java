@@ -39,10 +39,27 @@ public class GameState implements Serializable
 	private CommandParser commandParser = new CommandParser();
 	private Space currentRoom;
 	private boolean alive = true;
+
+	//===============================================================
+	//Variable for tracking gas leak in house
+	//===============================================================
+	protected AreaCount gasLeak = new AreaCount();
+	
 	
 	public GameState()
 	{
 		//default constructor
+	}
+	
+	/**
+	 * Increment or decrement the gas leak count based on its active status.
+	 */
+	public void handleGasLeak()
+	{
+		if (this.gasLeak.getActive() == true)
+			this.gasLeak.increment();
+		else
+			this.gasLeak.decrement();
 	}
 
 	//===============================================================
