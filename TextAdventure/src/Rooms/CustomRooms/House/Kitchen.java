@@ -7,22 +7,23 @@
 
 package Rooms.CustomRooms.House;
 
-import Rooms.CountdownRoom;
+import Rooms.Room;
 import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.GasLeak;
 import Items.BasicItem;
 import Items.Item;
 
-public class Kitchen extends CountdownRoom 
+public class Kitchen extends Room implements GasLeak
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public Kitchen(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 
 	@Override
@@ -40,11 +41,20 @@ public class Kitchen extends CountdownRoom
 	@Override
 	public String fullDescription() 
 	{
-		this.description = "You step into the kitchen. Like many kitchens, cabinets line the walls above the counter, "
-				+ "stove, and oven. Stains indicating water damage mottle the cabinet doors. Below a window showing a "
-				+ "view to the backyard, there is a sink. ";
+		this.description = "This small-ish kitchen is typical of a farmhouse. "
+				+ "Two of the walls are lined with cabinets. There's a sink with a window over it, which looks out onto the back yard. "
+				+ "At one end of the cabinets is an old gas stove. "
+				+ "On the opposite side of the room, there's an empty set of shelves build into the wall, to act as a pantry. "
+				+ "There's a door that leads outside, to the backyard, and another larger window next to it. "
+				+ "There are also open doorways leading to the dining room and the living room. ";
 
 		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 0);
 	}
 
 	@Override
@@ -54,8 +64,9 @@ public class Kitchen extends CountdownRoom
 		//Create directions that move to Backyard
 		//=================================================================================
 		this.addMovementDirection("outside", "Backyard");
-		this.addMovementDirection("porch", "Backyard");
 		this.addMovementDirection("backyard", "Backyard");
+		this.addMovementDirection("back yard", "Backyard");
+		this.addMovementDirection("north", "Backyard");
 
 		//=================================================================================
 		//Create directions that move to Living Room
@@ -76,29 +87,25 @@ public class Kitchen extends CountdownRoom
 		//=================================================================================
 		//Create jiffypop
 		//=================================================================================
-		Item jiffy = new BasicItem(this.gameState, "Jiffy Pop", "", "A disposable pan covered in foil, filled to the brim with unpopped corn kernels. ");
-		this.gameState.addItemSynonyms(jiffy, "jiffypop", "jiffy pop", "pan");
+		Item jiffy = new BasicItem(this.gameState, "Popcorn", "", "A disposable pan covered in foil, filled to the brim with unpopped corn kernels. "
+				+ "It says 'Jiffy Pop' across the top. ");
+		jiffy.setState("(unpopped)");
+		this.gameState.addItemSynonyms(jiffy, "jiffypop", "jiffy pop", "popcorn");
 		this.gameState.addSpace(jiffy.getName(), jiffy);
-
-		//=================================================================================
-		//Create cooked pop
-		//=================================================================================
-		Item cookedpop = new BasicItem(this.gameState, "Cooked Popcorn", "", "Delicious, fluffy popcorn. ");
-		this.gameState.addItemSynonyms(cookedpop, "cooked", "popcorn");
-		this.gameState.addSpace(cookedpop.getName(), cookedpop);
 	}
 
 	@Override
 	protected void createFlags() 
 	{
-		this.gameState.addFlag("jiffypop taken", new Flag(false, "", "JiffyPop taken."));
-		this.gameState.addFlag("valve turned", new Flag(false, "", "Valve turned."));
-		this.gameState.addFlag("flextape installed", new Flag(false, "", "FlexTape installed."));
-		this.gameState.addFlag("gas connected", new Flag(false, "", "Gas connected."));
-		this.gameState.addFlag("stove on", new Flag(false, "", "Stove on."));
-		this.gameState.addFlag("cooked popcorn", new Flag(false, "", "Cooked popcorn."));
-		this.gameState.addFlag("gas released", new Flag(false, "", "Gas released."));
-		this.gameState.addFlag("gas contained", new Flag(false, "", "Gas contained."));
+		this.gameState.addFlag("popcorn taken", new Flag(false, "And a pan of stovetop popcorn. ", ""));
+		this.gameState.addFlag("pipe fixed", new Flag(false, "", ""));	
+		this.gameState.addFlag("gas on", new Flag(false, "", ""));
+
+		//===============================================================
+		//If the back door flag hasn't been made yet, make it
+		//===============================================================
+		if (this.gameState.checkFlag("back door unlocked") == false)
+			this.gameState.addFlag("back door unlocked", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -112,15 +119,28 @@ public class Kitchen extends CountdownRoom
 		//===============================================================
 		switch (command.getVerb())
 		{
-
 		case "move":  //doing this will cause move to execute the go code
 		case "go": 
+			//===============================================================
+			//If go outside, verify the door is unlocked
+			//===============================================================
+			if (command.unordered("outside|backyard|back yard|north"))
+			{
+				if (this.gameState.checkFlipped("back door unlocked") == true)
+				{
+					if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+						return this.move(command);
+				}
+				else
+					return new DisplayData("", "You try to go outside, but the door is locked. ");
+			}
+
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
 			if (command.unordered("back"))
 				return this.displayOnEntry();
-
+			
 			//===============================================================
 			//Change current room and return new room DisplayData.
 			//===============================================================
@@ -137,80 +157,73 @@ public class Kitchen extends CountdownRoom
 			//Return base room DisplayData.
 			//===============================================================
 			return this.displayOnEntry();
-
-		case "turn": //synonyms
-		case "twist":
+			
+		case "throw":
+		case "open":
+		case "unlock":
 			//===============================================================
-			//turn gas valve // calling this while the countdown is triggered turns the countdown off
+			//Unlock back door
 			//===============================================================
-			if (command.unordered("valve"))
+			if (command.unordered("door|deadbolt|dead bolt"))
 			{
-				if (this.gameState.checkFlipped("flextape installed") == true)
-				{
-					this.gameState.flipFlag("gas connected");
-					return new DisplayData ("", "You turn the gas valve. With your repairs to the pipe, gas is flowing smoothly "
-							+ "to the stove.");
-				}
-				else if(this.gameState.checkFlipped("gas released") == false)
-				{
-					this.gameState.flipFlag("gas released");
-					return new DisplayData ("", "As you turn the gas valve, you hear a hiss as you get blasted with the smell "
-							+ "of rotten eggs. If things stay as they are, you don't have much time before this turns into a "
-							+ "dangerous situation.");
-				}
-				else
-				{
-					this.gameState.flipFlag("gas contained");
-					return new DisplayData ("", "You quickly turn the valve back to where it was, turning off the gas flow. You are safe. ");
-				}
+				this.gameState.flipFlag("back door unlocked");
+				return new DisplayData("", "You unlock the back door. ");
 			}
-
-			//===============================================================
-			//turn on stove
-			//===============================================================
-			if (command.unordered("stove|knobs|knob"))
-			{
-				if (this.gameState.checkFlipped("gas connected") == true)
-				{
-					if (this.gameState.checkFlipped("power restored") == true)
-					{
-						this.gameState.flipFlag("stove on");
-						return new DisplayData ("", "Gas hisses from the stove and is ignited. ");
-					}
-					else
-						return new DisplayData ("", "Without electricity to spark the gas, gas hisses from the stove. You quickly turn the stove off.");
-				}
-				else
-					return new DisplayData ("", "Nothing happens. The gas appears to be disconnected.");
-			}
-
-			//===============================================================
-			//Oven is broken, return a failure message.
-			//===============================================================
-			if (command.unordered("oven"))
-				return new DisplayData ("", "Nothing happens, the oven is broken.");
 
 			//===============================================================
 			//Command unrecognized, return a failure message.
 			//===============================================================
 			return new DisplayData ("", "Can't do that here.");
 
+		case "turn":
+		case "twist":
+			//===============================================================
+			//toggle gas valve
+			//===============================================================
+			if (command.unordered("valve"))
+			{
+				if (this.gameState.checkFlipped("gas on") == false)
+				{
+					this.gameState.flipFlag("gas on");
+					
+					String description = "You turn on the valve. ";
+					if (this.gameState.checkFlipped("pipe fixed") == false)
+					{
+						this.initializeLeak(gameState);
+						description += "You smell a hint of natural gas. ";
+					}
+					
+					return new DisplayData("", description);
+				}
+				else
+				{
+					this.gameState.getFlag("gas on").reset();
+					this.terminateLeak(gameState);
+					return new DisplayData("", "You turn off the valve. ");
+				}
+			}
+
+			//===============================================================
+			//Command unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData ("", "Can't do that here. ");
+
 		case "grab":
 		case "pick":
 		case "take":
 			//===============================================================
-			//take jiffypop
+			//take popcorn
 			//===============================================================
 			if (command.unordered("jiffy pop|jiffypop|popcorn"))
 			{
-				if (this.gameState.checkFlipped("jiffypop taken") == false)
+				if (this.gameState.checkFlipped("popcorn taken") == false)
 				{
-					this.gameState.addToInventory("Jiffy Pop");
-					this.gameState.flipFlag("jiffypop taken");
-					return new DisplayData("", "Jiffy Pop taken.");
+					this.gameState.addToInventory("Popcorn");
+					this.gameState.flipFlag("popcorn taken");
+					return new DisplayData("", "You take the popcorn. Maybe you'll get hungry later. ");
 				}
 				else
-					return new DisplayData("", "You've already taken that.");
+					return new DisplayData("", "You've already taken that. ");
 			}
 			
 			//===============================================================
@@ -220,39 +233,65 @@ public class Kitchen extends CountdownRoom
 
 		case "repair":
 		case "patch":
+		case "fix":
+		case "seal":
 		case "use":
 			//===============================================================
-			//use flextape on pipe
+			//use duct tape on pipe
 			//===============================================================
-			if (command.unordered("flextape|tape", "pipe|crack"))
+			if (command.unordered("duct tape|tape", "pipe|crack"))
 			{
-				if (this.gameState.checkFlipped("flextape installed") == false)
+				if (this.gameState.checkFlipped("pipe fixed") == false)
 				{
-					if (this.gameState.checkInventory("FlexTape") == true)
+					if (this.gameState.checkInventory("Duct Tape") == true)
 					{
-						this.gameState.removeFromInventory("FlexTape");
-						this.gameState.flipFlag("flextape installed");
-						return new DisplayData("", "You wrap the FlexTape over the crack on the pipe. It looks airtight.");
+						this.gameState.flipFlag("pipe fixed");
+						this.terminateLeak(gameState);
+						return new DisplayData("", "You wrap the duct tape around the pipe, making sure to completely cover the crack with "
+								+ "multiple layers. You think that should work. Duct tape fixes everything, after all. ");
 					}
 					else
-						return new DisplayData ("", "You don't have that item.");
+						return new DisplayData ("", "You don't have any tape. ");
 				}
 				else
-					return new DisplayData ("", "You have already done that.");
+					return new DisplayData ("", "You have already done that. ");
 			}
-
+			
 			//===============================================================
-			//Oven is broken, return a failure message.
+			//Case for 'use stove' without popcorn in the command
 			//===============================================================
-			if (command.unordered("oven"))
-				return new DisplayData ("", "Nothing happens, the oven is broken.");
+			if (command.unordered("use", "stove|oven") == true &&
+				command.unordered("jiffy pop|jiffypop|popcorn") == false)
+			{
+				if (this.gameState.checkFlipped("gas on"))
+				{
+					if (this.gameState.checkFlipped("power restored"))
+					{
+						//===============================================================
+						//If there are lethal levels of gas, trigger death
+						//===============================================================
+						if (this.isLevelLethal(gameState, this.getName()))
+							return this.gameState.death("You turn on one of the burners. "
+									+ "You have only a second to realize your mistake, before the gas you've been smelling in the air ignites. "
+									+ "The room is enveloped in flame, blasting you with hellish fury. "
+									+ "Thankfully, the pain only lasts a moment... ");
+						
+						return new DisplayData("", "You turn a few dials, checking the oven out. It works. ");
+					}
+					else
+						return new DisplayData("", "You try to turn on the stove, but it doesn't seem to have any power. "
+								+ "The igniter isn't working. ");
+				}
+				else
+					return new DisplayData("", "You try to turn on the stove, but it doesn't seem to have any gas. ");
+			}
 
 			//===============================================================
 			//Command unrecognized, return a failure message.  Excludes the
 			//verb 'use', allowing it to pass into the next set of verbs.
 			//===============================================================
-			if (command.getVerb().matches("repair|patch"))
-				return new DisplayData ("", "That doesn't work.");
+			if (command.getVerb().matches("repair|patch|fix|seal"))
+				return new DisplayData ("", "Can't do that here. ");
 
 		case "pop":
 		case "cook":	
@@ -261,31 +300,48 @@ public class Kitchen extends CountdownRoom
 			//===============================================================
 			if (command.unordered("jiffy pop|jiffypop|popcorn"))
 			{		
-				if (this.gameState.checkFlipped("cooked popcorn") == false)
+				if (this.gameState.checkInventory("Popcorn") == true)
 				{	
-					if (this.gameState.checkInventory("Jiffy Pop") == true)
-					{	
-						if (this.gameState.checkFlipped("stove on") == true)
+					if (this.gameState.checkFlipped("gas on") == true)
+					{
+						if (this.gameState.checkFlipped("power restored") == true)
 						{
-							this.gameState.removeFromInventory("jiffy pop");
-							this.gameState.addToInventory("Cooked Popcorn");
-							this.gameState.flipFlag("cooked popcorn");
-							return new DisplayData("", "Your pan of jiffy pop has transformed into a lovely pan of cooked popcorn!");
+							if (((Item) this.gameState.getSpace("Popcorn")).getState().contains("unpopped"))
+							{
+								//===============================================================
+								//If there are lethal levels of gas, trigger death
+								//===============================================================
+								if (this.isLevelLethal(gameState, this.getName()))
+									return this.gameState.death("You turn on one of the burners. "
+											+ "You have only a second to realize your mistake, before the gas you've been smelling in the air ignites. "
+											+ "The room is enveloped in flame, blasting you with hellish fury. "
+											+ "Thankfully, the pain only lasts a moment... ");
+
+								//===============================================================
+								//Else, cook the popcorn
+								//===============================================================
+								((Item) this.gameState.getSpace("Popcorn")).setState("(popped)");
+								return new DisplayData("", "You turn on one of the burners, and set the popcorn pan on it. "
+										+ "A few minutes later, you have some succulent smelling popcorn! ");
+							}
+							else
+								return new DisplayData("", "The popcorn has already been popped. ");
 						}
 						else
-							return new DisplayData("", "The stove is not on.");
+							return new DisplayData("", "You try to turn on one of the burners, but it doesn't have any power. "
+									+ "The igniter isn't working. ");
 					}
 					else
-						return new DisplayData("", "You don't have that item in your inventory.");
+						return new DisplayData("", "You try to turn on one of the burners, but it doesn't have any gas. ");
 				}
 				else
-					return new DisplayData("", "You have already done that.");
+					return new DisplayData("", "You don't have any popcorn. ");
 			}
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
-			return new DisplayData ("", "Can't do that here.");
+			return new DisplayData ("", "Nothing happens. ");
 
 		case "search":  //synonyms
 		case "look":
@@ -294,35 +350,44 @@ public class Kitchen extends CountdownRoom
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
 			if (command.unordered("around|area|room|kitchen") || command.getSentence().contentEquals("search"))
-				return new DisplayData("", "You notice a pipe jutting from the wall leading behind the stove and oven. "
-						+ "You notice a small crack on the pipe, just below a turnable valve.");
+				return new DisplayData("", "Even aside from the filthy state it's in, this kitchen isn't great. "
+						+ "It's severely lacking in modern features. "
+						+ "No hot water for the sink, no outlets above the counters for appliances, "
+						+ "no refrigerator, though you do see a spot where one likely used to be. ");
 
-			if (command.unordered("pipe|valve"))
-				return new DisplayData("", "This gas line pipe has a crack in it. It would be best to leave that valve "
-						+ "well alone, as it is now.");
+			if (command.unordered("line|pipe|valve"))
+				return new DisplayData("", "An old copper gas line, with a valve. It looks like it's shut off right now. "
+						+ "The copper line has a large crack in it. ");
 
 			if (command.unordered("sink|faucet"))
-				return new DisplayData("", "This steel sink has long since rusted through.");
+				return new DisplayData("", "The sink is an old porcelain piece, still in fair condition underneath the filth. "
+						+ "It has an old timey faucet with a single knob. You try turning it, but nothing comes out. ");
 
-			if (command.unordered("window|backyard"))
-				return new DisplayData("", "Through the window above the sink, you can see a view of the "
-						+ "backyard, and the buildings and farmland beyond. ");
+			if (command.unordered("window|backyard|back yard"))
+				return new DisplayData("", "The window is filthy. You are barely able to make out the back yard through it. "
+						+ "You see a barn, a shed, and a cornfield. ");
 
-			if (command.unordered("oven"))
-				return new DisplayData("", "An old gas oven. It looks like it is broken.");
+			if (command.unordered("oven|stove"))
+				return new DisplayData("", "An old, natural gas model, it's covered in dust, grime and rust. "
+						+ "It's pulled half away from the wall for some reason. "
+						+ "Looking behind it, you see a copper gas line. The valve appears to be shut off. ");
 
-			if (command.unordered("stove|stovetop"))
-				return new DisplayData("", "A gas stove. There are knobs below it to control the gas flow. ");
+			if (command.unordered("pantry"))
+				return new DisplayData("", "It's a set of shelves built into the wall. Nothing but dust and dead bugs there. ");
 
-			//===============================================================
-			//description of cabinet with/without jiffy pop
-			//===============================================================
-			if (command.unordered("cabinet|cabinets"))
-			{	String description = "Cabinets are littered with clutter and dead bugs.";
-			if(this.gameState.checkFlipped("jiffypop taken") == false)
-				description += " Except in one of them, you find a jiffy pop. How long has that been there?";
-			return new DisplayData("", description);
+			if (command.unordered("door"))
+			{
+				String description = "Unlike the front door, this back door still looks sturdy, and closes properly. ";
+				if (this.gameState.checkFlipped("back door unlocked") == false)
+					description += "The deadbolt is thrown, locking it. ";
+				
+				return new DisplayData("", description);
 			}
+
+			if (command.unordered("cabinets|cabinet"))
+				return new DisplayData("", "They're old wooden cabinets, covered with peeling paint and cobwebs. "
+						+ "Looking through them, you find a lot of dead bugs, mouse poop, and dust. "
+						+ this.gameState.getFlag("popcorn taken").toString());
 
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
@@ -354,28 +419,6 @@ public class Kitchen extends CountdownRoom
 			return new DisplayData("", "Can't do that here.");
 		}
 	}
-	//=================================================================================
-	//Plan to have two death conditions. One from turning the valve without flextape,
-	//and another from turning the stove on(once the gas is connected) without the power.
-	//=================================================================================
-
-	protected void initializeCountdown() 
-	{
-		//=================================================================================
-		//Death after third command
-		//=================================================================================
-		this.setCountdown(2, "It reaaaally smells like eggs...", 
-				"With a fire sparking from the dining room candles, an explosion blows the walls out "
-						+ "of the building, and you.");
-
-		//=================================================================================
-		//Count down starts and progresses unless the brooch is in inventory
-		//=================================================================================
-
-		this.setTriggers(this.gameState.getFlag("gas released"), this.gameState.getFlag("gas contained"));
-	}
-
-
 
 	//===============================================================
 	//ASCII image String constants beyond this point
@@ -425,5 +468,4 @@ public class Kitchen extends CountdownRoom
 			"  ```        ````-:+++/++//+/+//++++o+oooooo++sosyso+++o//++//++so+/+oyy+o+sy+/+:/ss+::::///++:::/://::::---//:::/:://+/:/+++:-:.../:--/++//++ssssyyhoosssyhh\r\n" + 
 			" `   `      ```-oh+++oooo+/////+++oso++++++++++++oo++oys+:++//////////++o/osdhhyo+//::+/-------:/:/:.-:```...------.--:////////:-...--:-:/+/+ossooshhyhhdyyys\r\n" + 
 			"   ` `   ````.:++++/:///:-:::/so+++//++////+/++/://///+/+++///::////////+oossos+:-:+o+//+/-/-.----:-`.-..`--.--........---:::::---::.---.....-::://sosos+///+";
-
 }

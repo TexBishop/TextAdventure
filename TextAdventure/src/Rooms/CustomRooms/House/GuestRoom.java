@@ -12,17 +12,18 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.GasLeak;
 import Items.BasicItem;
 import Items.Item;
 
-public class GuestRoom extends Room 
+public class GuestRoom extends Room implements GasLeak
 {
-
 	private static final long serialVersionUID = 1L;
 
 	public GuestRoom(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 
 	@Override
@@ -40,11 +41,40 @@ public class GuestRoom extends Room
 	@Override
 	public String fullDescription() 
 	{
-		this.description = "You open the right door, and step into the guest room. With the light from a large "
-				+ "window on the far wall, you can see a bare mattress on a bedframe. To it's side, there is a "
-				+ "closet; it's sliding doors have been removed.";
+		this.description = "This room seems to be the guest bedroom. "
+				+ "There's an old, wooden bedframe against one wall, splintered in several places. "
+				+ "A small bedside table sits next to it. "
+				+ "The room is lit by a grimy window, which overlooks the back yard. ";
+
+		//=================================================================================
+		//If the key has been left on the floor, say so
+		//=================================================================================
+		if (this.gameState.checkFlipped("key traded sequence ran") == true &&
+			this.gameState.checkFlipped("small key taken") == false)
+		{
+			this.description += "On the floor next to the empty popcorn pan is a small key. ";
+		}
+
+		//=================================================================================
+		//Key trade sequence, will only run once.  Replaces previous description.
+		//=================================================================================
+		if (this.gameState.checkFlipped("key traded sequence ran") == false &&
+			this.gameState.checkFlipped("room exited") == true)
+		{
+			this.gameState.flipFlag("key traded sequence ran");
+			this.description = "You charge back into the room, planning to catch the mouse snacking on the popcorn. "
+					+ "Instead, what you see is an empty popcorn pan. "
+					+ "What? How in the world... that was enough popcorn for two or three people! And in such a short time... "
+					+ "On the floor next to the popcorn pan is the key that you were hoping to get from the mouse. ";
+		}
 
 		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 4);
 	}
 
 	@Override
@@ -55,6 +85,8 @@ public class GuestRoom extends Room
 		//=================================================================================
 		this.addMovementDirection("hallway", "UpstairsHallway");
 		this.addMovementDirection("hall", "UpstairsHallway");
+		this.addMovementDirection("leave", "UpstairsHallway");
+		this.addMovementDirection("exit", "UpstairsHallway");
 	}
 
 	@Override
@@ -63,17 +95,29 @@ public class GuestRoom extends Room
 		//=================================================================================
 		//Create flextape
 		//=================================================================================
-		Item tape = new BasicItem(this.gameState, "FlexTape", "", "Flex tape. Can even repair boats, when they are cut in half. ");
-		this.gameState.addItemSynonyms(tape, "flextape", "tape");
+		Item tape = new BasicItem(this.gameState, "Duct Tape", "", "Silver duct tape. Famous for being able to repair anything. ");
+		this.gameState.addItemSynonyms(tape, "duct tape", "tape");
 		this.gameState.addSpace(tape.getName(), tape);
+
+		//=================================================================================
+		//Create small key
+		//=================================================================================
+		Item key = new BasicItem(this.gameState, "Small Key", "", "A key a bit smaller than a typical house key. ");
+		this.gameState.addItemSynonyms(key, "small key");
+		this.gameState.addSpace(key.getName(), key);
 	}
 
 	@Override
 	public void createFlags() 
 	{
-		this.gameState.addFlag("key snatched", new Flag(false, "", "Key snatched."));
-		this.gameState.addFlag("chest opened", new Flag(false, "", "Chest opened."));
-		this.gameState.addFlag("flextape taken", new Flag(false, "", "Flextape taken."));
+		this.gameState.addFlag("key found", new Flag(false, "", ""));
+		this.gameState.addFlag("key traded", new Flag(false, "", ""));
+		this.gameState.addFlag("small key taken", new Flag(false, "", ""));
+		this.gameState.addFlag("popcorn placed", new Flag(false, "", ""));
+		this.gameState.addFlag("room exited", new Flag(false, "", ""));
+		this.gameState.addFlag("key traded sequence ran", new Flag(false, "", ""));
+		this.gameState.addFlag("bedside drawer opened", new Flag(false, "", ""));
+		this.gameState.addFlag("duct tape taken", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -88,12 +132,29 @@ public class GuestRoom extends Room
 		switch (command.getVerb())
 		{
 		case "move":  //doing this will cause move to execute the look code
+		case "leave":
+		case "exit":
 		case "go": 
 			//===============================================================
 			//If go back, return base room DisplayData.
 			//===============================================================
 			if (command.unordered("back"))
 				return this.displayOnEntry();
+
+			//===============================================================
+			//Trigger the key traded flag on room exit
+			//===============================================================
+			if (this.gameState.checkFlipped("popcorn placed") == true &&
+				this.gameState.checkFlipped("room exited") == false)
+			{
+				if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+				{
+					this.gameState.flipFlag("room exited");
+					this.gameState.flipFlag("key found");
+					this.gameState.flipFlag("key traded");
+					return this.move(command);
+				}
+			}
 
 			//===============================================================
 			//Change current room and return new room DisplayData.
@@ -104,13 +165,48 @@ public class GuestRoom extends Room
 			//===============================================================
 			//Go / Move command not recognized
 			//===============================================================
-			return new DisplayData("", "Can't go that direction.");
+			return new DisplayData("", "Can't go that direction. ");
 
 		case "return":
 			//===============================================================
 			//Return base room DisplayData.
 			//===============================================================
 			return this.displayOnEntry();
+			
+		case "set":
+		case "drop":
+		case "position":
+		case "put":
+		case "place":
+			//===============================================================
+			//Place the popcorn on the floor next to the mouse hole
+			//===============================================================
+			if (command.unordered("popcorn", "mouse|hole|floor"))
+			{
+				if (this.gameState.checkInventory("Popcorn"))
+				{
+					if (((Item) this.gameState.getSpace("Popcorn")).getState().contentEquals("(popped)"))
+					{
+						this.gameState.flipFlag("popcorn placed");
+						this.gameState.removeFromInventory("Popcorn");
+						return new DisplayData("", "You place the popcorn next to the mouse hole and back off to the other side of the room. "
+								+ "Surely this buttery popcorn smell will lure it out. "
+								+ "You see the mouse stick it's nose out of the hole and sniff the air, then dart back inside. "
+								+ "It knows you're here. You're probably going to have to leave the room. ");
+					}
+					else
+						return new DisplayData("", "You place the popcorn next to the mouse hole and back off to the other side of the room."
+								+ "You wait for a while, but nothing happens. I guess the mouse isn't interested in unpopped popcorn. "
+								+ "You pick it back up. ");
+				}
+				else
+					return new DisplayData("", "You don't have any popcorn. ");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData("", "That doesn't do anything. ");
 
 		case "grab":
 		case "pick":
@@ -119,44 +215,93 @@ public class GuestRoom extends Room
 			//Take the key from the drawer
 			//===============================================================
 			if (command.unordered("key"))
-				if(this.gameState.checkFlipped("key snatched") == false)
-				{	this.gameState.flipFlag("key snatched");
-				return new DisplayData("", "You barely grab the key with the tips of your fingers. "
-						+ "As you pull them out you feel something furry against your hand, and the key "
-						+ "slip from from your grasp into the darkness between the walls.");
-				}
-				else
-					return new DisplayData("", "The key is gone.");
-
-			if (command.unordered("flextape|tape"))
-				if(this.gameState.checkFlipped("chest opened") == true)
-					if(this.gameState.checkFlipped("flextape taken") == false)
-					{		
-						this.gameState.addToInventory("FlexTape");
-						this.gameState.flipFlag("flextape taken");
-						return new DisplayData("", "You take the roll of FlexTape.");
+			{
+				if (this.gameState.checkFlipped("key found") == true)
+				{
+					if (this.gameState.checkFlipped("key traded") == true)
+					{	
+						this.gameState.flipFlag("small key taken");
+						this.gameState.addToInventory("Small Key");
+						return new DisplayData("", "You take the small key that the mouse left behind. ");
 					}
 					else
-						return new DisplayData("", "You've already taken that.");
+						return new DisplayData("", "It's out of reach. Your hand won't fit through the small mouse hole. ");
+				}
+			}
 
-			//===============================================================
-			//Subject is unrecognized, return a failure message.
-			//===============================================================
-			return new DisplayData("", "Can't take that.");
-
-		case "open":
-			if (command.unordered("box|chest"))
-			{	
-				this.gameState.flipFlag("chest opened");
-				return new DisplayData("", "You try to open the latch, and to your surprise, "
-						+ "it opens! You didn't even need a key. Perfectly fitting the round "
-						+ "shape of the box, you find a gorgeous roll of FlexTape.");
+			if (command.unordered("tape"))
+			{
+				if(this.gameState.checkFlipped("bedside drawer opened") == true)
+				{
+					if(this.gameState.checkFlipped("duct tape taken") == false)
+					{		
+						this.gameState.addToInventory("Duct Tape");
+						this.gameState.flipFlag("duct tape taken");
+						return new DisplayData("", "You take the roll of duct tape. Duct tape is always useful. ");
+					}
+					else
+						return new DisplayData("", "You already have that. ");
+				}
 			}
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			return new DisplayData("", "You don't see that here. ");
+			
+		case "force":
+		case "lever":
+		case "leverage":
+		case "wedge":
+		case "pop":
+		case "use":
+			//===============================================================
+			//use the flathead screwdriver to open the drawer
+			//===============================================================
+			if (command.unordered("flathead|screwdriver", "drawer"))
+			{
+				if (this.gameState.checkInventory("Flathead Screwdriver") == true)
+				{
+					if (this.gameState.checkFlipped("bedside drawer opened") == false)
+					{
+						this.gameState.flipFlag("bedside drawer opened");
+						return new DisplayData("", "Wedging the screwdriver into a gap in the bedside table's drawer, you try to force it open. "
+								+ "Success! The drawer breaks free from whatever was holding it closed. "
+								+ "Pulling it open, you see a roll of silver duct tape. ");
+					}
+					else
+						return new DisplayData ("", "You've already done that. ");
+				}
+				else
+					return new DisplayData ("", "You don't have a screwdriver. ");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData ("", "Can't do that here. ");
+
+		case "open":	
+			//===============================================================
+			//Open drawer
+			//===============================================================
+			if (command.unordered("drawer"))
+			{
+				if(this.gameState.checkFlipped("bedside drawer opened") == true)
+				{
+					if (this.gameState.checkFlipped("duct tape taken") == true)
+						return new DisplayData("", "The drawer is empty. ");
+					else
+						return new DisplayData("", "There's a roll of duct tape in the drawer. ");
+				}
+				else
+					return new DisplayData("", "The drawer is stuck; you can't get it open. ");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData("", "You don't see that here. ");
 
 		case "search":  //synonyms
 		case "look":
@@ -164,37 +309,48 @@ public class GuestRoom extends Room
 			//If look around, return descriptive.
 			//If look at 'subject', return descriptive for that subject.
 			//===============================================================
-			if (command.unordered("bed|mattress"))
-				return new DisplayData("", "A musty double mattress. Bedbug spots are visible under the seam. "
-						+ "You look under the bed, and find a small circular chest with a keyhole.");
-
-			if (command.unordered("closet"))
-				return new DisplayData("", "Nothing remains in this closet, except for a few bare hangers. "
-						+ "you notice a small hole in the bottom left corner of the closet, from what must "
-						+ "be some sort of rodent.");
+			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
+				return new DisplayData("", "The room is mostly empty, and covered in dust and cobwebs. "
+						+ "You see mouse tracks in the dust around the perimeter of the room, and mouse droppings scattered liberally. "
+						+ "There's a mouse hole in the corner. ");
+			
+			if (command.unordered("bed"))
+				return new DisplayData("", "An old, wooden bed frame. It was probably sturdy at one time, but it's now broken, "
+						+ "half of its slats splintered, along with one of the length-wise struts. "
+						+ "The headboard still looks like it's in good shape though. ");
 
 			if (command.unordered("hole"))
-				if(this.gameState.checkFlipped("key snatched") == false)
-					return new DisplayData("", "you find a small key in the hole.");
+			{
+				if(this.gameState.checkFlipped("key traded") == false)
+				{
+					this.gameState.flipFlag("key found");
+					return new DisplayData("", "Getting down on the floor and looking in the hole, "
+							+ "you're able to discern a mouse's nest in the darkness within. "
+							+ "You see a bit of movement, and notice the mouse, and a glint. "
+							+ "It looks like it's holding a small key in its mouth. "
+							+ "Why does it have something like that? "
+							+ "If you can lure it out somehow, maybe you can get the key from it. Maybe with some food? ");
+				}
 				else
-					return new DisplayData("", "You look into the hole; there is nothing to be found.");
+					return new DisplayData("", "Getting down on the floor and looking in the hole, "
+							+ "you're able to discern a mouse's nest in the darkness within. "
+							+ "The mouse is there, sleeping, looking fat. ");
+			}
 
-			if (command.unordered("chest"))
-				return new DisplayData("", "This circular chest is bound with leather. A tiny keyhole "
-						+ "with a latch marks the front.");
+			if (command.unordered("table"))
+				return new DisplayData("", "It's a small wooden bedside table, not very big. "
+						+ "The top of it is all sticky. Gross. What is that? "
+						+ "Dust is plastered to it. It has a small drawer. ");
 
-			//===============================================================
-			//look around
-			//===============================================================
-			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
-				return new DisplayData("", "The room is empty, except for the bed, and the closet. "
-						+ "Outside the window, you can see the mailbox.");
+			if (command.unordered("window"))
+				return new DisplayData("", "It's filthy, but you can still make out the back yard. There's a barn, a shed, and a cornfield. "
+						+ "And there behind the barn, you see an old timey outhouse. How old is this farm? ");
 
 		default: 
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't do that here.");
+			return new DisplayData("", "Can't do that here. ");
 		}
 	}
 

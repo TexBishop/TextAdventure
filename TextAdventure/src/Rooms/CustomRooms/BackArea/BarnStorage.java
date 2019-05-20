@@ -116,6 +116,14 @@ public class BarnStorage extends CountdownRoom
 				+ "by rock climbers and other people who don't want their necks broken when climbing to higher places.'.");
 		this.gameState.addItemSynonyms(ClimbingTether, "climbing", "tether");
 		this.gameState.addSpace(ClimbingTether.getName(), ClimbingTether);
+
+		//=================================================================================
+		//Create gas can
+		//=================================================================================
+		Item gasCan = new BasicItem(this.gameState, "Gas Can", "", "A one gallon can for gasoline. It's red, and says 'Gas' on the side in yellow. It looks newish. ");
+		gasCan.setState("(full)");
+		this.gameState.addItemSynonyms(gasCan, "gas can", "gasoline", "gas");
+		this.gameState.addSpace(gasCan.getName(), gasCan);
 	}
 
 	@Override
@@ -129,6 +137,7 @@ public class BarnStorage extends CountdownRoom
 		this.gameState.addFlag("longsword taken", new Flag(false, "", "The longsword is strapped firlmy to you waist. "));
 		this.gameState.addFlag("tether taken", new Flag(false, "", "The climbing tether is rolled up and secured firmly to your waist. "));
 		this.gameState.addFlag("used knife", new Flag(false, "", "The knife is wet once again with dark blood."));
+		this.gameState.addFlag("gas can taken", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -231,7 +240,7 @@ public class BarnStorage extends CountdownRoom
 			}
 
 			//=================================================================================
-			//Creates the Climbing tether
+			//Take the climbing tether
 			//=================================================================================
 			if (command.unordered("climbing|tether"))
 			{
@@ -240,6 +249,21 @@ public class BarnStorage extends CountdownRoom
 					this.gameState.addToInventory("Climbing Tether");
 					this.gameState.flipFlag("tether taken");
 					return new DisplayData("", "You grab the climbling tether, roll it up and strap it to your belt. ");
+				}
+				else
+					return new DisplayData("", "You've already taken that. ");
+			}
+
+			//=================================================================================
+			//Take the gas can
+			//=================================================================================
+			if (command.unordered("gas can|gasoline|gas"))
+			{
+				if (this.gameState.checkFlipped("gas can taken") == false)
+				{
+					this.gameState.addToInventory("Gas Can");
+					this.gameState.flipFlag("gas can taken");
+					return new DisplayData("", "You take the gas can. ");
 				}
 				else
 					return new DisplayData("", "You've already taken that. ");

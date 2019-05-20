@@ -12,14 +12,16 @@ import Structure.Command;
 import Structure.DisplayData;
 import Structure.Flag;
 import Structure.GameState;
+import Structure.GasLeak;
 
-public class UpstairsHallway extends Room
+public class UpstairsHallway extends Room implements GasLeak
 {
 	private static final long serialVersionUID = 1L;
 
 	public UpstairsHallway(GameState gameState) 
 	{
 		super(gameState);
+		this.initializeGasLeak();
 	}
 	
 	@Override
@@ -35,12 +37,29 @@ public class UpstairsHallway extends Room
 	}
 	
 	@Override
+	public String fullDescription() 
+	{
+		this.description = "At the top of the stairs is a small, empty hallway. "
+				+ "There's a door to either side, one on the left and one on the right. "
+				+ "A small, grimy window is lighting the area weakly. ";
+
+		return this.description;
+	}
+	
+	@Override
+	public void initializeGasLeak() 
+	{
+		this.addRoomToLeakArea(this.gameState, this.getName(), 3);
+	}
+	
+	@Override
 	protected void createMovementDirections() 
 	{
 		//=================================================================================
 		//Create directions that move to Entryway
 		//=================================================================================
 		this.addMovementDirection("downstairs", "Entryway");
+		this.addMovementDirection("down", "Entryway");
 		this.addMovementDirection("stairs", "Entryway");
 		
 		//=================================================================================
@@ -69,19 +88,7 @@ public class UpstairsHallway extends Room
 	@Override
 	public void createFlags() 
 	{
-		this.gameState.addFlag("door unlocked", new Flag(false, "", "Door unlocked."));
-	}
-	
-	@Override
-	public String fullDescription() 
-	{
-		if(this.gameState.checkFlipped("power restored") == true)
-			this.description = "You stand at the top of the stairs in the center of the hallway. There is a door "
-					+ "at each end of the hallway to your left and to your right.";
-		else
-			this.description = "You stand at the top of the stairs in dark hallway, with paths leading to your left and your right.";
-		
-		return this.description;
+		this.gameState.addFlag("master bedroom unlocked", new Flag(false, "", ""));
 	}
 	
 	@Override
@@ -100,10 +107,9 @@ public class UpstairsHallway extends Room
 			//===============================================================
 			//If the master bedroom door is still locked
 			//===============================================================
-			if(command.unordered("left|master") && this.gameState.checkFlipped("door unlocked") == false)
+			if(command.unordered("left|master") && this.gameState.checkFlipped("master bedroom unlocked") == false)
 			{
-				return new DisplayData("", "You go left. At the end of the hallway, you come "
-						+ "across a door; it is locked.");
+				return new DisplayData("", "You try to go through the door on the left, but it's locked. ");
 			}
 
 			//===============================================================
@@ -121,41 +127,52 @@ public class UpstairsHallway extends Room
 			//===============================================================
 			//Direction not found
 			//===============================================================
-			return new DisplayData("", "Can't go that direction.");
+			return new DisplayData("", "Can't go that direction. ");
 			
 		case "return":
 			//===============================================================
 			//Return base room DisplayData.
 			//===============================================================
 			return this.displayOnEntry();
-				
-		case "use":
-		case "unlock":
-			if (command.unordered("key"))
+			
+		case "take":
+			//===============================================================
+			//Move on 'take stairs'
+			//===============================================================
+			if (command.unordered("stairway|stairs|stair"))
 			{
-				if (this.gameState.checkInventory("Door Key"))
-				{
-					if (command.unordered("door"))
-					{
-						if (this.gameState.checkFlipped("door unlocked") == false)
-						{
-							this.gameState.flipFlag("door unlocked");
-							return new DisplayData("", "The door has been unlocked. It leads into the master bedroom.");
-						}
-						else
-							return new DisplayData("", "You have already unlocked the door.");
-					}
-					else
-						return new DisplayData("", "You cannot use this item on that.");
-				}
-				else
-					return new DisplayData("", "You do not have a key.");
+				if (this.checkMovementDirection(command.getMatch(this.movementRegex)) == true)
+					return this.move(command);
 			}
 			
 			//===============================================================
 			//Subject not recognized.
 			//===============================================================
-			return new DisplayData ("", "Can't do that here.");
+			return new DisplayData ("", "Can't do that here. ");
+				
+		case "use":
+		case "unlock":
+			if (command.unordered("key|door"))
+			{
+				if (this.gameState.checkInventory("Small Key"))
+				{
+						if (this.gameState.checkFlipped("master bedroom unlocked") == false)
+						{
+							this.gameState.flipFlag("master bedroom unlocked");
+							return new DisplayData("", "You use the key you got from the mouse. "
+									+ "It works. The door swings open, revealing what looks to be the master bedroom. ");
+						}
+						else
+							return new DisplayData("", "You have already unlocked the door. ");
+				}
+				else
+					return new DisplayData("", "It seems you don't have the needed key. ");
+			}
+			
+			//===============================================================
+			//Subject not recognized.
+			//===============================================================
+			return new DisplayData ("", "Can't do that here. ");
 			
 		case "search":  //doing this will cause search to execute the go code
 		case "look":
@@ -163,11 +180,12 @@ public class UpstairsHallway extends Room
 			//If look around, return descriptive.
 			//===============================================================
 			if (command.unordered("around|area|room") || command.getSentence().contentEquals("search"))
-				if(gameState.checkFlipped("power restored") == true)
-					return new DisplayData("", "With the power restored, the corridor is well lit. ");
-				else
-					return new DisplayData("", "Surrounded by darkness, you cannot see where the paths lead.");
-
+				return new DisplayData("", "The hallway is dimly lit, but even so, it's easy to tell that there's nothing of interest here. ");
+			
+			if (command.unordered("window"))
+				return new DisplayData("", "The window is so filthy that you can't see anything through it. "
+						+ "At least it's letting in a bit of light. ");
+			
 			//===============================================================
 			//If default is reached, check to see if the command contained an 
 			//inventory item.  If yes, run the command through it.  If the
@@ -180,7 +198,7 @@ public class UpstairsHallway extends Room
 			//===============================================================
 			//No command matches, return failure.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			return new DisplayData("", "You don't see that here. ");
 			
 		default: 
 			//===============================================================
@@ -195,7 +213,7 @@ public class UpstairsHallway extends Room
 			//===============================================================
 			//If default is reached, return a failure message.
 			//===============================================================
-			return new DisplayData("", "Can't do that here.");
+			return new DisplayData("", "Can't do that here. ");
 		}
 	}
 

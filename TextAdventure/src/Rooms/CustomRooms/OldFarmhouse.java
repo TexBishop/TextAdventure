@@ -122,23 +122,23 @@ public class OldFarmhouse extends Room
 		//Flags have been flipped.
 		//=================================================================================
 		MultiFlag mailboxEmpty = new MultiFlag(this.gameState, false, "Inside the mailbox is a flyer. ", "The mailbox appears to be empty. ");
-		mailboxEmpty.addFlag("mailbox open");
-		mailboxEmpty.addFlag("flyer taken");
+		mailboxEmpty.addFlag("mailbox open", true);
+		mailboxEmpty.addFlag("flyer taken", true);
 		this.gameState.addFlag("mailbox empty", mailboxEmpty);
 		
 		//=================================================================================
 		//Win condition flags.  Our win condition MultiFlag will depend on these three flags.
 		//=================================================================================
 		this.gameState.addFlag("cube solved", new Flag(false, "", ""));
-		this.gameState.addFlag("jewel obtained", new Flag(false, "", ""));
+		this.gameState.addFlag("ruby skull obtained", new Flag(false, "", ""));
 
 		//=================================================================================
 		//The win condition multi-flag
 		//=================================================================================
 		MultiFlag gameWon = new MultiFlag(this.gameState, false, "", "");
-		gameWon.addFlag("cube solved");
-		gameWon.addFlag("ruby skull obtained");
-		gameWon.addFlag("ring obtained");
+		gameWon.addFlag("cube solved", true);
+		gameWon.addFlag("ruby skull obtained", true);
+		gameWon.addFlag("ring obtained", true);
 		this.gameState.addFlag("game won", gameWon);
 
 		//=================================================================================

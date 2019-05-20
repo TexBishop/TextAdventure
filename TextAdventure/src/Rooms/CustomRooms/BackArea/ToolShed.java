@@ -101,6 +101,7 @@ public class ToolShed extends CountdownRoom
 	{
 		this.gameState.addFlag("trapdoor open", new Flag(false, "", "In the center of the shed is an opened trapdoor, leading downwards. "));
 		this.gameState.addFlag("attacked with knife", new Flag(false, "", "The beast's slain corpse is still on the floor, in a pool of its own dark blood."));
+		this.gameState.addFlag("generator fueled", new Flag(false, "", ""));
 	}
 
 	@Override
@@ -194,10 +195,10 @@ public class ToolShed extends CountdownRoom
 						if(this.gameState.checkFlipped("trapdoor open"))
 							return new DisplayData("", "You quickly grasp the shard of glass in your hand and plunge it into the beast's chest, dark"
 									+ "blood begining to coat your hand. The creature amazingly seems to barely notice your sudden act of aggression, and is"
-									+ "unphased.");
+									+ "unphased. ");
 					}
 					else
-						return new DisplayData("", "Nothing to attack here ");
+						return new DisplayData("", "Nothing to attack here. ");
 				}
 			}
 			else
@@ -205,8 +206,64 @@ public class ToolShed extends CountdownRoom
 
 			//===============================================================
 			//Subject is unrecognized, return a failure message.
+			//Intentionally allow 'Use' to pass through to the next command set.
 			//===============================================================
-			return new DisplayData("", "You don't see that here.");
+			if (command.getVerb().matches("attack|slash|stab"))
+				return new DisplayData("", "You don't see that here. ");
+			
+		case "pour":
+		case "refill":
+		case "gas":
+		case "fuel":
+		case "refuel":
+			//===============================================================
+			//Gas up the generator
+			//===============================================================
+			if (command.ordered("generator"))
+			{
+				if (this.gameState.checkInventory("Gas Can"))
+				{
+					if (this.gameState.checkFlipped("generator fueled") == false)
+					{
+						this.gameState.flipFlag("generator fueled");
+						((Items.Item) this.gameState.getSpace("Gas Can")).setState("(empty)");
+						return new DisplayData("", "You pour the gas into the generator. It should be good to go now. ");
+					}
+					else
+						return new DisplayData("", "You've already refueled the generator. ");
+				}
+				else
+					return new DisplayData("", "You don't have any gasoline. ");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData("", "You can't do that. ");
+			
+		case "run":
+		case "fire":
+		case "start":
+			//===============================================================
+			//Start the generator
+			//===============================================================
+			if (command.unordered("generator"))
+			{
+				if (this.gameState.checkFlipped("generator fueled"))
+				{
+					this.gameState.flipFlag("generator started");
+					return new DisplayData("", "The generator sputters to life. It's kind of loud, but it's working. "
+							+ "The bulb overhead comes on. You wonder if the house has power now, too? ");
+				}
+				else
+					return new DisplayData("", "You try to start the generator. It turns over, but it won't catch. "
+							+ "Looking it over to find the problem, you discover that the gas tank is empty. ");
+			}
+
+			//===============================================================
+			//Subject is unrecognized, return a failure message.
+			//===============================================================
+			return new DisplayData("", "You can't do that. ");
 
 		case "lift":
 		case "open":

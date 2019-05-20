@@ -23,6 +23,7 @@ import java.util.Objects;
 import Structure.Command;
 import Structure.DisplayData;
 import Structure.GameState;
+import Structure.GasLeak;
 import Structure.InvalidMapKeyException;
 import Structure.Space;
 
@@ -90,6 +91,19 @@ public abstract class Room implements Space, Serializable
 	{
 		DisplayData displayData;
 		//=================================================================================
+		//Handle the gas leak.
+		//If the current room is part of the gas leak, handle cases where an inventory
+		//item ignites the gas.
+		//=================================================================================
+		this.gameState.handleGasLeak();
+		if (this instanceof GasLeak)
+		{
+			String message = ((GasLeak) this).handleInventorySparks(this.gameState, command);
+			if (message != null)
+				return this.gameState.death(message);
+		}
+		
+		//=================================================================================
 		//If innerSpace is null, check it to see if it needs to be set
 		//=================================================================================
 		if (this.innerSpace == null)
@@ -98,6 +112,12 @@ public abstract class Room implements Space, Serializable
 			
 			if (displayData != null)
 			{
+				//=================================================================================
+				//If the current room is part of the gas leak, add the leak message
+				//=================================================================================
+				if (this.gameState.getCurrentRoom() instanceof GasLeak)
+					displayData.appendToDescription(((GasLeak) this.gameState.getCurrentRoom()).getGasMessage(gameState));
+				
 				//=================================================================================
 				//Check if the game won flag was flipped on this command
 				//=================================================================================
@@ -113,6 +133,12 @@ public abstract class Room implements Space, Serializable
 		if (this.innerSpace != null)
 		{
 			displayData = this.innerSpace.handleDisplayData(command);
+			
+			//=================================================================================
+			//If the current room is part of the gas leak, add the leak message
+			//=================================================================================
+			if (this.gameState.getCurrentRoom() instanceof GasLeak)
+				displayData.appendToDescription(((GasLeak) this.gameState.getCurrentRoom()).getGasMessage(gameState));
 
 			//=================================================================================
 			//Check if the game won flag was flipped on this command
@@ -124,6 +150,12 @@ public abstract class Room implements Space, Serializable
 		else
 		{
 			displayData = this.executeCommand(command);
+
+			//=================================================================================
+			//If the current room is part of the gas leak, add the leak message
+			//=================================================================================
+			if (this.gameState.getCurrentRoom() instanceof GasLeak)
+				displayData.appendToDescription(((GasLeak) this.gameState.getCurrentRoom()).getGasMessage(gameState));
 
 			//=================================================================================
 			//Check if the game won flag was flipped on this command
