@@ -1,6 +1,7 @@
 # TextAdventure
 A text adventure game with a ligthweight GUI.
 
+![text-adventure-ss](https://user-images.githubusercontent.com/48114601/123005008-0a2b9a80-d37b-11eb-8055-24fe7d1a3c9c.jpg)
 
 Section 1 – User Interaction
 1.	Game Type / Description :  A traditional text adventure game, with the addition of a GUI.   
